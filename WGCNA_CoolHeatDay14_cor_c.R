@@ -259,7 +259,7 @@ pdf("Clustering of module eigengenes 14_cl.pdf",height=8,width=16)
 plot(METree14_cl, main = "Clustering of module eigengenes 14_cl",
      xlab = "", sub = "")
 ## We choose a height cut of 0.2, corresponding to correlation of 0.80, to merge
-MEDissThres = 0.2
+MEDissThres = 0.1
 # Plot the cut line into the dendrogram
 abline(h = MEDissThres, col = "red")
 dev.off()
