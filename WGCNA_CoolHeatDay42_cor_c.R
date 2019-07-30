@@ -78,8 +78,8 @@ dim(networkData14_filter)#;dim(networkData42_filter);dim(networkData84_filter);
 #BiocManager::install("edgeR") 
 # zeros out!
 remove_index14 = which(rowSums(networkData14_filter) == 0);length(remove_index14)
-remove_index42 = which(rowSums(networkData42_filter) == 0);length(remove_index42)
-remove_index84 = which(rowSums(networkData84_filter) == 0);length(remove_index84)
+#remove_index42 = which(rowSums(networkData42_filter) == 0);length(remove_index42)
+#remove_index84 = which(rowSums(networkData84_filter) == 0);length(remove_index84)
 
 # normalization
 require(edgeR)
@@ -136,7 +136,7 @@ dim(datExpr14_cl);dim(datExpr14_ht)
 
 # step 7 check for na (may not necessary)
 table(is.na(datExpr14_cl));table(is.na(datExpr14_ht))
-
+print("check na results bicor")
 #set.seed(316)
 #random_label = sample(c(1:ncol(datExpr14_ht)),5000,replace = F)
 #datExpr14_cl = datExpr14_cl[,random_label]

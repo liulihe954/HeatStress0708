@@ -73,16 +73,16 @@ remove_filter = function(networkData,thres){
   return(Results)
 }
 networkData14_filter = remove_filter(networkData14,0.4)$networkData_filter
-networkData42_filter = remove_filter(networkData42,0.4)$networkData_filter
-networkData84_filter = remove_filter(networkData84,0.4)$networkData_filter
-dim(networkData14_filter);dim(networkData42_filter);dim(networkData84_filter);
+#networkData42_filter = remove_filter(networkData42,0.4)$networkData_filter
+#networkData84_filter = remove_filter(networkData84,0.4)$networkData_filter
+dim(networkData14_filter)#;dim(networkData42_filter);dim(networkData84_filter);
 
 # step 2 - normalization (0s out and normalization)
 #BiocManager::install("edgeR") 
 # zeros out!
 remove_index14 = which(rowSums(networkData14_filter) == 0);length(remove_index14)
-remove_index42 = which(rowSums(networkData42_filter) == 0);length(remove_index42)
-remove_index84 = which(rowSums(networkData84_filter) == 0);length(remove_index84)
+#remove_index42 = which(rowSums(networkData42_filter) == 0);length(remove_index42)
+#remove_index84 = which(rowSums(networkData84_filter) == 0);length(remove_index84)
 
 # normalization
 require(edgeR)
