@@ -1,4 +1,3 @@
-# getwd()
 #================================================================================================
 ###                                       0. pkg prep                                      ######
 #================================================================================================
@@ -8,11 +7,6 @@ require(edgeR);require(clusterProfiler)
 require(ggplot2);require(magrittr)
 require(biomaRt);require(gage);require(doParallel)
 require(limma);require(recount);require(pamr)
-#library(igraph);;library(ggplot2);library(gdata)
-#library(ggpubr);require(cowplot);library(extrafont)
-#library(plotly) ;library(geomnet);library(readxl);
-#library(car) ## qqplot but didnt use
-#library(qqplotr)## qqplot: used 
 #================================================================================================
 ###                                       1. dataprep                                      ######
 #================================================================================================
@@ -20,8 +14,8 @@ require(limma);require(recount);require(pamr)
 #setwd("/Users/liulihe95/Desktop/HeatStress0708");getwd()
 options(stringsAsFactors = FALSE)
 enableWGCNAThreads()
-CowsID_ht = c("6334","8514","8971","8867","8841","8966")# ID of heat group
-CowsID_cl = c("8252","8832","8896","8983","8897","8862")# ID of cool group
+CowsID_ht = c("6334","8514","8971","8867","8841","8966")# ID of heat group 
+CowsID_cl = c("8252","8832","8896","8983","8897","8862")# ID of cool group 
 # (all the IDs) 27570 genes; 12 cows; 3 time points 
 networkData = read.csv("count_matrix.tsv",sep = "\t",header = T);rownames(networkData) = networkData[,1];networkData = networkData[,-1] 
 dim(networkData)
@@ -45,13 +39,6 @@ networkData42 = networkData[,c(column_42_cl,column_42_ht)]
 networkData84 = networkData[,c(column_84_cl,column_84_ht)]
 dim(networkData14);dim(networkData42);dim(networkData84)
 
-################################################################################
-#### substitute dataset for multiple scripts ###################################
-networkData14 = networkData84                ###################################
-#### substitute dataset for multiple scripts ###################################
-################################################################################
-
-########################################################################################################################
 # step 1 - filter out top 40% counts
 ## filter out top 40% counts # function established for future use
 remove_filter = function(networkData,thres){
@@ -70,9 +57,9 @@ remove_filter = function(networkData,thres){
   return(Results)
 }
 networkData14_filter = remove_filter(networkData14,0.4)$networkData_filter
-#networkData42_filter = remove_filter(networkData42,0.4)$networkData_filter
-#networkData84_filter = remove_filter(networkData84,0.4)$networkData_filter
-dim(networkData14_filter)#;dim(networkData42_filter);dim(networkData84_filter);
+networkData42_filter = remove_filter(networkData42,0.4)$networkData_filter
+networkData84_filter = remove_filter(networkData84,0.4)$networkData_filter
+dim(networkData14_filter);dim(networkData42_filter);dim(networkData84_filter);
 
 # step 2 - normalization (0s out and normalization)
 #BiocManager::install("edgeR") 
@@ -89,56 +76,42 @@ networkData14_nm2 = calcNormFactors(networkData14_nmList)
 networkData14_normalized_normfactors = networkData14_nm2$samples
 networkData14_normalized = data.frame(networkData14_nm2$counts)
 dim(networkData14_normalized)
-save(networkData14_normalized_normfactors,networkData14_normalized,file = "networkData norm and factors.RData")
+save(networkData14_normalized_normfactors,networkData14_normalized,file = "networkData14 norm and factors.RData")
 
-# step 3 - log 2 trans
-# log trans
-networkData14_log2 = log2(networkData14_normalized+2)
-# step 4 - filter out bottom 50% variation
-# select most var
-networkData14_log2$variance = apply(networkData14_log2,1,var)
-networkData14_log2_50var = networkData14_log2[networkData14_log2$variance >= quantile(networkData14_log2$variance,c(.50)),] #50% most variable genes
-networkData14_log2_50var$variance <- NULL
-dim(networkData14_log2_50var)
-
-# step 5 - pca correction 
-q_normalize <- function(dat){
-  n = nrow(dat)
-  p = ncol(dat)
-  rank.dat =  dat # matrix for ranking
-  for (i in 1:p){
-    rank.dat[,i] = rank(dat[,i])
-  }
-  U = rank.dat/(n+1)
-  qnorm(U)
-}
-Correct_pca = function(rse_raw,method){
-  rse_raw <- t(rse_raw)# transpose data so that rows are samples and columns are gene expression measurements
-  mod=matrix(1,nrow=dim(rse_raw)[1],ncol=1)
-  colnames(mod)="Intercept"
-  ## num.sv requires data matrix with features(genes) in the rows and samples in the column
-  nsv=num.sv(t(rse_raw), mod, method = method)
-  print(paste("Number of PCs estimated to be removed:", nsv))
-  ## PC residualization of gene expression data using sva_network. Rows correspond to samples, Columns correspond to features
-  exprs_corrected = sva_network(rse_raw, nsv)
-  ## Quantile normalize the corrected gene expression measurements such that each expression of every gene follows a gaussian distribution
-  exprs_corrected_norm <- q_normalize(exprs_corrected)
-  return(list(exprs_corrected_norm = t(data.frame(exprs_corrected_norm))))
-}
-networkData14_correction = Correct_pca(networkData14_log2_50var,"leek")
-networkData14_final = data.frame(networkData14_correction$exprs_corrected_norm); 
-names(networkData14_final) = names(networkData14_log2_50var)
-# step 6 - select into two groups
-datExpr14_cl = t(networkData14_final[,colnames(networkData14_final) %in% names(networkData)[column_84_cl]])
-datExpr14_ht = t(networkData14_final[,colnames(networkData14_final) %in% names(networkData)[column_84_ht]])
+# step 3 - select var top 50 & 90% of the counts above 10
+# top 50 variance 
+networkData14_normalized$variance = apply(networkData14_normalized, 1, var)
+sum(networkData14_normalized$variance >= quantile(networkData14_normalized$variance,c(.50)))
+networkData14_50var = networkData14_normalized[networkData14_normalized$variance >= quantile(networkData14_normalized$variance,c(.50)), ] #50% most variable genes
+networkData14_50var$variance <- NULL
+dim(networkData14_50var)
+# We suggest removing features whose counts are consistently low 
+#(for example, removing all features that have a count of less than say 10 in more than 90% of the samples) 
+lowcount_keepIndex14 = (rowSums(networkData14_50var >= 10)) >= round(ncol(networkData14_50var)*.9)
+table(lowcount_keepIndex14) # 1437 out again
+networkData14_filnal = networkData14_50var[lowcount_keepIndex14,]
+dim(networkData14_filnal)
+# step 4 - select into two groups
+datExpr14_cl = t(networkData14_filnal[,names(networkData14_filnal) %in% names(networkData)[column_14_cl] ])
+datExpr14_ht = t(networkData14_filnal[,names(networkData14_filnal) %in% names(networkData)[column_14_ht] ])
 dim(datExpr14_cl);dim(datExpr14_ht)
 
-
-# step 7 check for na (may not necessary)
+# step 5 check for na (may not necessary)
 table(is.na(datExpr14_cl));table(is.na(datExpr14_ht))
+print("check na results cor")
+### summary
+# raw 27570 
+# remove top 40 counts - 4 /// around (5) (27566)
+# remove all zero - around 48k () (22699)
+# and normalization (no removal)
+# top 90 variance and 90% of sample above 10   - 11349 (remain 11350) and - 83 (11267) 
+# rest: 11267
+####
 
+###### slective testing  ########
+# random select 1500 for testing
 #set.seed(316)
-#random_label = sample(c(1:ncol(datExpr14_ht)),5000,replace = F)
+#random_label = sample(c(1:ncol(datExpr14_ht)),4000,replace = F)
 #datExpr14_cl = datExpr14_cl[,random_label]
 #datExpr14_ht = datExpr14_ht[,random_label]
 #dim(datExpr14_ht);dim(datExpr14_cl)
@@ -147,7 +120,7 @@ table(is.na(datExpr14_cl));table(is.na(datExpr14_ht))
 ###                                  2. weighted in day 14                                ######    
 #================================================================================================
 ## good genes --- ok
-gsg_all = goodSamplesGenes(networkData14_final, verbose = 3)
+gsg_all = goodSamplesGenes(networkData14_filnal, verbose = 3)
 gsg_all$allOK
 ## plot sample distance
 sample_Tree_ht = hclust(dist(datExpr14_ht), method = "average")
@@ -176,7 +149,7 @@ MeanK = sft_cl$fitIndices[softPower,5]
 # Plot the results of threshold picking:
 sizeGrWindow(9,5)
 cex1 = 0.9
-pdf(file = "soft threshold picking day14.pdf", width = 12, height = 9)
+pdf(file = "soft_threshold_picking_day14.pdf", width = 12, height = 9)
 par(mfrow = c(1,2))
 # Scale-free topology fit index as a function of the soft-thresholding power
 plot(sft_cl$fitIndices[,1], -sign(sft_cl$fitIndices[,3])*sft_cl$fitIndices[,2],
@@ -261,7 +234,7 @@ MEDiss14_cl = 1 - cor(MEs14_cl)
 METree14_cl = hclust(as.dist(MEDiss14_cl), method = "average");
 # Plot the result of module eigengenes
 sizeGrWindow(8,16)
-pdf("Clustering of module eigengenes 14_cl.pdf",height=8,width=16)
+pdf("Clustering_of_module_eigengenes _14_cl.pdf",height=8,width=16)
 plot(METree14_cl, main = "Clustering of module eigengenes 14_cl",
      xlab = "", sub = "")
 ## We choose a height cut of 0.2, corresponding to correlation of 0.80, to merge
@@ -280,7 +253,8 @@ mergedMEs14_cl = merge14_cl$newMEs;
 moduleColors14_cl = mergedColors14_cl
 # Construct numerical labels corresponding to the colors
 colorOrder = c("grey", standardColors())
-moduleLabels14_cl = match(moduleColors14_cl, colorOrder) -1;
+moduleLabels14_cl = match(moduleColors14_cl,colorOrder) -1;
+table(moduleLabels14_cl)
 MEs14_cl = mergedMEs14_cl;
 # Save module colors and labels for use in subsequent parts
 save(MEs14_cl, moduleLabels14_cl, moduleColors14_cl, geneTree14_cl, file = "CoolHeatday14.RData")
@@ -289,7 +263,7 @@ print("Step5 - mergeing finished")
 #=================================================================================================
 #                              6. plotting heatmap                                            ###
 #=================================================================================================
-pdf("Network heatmap plot, all genes 14_cl.pdf",height=8,width=16)
+pdf("Network_heatmap_plot_all_genes_14_cl.pdf",height=8,width=16)
 for (i in c(6:12)){
   # Transform dissTOM with a power to make moderately strong connections more visible in the heatmap
   plotTOM = dissTOM14_cl^i
@@ -303,7 +277,7 @@ print("Step6 - heapmap created")
 #===============================================================================================
 #                           7. plot cross-condition dendrogram                               ###
 #===============================================================================================
-pdf("Gene dendrogram cross condition.pdf",height=8,width=16)
+pdf("Gene_dendrogram_cross_condition.pdf",height=8,width=16)
 plotDendroAndColors(geneTree14_cl, moduleLabels14_cl, "Modules", dendroLabels=F, hang=0.03, addGuide=TRUE,
                     guideHang=0.05, main="Gene dendrogram and module colors (14_cl)")
 plotDendroAndColors(geneTree14_ht, moduleLabels14_cl, "Modules", dendroLabels=F,hang=0.03, addGuide=TRUE,
@@ -322,6 +296,8 @@ multiExpr14 = list(cl=list(data = adjacency14_cl),
 multiColor14 = list(cl = moduleColors14_cl)
 names(multiExpr14) = setLabels
 
+
+
 # permutation
 mp14 = modulePreservation(multiExpr14,multiColor14,referenceNetworks=1,verbose=3,
                           networkType="unsigned", nPermutations=1000, 
@@ -334,7 +310,7 @@ save(mp14, file = "CoolHeatDay14_modulePreservation.RData")
 print("Step8 - mp finished and data saved")
 # load("CoolHeatDay14_modulePreservation.RData")
 ################ output - shortest - only p summmary  ######################
-write.csv(Results_mp14_1,"module size and preservation statistics day14.csv")
+write.csv(Results_mp14_1,"module_size_and_preservation_statistics_day14.csv")
 ################ output - shortest - only p summmary  ######################
 # specify the reference and the test networks
 ref=1; test = 2
@@ -369,7 +345,7 @@ point.label14 = modColors14[selectModules]
 medianRank14=Obs.PreservationStats14$medianRank.pres
 Zsummary14=Z.PreservationStats14$Zsummary.pres
 #
-pdf("medianRank_Zsummary versus module size.pdf",height = 8, width = 16)
+pdf("medianRank_Zsummary_versus_module_size.pdf",height = 8, width = 16)
 par(mfrow=c(1,2),mar = c(4.5,4.5,2.5,1))
 # plot medianRank versus module size
 plot(moduleSize14[selectModules],medianRank14[selectModules],col=1,
@@ -409,7 +385,7 @@ plotData = cbind(mp14$preservation$observed[[ref]][[test]][,2], mp14$preservatio
 mains = c("Preservation Median rank", "Preservation Zsummary")
 # Start the plot: open a suitably sized graphical window and set sectioning and margins.
 # Plot each Z statistic in a separate plot.
-pdf("all module preservation statistics nested.pdf",height = 8, width = 16)
+pdf("all_module_preservation_statistics_nested.pdf",height = 8, width = 16)
 par(mfrow = c(4,5))
 for (s in 1:ncol(statsZ14)){
   min = min(statsZ14[plotMods, s], na.rm = TRUE)
@@ -443,7 +419,7 @@ mart <- biomaRt::useMart(biomart="ENSEMBL_MART_ENSEMBL",
 nonpres_index = (which(Zsummary14 < 2))
 nonpres_modulenames = rownames(Z.PreservationStats14)[nonpres_index]
 KEGG_results = list()
-pdf("KEGG Enrichment in modules.pdf")
+pdf("KEGG_Enrichment_in_modules.pdf")
 for (i in c(1:length(nonpres_modulenames))){
   #i = 3
   module_name = nonpres_modulenames[i]
@@ -530,7 +506,7 @@ for (i in c(1:(length(nonpres_modulenames)))){
   ot = subset(out,totalG > 4 & Pvalue < 0.05)
   final = ot[order(ot$Pvalue),];colnames(final) = c("GOID","GO_Name", "Total_Genes", "Significant_Genes", "pvalue")
   GO_results[[i]] = final
-  pdf(paste("GO Enrichment in modules",module_name,".pdf"))
+  pdf(paste("GO_Enrichment_in_modules",module_name,".pdf"))
   print(final %>%
           top_n(dim(final)[1], wt= -pvalue)%>%
           mutate(hitsPerc = Significant_Genes*100/Total_Genes) %>% ## signi genes, v1 = all genes in the go.
@@ -551,3 +527,5 @@ for (i in c(1:(length(nonpres_modulenames)))){
 }
 save(GO_results, file = "GO_results.RData")
 print("Step11 - GO finished and data saved")
+
+

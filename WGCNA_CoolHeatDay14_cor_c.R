@@ -45,6 +45,12 @@ networkData42 = networkData[,c(column_42_cl,column_42_ht)]
 networkData84 = networkData[,c(column_84_cl,column_84_ht)]
 dim(networkData14);dim(networkData42);dim(networkData84)
 
+################################################################################
+#### substitute dataset for multiple scripts ###################################
+networkData14 = networkData42               ###################################
+#### substitute dataset for multiple scripts ###################################
+################################################################################
+
 ########################################################################################################################
 # step 1 - filter out top 40% counts
 ## filter out top 40% counts # function established for future use
@@ -64,9 +70,9 @@ remove_filter = function(networkData,thres){
   return(Results)
 }
 networkData14_filter = remove_filter(networkData14,0.4)$networkData_filter
-networkData42_filter = remove_filter(networkData42,0.4)$networkData_filter
-networkData84_filter = remove_filter(networkData84,0.4)$networkData_filter
-dim(networkData14_filter);dim(networkData42_filter);dim(networkData84_filter);
+#networkData42_filter = remove_filter(networkData42,0.4)$networkData_filter
+#networkData84_filter = remove_filter(networkData84,0.4)$networkData_filter
+dim(networkData14_filter)#;dim(networkData42_filter);dim(networkData84_filter);
 
 # step 2 - normalization (0s out and normalization)
 #BiocManager::install("edgeR") 
