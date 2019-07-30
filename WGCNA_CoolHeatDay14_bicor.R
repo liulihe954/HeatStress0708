@@ -98,6 +98,7 @@ dim(networkData14_filnal)
 # step 4 - select into two groups
 datExpr14_cl = t(networkData14_filnal[,names(networkData14_filnal) %in% names(networkData)[column_14_cl] ])
 datExpr14_ht = t(networkData14_filnal[,names(networkData14_filnal) %in% names(networkData)[column_14_ht] ])
+datExpr14_cl = data.frame(datExpr14_cl);datExpr14_ht = data.frame(datExpr14_ht)
 dim(datExpr14_cl);dim(datExpr14_ht)
 
 # step 5 check for na (may not necessary)
