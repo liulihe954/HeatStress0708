@@ -131,6 +131,7 @@ names(networkData14_final) = names(networkData14_log2_50var)
 # step 6 - select into two groups
 datExpr14_cl = t(networkData14_final[,colnames(networkData14_final) %in% names(networkData)[column_84_cl]])
 datExpr14_ht = t(networkData14_final[,colnames(networkData14_final) %in% names(networkData)[column_84_ht]])
+datExpr14_cl = data.frame(datExpr14_cl);datExpr14_ht = data.frame(datExpr14_ht)
 dim(datExpr14_cl);dim(datExpr14_ht)
 
 

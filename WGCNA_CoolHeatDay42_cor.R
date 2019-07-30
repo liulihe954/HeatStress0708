@@ -101,6 +101,7 @@ dim(networkData14_filnal)
 # step 4 - select into two groups
 datExpr14_cl = t(networkData14_filnal[,names(networkData14_filnal) %in% names(networkData)[column_42_cl] ])
 datExpr14_ht = t(networkData14_filnal[,names(networkData14_filnal) %in% names(networkData)[column_42_ht] ])
+datExpr14_cl = data.frame(datExpr14_cl);datExpr14_ht = data.frame(datExpr14_ht)
 dim(datExpr14_cl);dim(datExpr14_ht)
 
 # step 5 check for na (may not necessary)
@@ -145,6 +146,7 @@ dev.off()
 print("Step2 - sample tree plotted")
 
 ## pick soft thresholds
+
 # Choose a set of soft-thresholding powers
 powers = c(c(1:10), seq(from = 12, to=30, by=2))
 sft_cl = pickSoftThreshold(datExpr14_cl, powerVector = powers, verbose = 0)
