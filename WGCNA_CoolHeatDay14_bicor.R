@@ -10,6 +10,7 @@ require(biomaRt);require(gage);require(doParallel)
 #library(plotly) ;library(geomnet);library(readxl);
 #library(car) ## qqplot but didnt use
 #library(qqplotr)## qqplot: used 
+getwd()
 #================================================================================================
 ###                                       1. dataprep                                      ######
 #================================================================================================
@@ -132,7 +133,7 @@ MeanK_b = sft_b_cl$fitIndices[softPower_b,5]
 # Plot the results of threshold picking:
 sizeGrWindow(9,5)
 cex1 = 0.9
-pdf(file = "soft_b threshold picking day14.pdf", width = 12, height = 9)
+pdf(file = "soft_b_threshold_picking_day14.pdf", width = 12, height = 9)
 par(mfrow = c(1,2))
 # Scale-free topology fit index as a function of the soft-thresholding power
 plot(sft_b_cl$fitIndices[,1], -sign(sft_b_cl$fitIndices[,3])*sft_b_cl$fitIndices[,2],
@@ -174,7 +175,7 @@ print("Step3 - adj matrix created and rdata saved")
 #                                    4.  plot trees                                  ######
 #==========================================================================================
 # cor
-pdf("dendrogram14 bicor.pdf",     height=6,width=16)
+pdf("dendrogram14_bicor.pdf",     height=6,width=16)
 par(mfrow=c(1,2))
 plot(geneTree14_b_cl,xlab="",sub="",main="Gene clustering on TOM-based dissimilarity bicor (14_cl)",labels=FALSE,hang=0.04);
 plot(geneTree14_b_ht,xlab="",sub="",main="Gene clustering on TOM-based dissimilarity bicor (14_ht)",labels=FALSE,hang=0.04);
@@ -214,11 +215,11 @@ MEDiss14_b_cl = 1 - cor(MEs14_b_cl)
 METree14_b_cl = hclust(as.dist(MEDiss14_b_cl), method = "average");
 # Plot the result of module eigengenes
 sizeGrWindow(8,16)
-pdf("Clustering of module eigengenes bicor 14_cl.pdf",height=8,width=16)
+pdf("Clustering_of_module_eigengenes_bicor_14_cl.pdf",height=8,width=16)
 plot(METree14_b_cl, main = "Clustering of module eigengenes bicor 14_cl",
      xlab = "", sub = "")
-## We choose a height cut of 0.2, corresponding to correlation of 0.80, to merge
-MEDissThres = 0.2
+## We choose a height cut of 0.1, corresponding to correlation of 0.90, to merge
+MEDissThres = 0.1
 # Plot the cut line into the dendrogram
 abline(h = MEDissThres, col = "red")
 dev.off()
@@ -233,6 +234,7 @@ moduleColors14_b_cl = mergedColors14_b_cl
 # Construct numerical labels corresponding to the colors
 colorOrder = c("grey", standardColors())
 moduleLabels14_b_cl = match(moduleColors14_b_cl, colorOrder) -1;
+table(moduleColors14_b_cl)
 MEs14_b_cl = mergedMEs14_b_cl;
 # Save module colors and labels for use in subsequent parts
 save(MEs14_b_cl, moduleLabels14_b_cl, moduleColors14_b_cl, geneTree14_b_cl, file = "CoolHeatday14 bicor.RData")
@@ -240,7 +242,7 @@ print("Step5 - mergeing finished")
 #=================================================================================================
 #                              6. plotting heatmap                                            ###
 #=================================================================================================
-pdf("Network heatmap plot bicor, all genes 14_cl.pdf",height=8,width=16)
+pdf("Network_heatmap_plot_bicor_all_genes_14_cl.pdf",height=8,width=16)
 for (i in c(6:12)){
   # Transform dissTOM with a power to make moderately strong connections more visible in the heatmap
   plotTOM_b = dissTOM14_b_cl^i
@@ -254,7 +256,7 @@ print("Step6 - heapmap created")
 #===============================================================================================
 #                           7. plot cross-condition dendrogram                               ###
 #===============================================================================================
-pdf("Gene dendrogram cross condition bicor.pdf",height=8,width=16)
+pdf("Gene_dendrogram_cross_condition_bicor1.pdf",height=8,width=16)
 plotDendroAndColors(geneTree14_b_cl, moduleLabels14_b_cl, "Modules", dendroLabels=F, hang=0.03, addGuide=TRUE,
                     guideHang=0.05, main="Gene dendrogram and module colors bicor (14_cl)")
 plotDendroAndColors(geneTree14_b_ht, moduleLabels14_b_cl, "Modules", dendroLabels=F,hang=0.03, addGuide=TRUE,
@@ -276,7 +278,7 @@ names(multiExpr14_b) = setLabels
 # permutation
 mp14_b = modulePreservation(multiExpr14_b,multiColor14_b,referenceNetworks=1,verbose=3,
                             corFnc = "bicor",
-                            networkType="unsigned", nPermutations=10000,
+                            networkType="unsigned", nPermutations=1000,
                             maxGoldModuleSize = 500, maxModuleSize = 500,
                             calculateQvalue = T,
                             calculateCor.kIMall = T,
@@ -323,7 +325,7 @@ point.label14_b = modColors14_b[selectModules]
 medianRank14_b=Obs.PreservationStats14_b$medianRank.pres
 Zsummary14_b=Z.PreservationStats14_b$Zsummary.pres
 #
-pdf("medianRank_Zsummary versus module size bicor.pdf",height = 8, width = 16)
+pdf("medianRank_Zsummary_versus_module_size_bicor.pdf",height = 8, width = 16)
 par(mfrow=c(1,2),mar = c(4.5,4.5,2.5,1))
 # plot medianRank versus module size
 plot(moduleSize14_b[selectModules],medianRank14_b[selectModules],col=1,
@@ -397,7 +399,7 @@ mart <- biomaRt::useMart(biomart="ENSEMBL_MART_ENSEMBL",
 nonpres_index_b = (which(Zsummary14_b < 2))
 nonpres_modulenames_b = rownames(Z.PreservationStats14_b)[nonpres_index_b]
 KEGG_results_b = list()
-pdf("KEGG Enrichment in modules bicor.pdf")
+pdf("KEGG_Enrichment_in_modules_bicor.pdf")
 for (i in c(1:length(nonpres_modulenames_b))){
   #i = 3
   module_name = nonpres_modulenames_b[i]
@@ -427,7 +429,7 @@ for (i in c(1:length(nonpres_modulenames_b))){
           xlim(0,max(enrich_add$overlap1)+5)+
           geom_point() +
           theme_gray()+
-          labs(title= paste("KEGG Enrichment in module",module_name), x="Hits (%)", y="Kegg term", colour="p value", size="Count")+
+          labs(title= paste("KEGG_Enrichment_in_module",module_name), x="Hits (%)", y="Kegg term", colour="p value", size="Count")+
           theme(axis.text.x = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
           theme(axis.text.y = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
           theme(axis.title.x = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
@@ -483,7 +485,7 @@ for (i in c(1:(length(nonpres_modulenames_b)))){
   ot = subset(out,totalG > 4 & Pvalue < 0.05)
   final = ot[order(ot$Pvalue),];colnames(final) = c("GOID","GO_Name", "Total_Genes", "Significant_Genes", "pvalue")
   GO_results_b[[i]] = final
-  pdf(paste("GO Enrichment in modules bicor",module_name,".pdf"))
+  pdf(paste("GO_Enrichment_in_modules_bicor",module_name,".pdf"))
   print(final %>%
           top_n(dim(final)[1], wt= -pvalue)%>%
           mutate(hitsPerc = Significant_Genes*100/Total_Genes) %>% ## signi genes, v1 = all genes in the go.

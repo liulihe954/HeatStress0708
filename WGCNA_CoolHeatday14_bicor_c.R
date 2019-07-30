@@ -291,7 +291,7 @@ names(multiExpr14_b) = setLabels
 # permutation
 mp14_b = modulePreservation(multiExpr14_b,multiColor14_b,referenceNetworks=1,verbose=3,
                             corFnc = "bicor",
-                            networkType="unsigned", nPermutations=10000,
+                            networkType="unsigned", nPermutations=1000,
                             maxGoldModuleSize = 500, maxModuleSize = 500,
                             calculateQvalue = T,
                             calculateCor.kIMall = T,

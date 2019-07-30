@@ -273,7 +273,7 @@ mergedMEs14_cl = merge14_cl$newMEs;
 # Rename to moduleColors
 moduleColors14_cl = mergedColors14_cl
 # Construct numerical labels corresponding to the colors
-colorOrder = c("grey", standardColors)
+colorOrder = c("grey", standardColors())
 moduleLabels14_cl = match(moduleColors14_cl, colorOrder) -1;
 MEs14_cl = mergedMEs14_cl;
 # Save module colors and labels for use in subsequent parts
@@ -318,7 +318,7 @@ names(multiExpr14) = setLabels
 
 # permutation
 mp14 = modulePreservation(multiExpr14,multiColor14,referenceNetworks=1,verbose=3,
-                          networkType="unsigned", nPermutations=10000, 
+                          networkType="unsigned", nPermutations=1000, 
                           maxGoldModuleSize=500, maxModuleSize=500, 
                           interpolationPlotFile = "CoolHeatDay14_modulePreservation.pdf")
 

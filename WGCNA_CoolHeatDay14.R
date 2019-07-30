@@ -149,7 +149,7 @@ MeanK = sft_cl$fitIndices[softPower,5]
 # Plot the results of threshold picking:
 sizeGrWindow(9,5)
 cex1 = 0.9
-pdf(file = "soft threshold picking day14.pdf", width = 12, height = 9)
+pdf(file = "soft_threshold_picking_day14.pdf", width = 12, height = 9)
 par(mfrow = c(1,2))
 # Scale-free topology fit index as a function of the soft-thresholding power
 plot(sft_cl$fitIndices[,1], -sign(sft_cl$fitIndices[,3])*sft_cl$fitIndices[,2],
@@ -234,11 +234,11 @@ MEDiss14_cl = 1 - cor(MEs14_cl)
 METree14_cl = hclust(as.dist(MEDiss14_cl), method = "average");
 # Plot the result of module eigengenes
 sizeGrWindow(8,16)
-pdf("Clustering of module eigengenes 14_cl.pdf",height=8,width=16)
+pdf("Clustering_of_module_eigengenes _14_cl.pdf",height=8,width=16)
 plot(METree14_cl, main = "Clustering of module eigengenes 14_cl",
      xlab = "", sub = "")
 ## We choose a height cut of 0.2, corresponding to correlation of 0.80, to merge
-MEDissThres = 0.2
+MEDissThres = 0.1
 # Plot the cut line into the dendrogram
 abline(h = MEDissThres, col = "red")
 dev.off()
@@ -252,8 +252,9 @@ mergedMEs14_cl = merge14_cl$newMEs;
 # Rename to moduleColors
 moduleColors14_cl = mergedColors14_cl
 # Construct numerical labels corresponding to the colors
-colorOrder = c("grey", standardColors)
-moduleLabels14_cl = match(moduleColors14_cl, colorOrder) -1;
+colorOrder = c("grey", standardColors())
+moduleLabels14_cl = match(moduleColors14_cl,colorOrder) -1;
+table(moduleLabels14_cl)
 MEs14_cl = mergedMEs14_cl;
 # Save module colors and labels for use in subsequent parts
 save(MEs14_cl, moduleLabels14_cl, moduleColors14_cl, geneTree14_cl, file = "CoolHeatday14.RData")
@@ -262,7 +263,7 @@ print("Step5 - mergeing finished")
 #=================================================================================================
 #                              6. plotting heatmap                                            ###
 #=================================================================================================
-pdf("Network heatmap plot, all genes 14_cl.pdf",height=8,width=16)
+pdf("Network_heatmap_plot_all_genes_14_cl.pdf",height=8,width=16)
 for (i in c(6:12)){
   # Transform dissTOM with a power to make moderately strong connections more visible in the heatmap
   plotTOM = dissTOM14_cl^i
@@ -276,7 +277,7 @@ print("Step6 - heapmap created")
 #===============================================================================================
 #                           7. plot cross-condition dendrogram                               ###
 #===============================================================================================
-pdf("Gene dendrogram cross condition.pdf",height=8,width=16)
+pdf("Gene_dendrogram_cross_condition.pdf",height=8,width=16)
 plotDendroAndColors(geneTree14_cl, moduleLabels14_cl, "Modules", dendroLabels=F, hang=0.03, addGuide=TRUE,
                     guideHang=0.05, main="Gene dendrogram and module colors (14_cl)")
 plotDendroAndColors(geneTree14_ht, moduleLabels14_cl, "Modules", dendroLabels=F,hang=0.03, addGuide=TRUE,
@@ -295,9 +296,11 @@ multiExpr14 = list(cl=list(data = adjacency14_cl),
 multiColor14 = list(cl = moduleColors14_cl)
 names(multiExpr14) = setLabels
 
+
+
 # permutation
 mp14 = modulePreservation(multiExpr14,multiColor14,referenceNetworks=1,verbose=3,
-                          networkType="unsigned", nPermutations=10000, 
+                          networkType="unsigned", nPermutations=1000, 
                           maxGoldModuleSize=500, maxModuleSize=500, 
                           interpolationPlotFile = "CoolHeatDay14_modulePreservation.pdf")
 
@@ -307,7 +310,7 @@ save(mp14, file = "CoolHeatDay14_modulePreservation.RData")
 print("Step8 - mp finished and data saved")
 # load("CoolHeatDay14_modulePreservation.RData")
 ################ output - shortest - only p summmary  ######################
-write.csv(Results_mp14_1,"module size and preservation statistics day14.csv")
+write.csv(Results_mp14_1,"module_size_and_preservation_statistics_day14.csv")
 ################ output - shortest - only p summmary  ######################
 # specify the reference and the test networks
 ref=1; test = 2
@@ -342,7 +345,7 @@ point.label14 = modColors14[selectModules]
 medianRank14=Obs.PreservationStats14$medianRank.pres
 Zsummary14=Z.PreservationStats14$Zsummary.pres
 #
-pdf("medianRank_Zsummary versus module size.pdf",height = 8, width = 16)
+pdf("medianRank_Zsummary_versus_module_size.pdf",height = 8, width = 16)
 par(mfrow=c(1,2),mar = c(4.5,4.5,2.5,1))
 # plot medianRank versus module size
 plot(moduleSize14[selectModules],medianRank14[selectModules],col=1,
@@ -382,7 +385,7 @@ plotData = cbind(mp14$preservation$observed[[ref]][[test]][,2], mp14$preservatio
 mains = c("Preservation Median rank", "Preservation Zsummary")
 # Start the plot: open a suitably sized graphical window and set sectioning and margins.
 # Plot each Z statistic in a separate plot.
-pdf("all module preservation statistics nested.pdf",height = 8, width = 16)
+pdf("all_module_preservation_statistics_nested.pdf",height = 8, width = 16)
 par(mfrow = c(4,5))
 for (s in 1:ncol(statsZ14)){
   min = min(statsZ14[plotMods, s], na.rm = TRUE)
@@ -416,7 +419,7 @@ mart <- biomaRt::useMart(biomart="ENSEMBL_MART_ENSEMBL",
 nonpres_index = (which(Zsummary14 < 2))
 nonpres_modulenames = rownames(Z.PreservationStats14)[nonpres_index]
 KEGG_results = list()
-pdf("KEGG Enrichment in modules.pdf")
+pdf("KEGG_Enrichment_in_modules.pdf")
 for (i in c(1:length(nonpres_modulenames))){
   #i = 3
   module_name = nonpres_modulenames[i]
@@ -503,7 +506,7 @@ for (i in c(1:(length(nonpres_modulenames)))){
   ot = subset(out,totalG > 4 & Pvalue < 0.05)
   final = ot[order(ot$Pvalue),];colnames(final) = c("GOID","GO_Name", "Total_Genes", "Significant_Genes", "pvalue")
   GO_results[[i]] = final
-  pdf(paste("GO Enrichment in modules",module_name,".pdf"))
+  pdf(paste("GO_Enrichment_in_modules",module_name,".pdf"))
   print(final %>%
           top_n(dim(final)[1], wt= -pvalue)%>%
           mutate(hitsPerc = Significant_Genes*100/Total_Genes) %>% ## signi genes, v1 = all genes in the go.

@@ -1,3 +1,4 @@
 *
 !*.R
 !.gitignore
+.Rproj.user
