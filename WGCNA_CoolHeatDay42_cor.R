@@ -150,6 +150,7 @@ print("Step2 - sample tree plotted")
 # Choose a set of soft-thresholding powers
 powers = c(c(1:10), seq(from = 12, to=30, by=2))
 sft_cl = pickSoftThreshold(datExpr14_cl, powerVector = powers, verbose = 0)
+sft_cl
 ### 10 works good. 10 - 0.832 and corresponging mean connectivity
 softPower = min(sft_cl$fitIndices[,1][which(sft_cl$fitIndices[,2] > 0.8)])
 # pre_checked
