@@ -45,6 +45,7 @@ networkData42 = networkData[,c(column_42_cl,column_42_ht)]
 networkData84 = networkData[,c(column_84_cl,column_84_ht)]
 dim(networkData14);dim(networkData42);dim(networkData84)
 
+
 ########################################################################################################################
 # step 1 - filter out top 40% counts
 ## filter out top 40% counts # function established for future use
