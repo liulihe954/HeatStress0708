@@ -144,7 +144,7 @@ sft_b_cl
 ### 10 works good. 10 - 0.832 and corresponging mean connectivity
 softPower_b = min(sft_b_cl$fitIndices[,1][which(sft_b_cl$fitIndices[,2] > 0.8)])
 # pre_checked
-softPower_b = 22
+softPower_b = sft_b_cl$powerEstimate
 MeanK_b = sft_b_cl$fitIndices[softPower_b,5]
 # Plot the results of threshold picking:
 sizeGrWindow(9,5)
