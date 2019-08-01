@@ -141,7 +141,7 @@ dim(datExpr14_cl);dim(datExpr14_ht)
 
 # step 7 check for na (may not necessary)
 table(is.na(datExpr14_cl));table(is.na(datExpr14_ht))
-
+print("check na results bicor")
 #================================================================================================
 ###                                  2. weighted in day 14                                ######    
 #================================================================================================
@@ -149,6 +149,7 @@ table(is.na(datExpr14_cl));table(is.na(datExpr14_ht))
 # Choose a set of soft-thresholding powers
 powers = c(c(1:10), seq(from = 12, to=30, by=2))
 sft_b_cl = pickSoftThreshold(datExpr14_cl, powerVector = powers, corFnc = "bicor",verbose = 0)
+sft_b_cl
 ### 10 works good. 10 - 0.832 and corresponging mean connectivity
 softPower_b = min(sft_b_cl$fitIndices[,1][which(sft_b_cl$fitIndices[,2] > 0.8)])
 # pre_checked

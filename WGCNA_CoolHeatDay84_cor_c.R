@@ -137,7 +137,7 @@ dim(datExpr14_cl);dim(datExpr14_ht)
 
 # step 7 check for na (may not necessary)
 table(is.na(datExpr14_cl));table(is.na(datExpr14_ht))
-
+print("check na results cor")
 #set.seed(316)
 #random_label = sample(c(1:ncol(datExpr14_ht)),5000,replace = F)
 #datExpr14_cl = datExpr14_cl[,random_label]
@@ -169,6 +169,7 @@ print("Step2 - sample tree plotted")
 # Choose a set of soft-thresholding powers
 powers = c(c(1:10), seq(from = 12, to=30, by=2))
 sft_cl = pickSoftThreshold(datExpr14_cl, powerVector = powers, verbose = 0)
+sft_cl
 ### 10 works good. 10 - 0.832 and corresponging mean connectivity
 softPower = min(sft_cl$fitIndices[,1][which(sft_cl$fitIndices[,2] > 0.8)])
 # pre_checked
