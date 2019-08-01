@@ -59,7 +59,7 @@ remove_filter = function(networkData,thres){
 networkData14_filter = remove_filter(networkData14,0.4)$networkData_filter
 networkData42_filter = remove_filter(networkData42,0.4)$networkData_filter
 networkData84_filter = remove_filter(networkData84,0.4)$networkData_filter
-dim(networkData14_filter);dim(networkData42_filter);dim(networkData84_filter);
+dim(networkData14_filter)#;dim(networkData42_filter);dim(networkData84_filter);
 
 # step 2 - normalization (0s out and normalization)
 #BiocManager::install("edgeR") 
@@ -142,6 +142,7 @@ print("Step2 - sample tree plotted")
 # Choose a set of soft-thresholding powers
 powers = c(c(1:10), seq(from = 12, to=30, by=2))
 sft_cl = pickSoftThreshold(datExpr14_cl, powerVector = powers, verbose = 0)
+sft_cl
 ### 10 works good. 10 - 0.832 and corresponging mean connectivity
 softPower = min(sft_cl$fitIndices[,1][which(sft_cl$fitIndices[,2] > 0.8)])
 # pre_checked

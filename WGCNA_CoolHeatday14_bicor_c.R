@@ -64,16 +64,16 @@ remove_filter = function(networkData,thres){
   return(Results)
 }
 networkData14_filter = remove_filter(networkData14,0.4)$networkData_filter
-networkData42_filter = remove_filter(networkData42,0.4)$networkData_filter
-networkData84_filter = remove_filter(networkData84,0.4)$networkData_filter
-dim(networkData14_filter);dim(networkData42_filter);dim(networkData84_filter);
+#networkData42_filter = remove_filter(networkData42,0.4)$networkData_filter
+#networkData84_filter = remove_filter(networkData84,0.4)$networkData_filter
+dim(networkData14_filter)#;dim(networkData42_filter);dim(networkData84_filter);
 
 # step 2 - normalization (0s out and normalization)
 #BiocManager::install("edgeR") 
 # zeros out!
 remove_index14 = which(rowSums(networkData14_filter) == 0);length(remove_index14)
-remove_index42 = which(rowSums(networkData42_filter) == 0);length(remove_index42)
-remove_index84 = which(rowSums(networkData84_filter) == 0);length(remove_index84)
+#remove_index42 = which(rowSums(networkData42_filter) == 0);length(remove_index42)
+#remove_index84 = which(rowSums(networkData84_filter) == 0);length(remove_index84)
 
 # normalization
 require(edgeR)
@@ -140,6 +140,7 @@ table(is.na(datExpr14_cl));table(is.na(datExpr14_ht))
 # Choose a set of soft-thresholding powers
 powers = c(c(1:10), seq(from = 12, to=30, by=2))
 sft_b_cl = pickSoftThreshold(datExpr14_cl, powerVector = powers, corFnc = "bicor",verbose = 0)
+sft_b_cl
 ### 10 works good. 10 - 0.832 and corresponging mean connectivity
 softPower_b = min(sft_b_cl$fitIndices[,1][which(sft_b_cl$fitIndices[,2] > 0.8)])
 # pre_checked

@@ -10,7 +10,6 @@ require(biomaRt);require(gage);require(doParallel)
 #library(plotly) ;library(geomnet);library(readxl);
 #library(car) ## qqplot but didnt use
 #library(qqplotr)## qqplot: used 
-getwd()
 #================================================================================================
 ###                                       1. dataprep                                      ######
 #================================================================================================
@@ -133,6 +132,7 @@ print("check na results bicor")
 # Choose a set of soft-thresholding powers
 powers = c(c(1:10), seq(from = 12, to=30, by=2))
 sft_b_cl = pickSoftThreshold(datExpr14_cl, powerVector = powers, corFnc = "bicor",verbose = 0)
+sft_b_cl
 ### 10 works good. 10 - 0.832 and corresponging mean connectivity
 softPower_b = min(sft_b_cl$fitIndices[,1][which(sft_b_cl$fitIndices[,2] > 0.8)])
 

@@ -81,8 +81,8 @@ dim(networkData14_filter)#;dim(networkData42_filter);dim(networkData84_filter);
 #BiocManager::install("edgeR") 
 # zeros out!
 remove_index14 = which(rowSums(networkData14_filter) == 0);length(remove_index14)
-remove_index42 = which(rowSums(networkData42_filter) == 0);length(remove_index42)
-remove_index84 = which(rowSums(networkData84_filter) == 0);length(remove_index84)
+#remove_index42 = which(rowSums(networkData42_filter) == 0);length(remove_index42)
+#remove_index84 = which(rowSums(networkData84_filter) == 0);length(remove_index84)
 
 # normalization
 require(edgeR)

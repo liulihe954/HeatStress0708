@@ -10,7 +10,6 @@ require(biomaRt);require(gage);require(doParallel)
 #library(plotly) ;library(geomnet);library(readxl);
 #library(car) ## qqplot but didnt use
 #library(qqplotr)## qqplot: used 
-getwd()
 #================================================================================================
 ###                                       1. dataprep                                      ######
 #================================================================================================
@@ -18,6 +17,7 @@ getwd()
 #setwd("/Users/liulihe95/Desktop/HeatStress0708");getwd()
 options(stringsAsFactors = FALSE)
 enableWGCNAThreads()
+#disableWGCNAThreads()
 CowsID_ht = c("6334","8514","8971","8867","8841","8966")# ID of heat group
 CowsID_cl = c("8252","8832","8896","8983","8897","8862")# ID of cool group
 # (all the IDs) 27570 genes; 12 cows; 3 time points 
@@ -61,16 +61,16 @@ remove_filter = function(networkData,thres){
   return(Results)
 }
 networkData14_filter = remove_filter(networkData14,0.4)$networkData_filter
-networkData42_filter = remove_filter(networkData42,0.4)$networkData_filter
-networkData84_filter = remove_filter(networkData84,0.4)$networkData_filter
-dim(networkData14_filter);dim(networkData42_filter);dim(networkData84_filter);
+#networkData42_filter = remove_filter(networkData42,0.4)$networkData_filter
+#networkData84_filter = remove_filter(networkData84,0.4)$networkData_filter
+dim(networkData14_filter)#;dim(networkData42_filter);dim(networkData84_filter);
 
 # step 2 - normalization (0s out and normalization)
 #BiocManager::install("edgeR") 
 # zeros out!
 remove_index14 = which(rowSums(networkData14_filter) == 0);length(remove_index14)
-remove_index42 = which(rowSums(networkData42_filter) == 0);length(remove_index42)
-remove_index84 = which(rowSums(networkData84_filter) == 0);length(remove_index84)
+#remove_index42 = which(rowSums(networkData42_filter) == 0);length(remove_index42)
+#remove_index84 = which(rowSums(networkData84_filter) == 0);length(remove_index84)
 
 # normalization
 require(edgeR)
@@ -125,6 +125,7 @@ print("check na results bicor")
 # Choose a set of soft-thresholding powers
 powers = c(c(1:10), seq(from = 12, to=30, by=2))
 sft_b_cl = pickSoftThreshold(datExpr14_cl, powerVector = powers, corFnc = "bicor",verbose = 0)
+sft_b_cl
 ### 10 works good. 10 - 0.832 and corresponging mean connectivity
 softPower_b = min(sft_b_cl$fitIndices[,1][which(sft_b_cl$fitIndices[,2] > 0.8)])
 
