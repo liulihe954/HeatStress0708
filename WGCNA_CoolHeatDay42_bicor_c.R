@@ -8,6 +8,7 @@ require(edgeR);require(clusterProfiler)
 require(ggplot2);require(magrittr)
 require(biomaRt);require(gage);require(doParallel)
 require(limma);require(recount);require(pamr)
+
 #library(igraph);;library(ggplot2);library(gdata)
 #library(ggpubr);require(cowplot);library(extrafont)
 #library(plotly) ;library(geomnet);library(readxl);
@@ -19,7 +20,7 @@ require(limma);require(recount);require(pamr)
 ## read
 #setwd("/Users/liulihe95/Desktop/HeatStress0708");getwd()
 options(stringsAsFactors = FALSE)
-enableWGCNAThreads()
+#enableWGCNAThreads()
 CowsID_ht = c("6334","8514","8971","8867","8841","8966")# ID of heat group
 CowsID_cl = c("8252","8832","8896","8983","8897","8862")# ID of cool group
 # (all the IDs) 27570 genes; 12 cows; 3 time points 
@@ -105,7 +106,7 @@ networkData14_log2_50var = networkData14_log2[networkData14_log2$variance >= qua
 networkData14_log2_50var$variance <- NULL
 dim(networkData14_log2_50var)
 
-# step 5 - pca correction 
+# step 5 - pca correction
 q_normalize <- function(dat){
   n = nrow(dat)
   p = ncol(dat)
@@ -153,7 +154,7 @@ sft_b_cl
 ### 10 works good. 10 - 0.832 and corresponging mean connectivity
 softPower_b = min(sft_b_cl$fitIndices[,1][which(sft_b_cl$fitIndices[,2] > 0.8)])
 # pre_checked
-softPower_b = 22
+softPower_b = 1
 MeanK_b = sft_b_cl$fitIndices[softPower_b,5]
 # Plot the results of threshold picking:
 sizeGrWindow(9,5)
