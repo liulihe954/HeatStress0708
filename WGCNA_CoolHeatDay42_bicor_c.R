@@ -2,13 +2,12 @@
 #================================================================================================
 ###                                       0. pkg prep                                      ######
 #================================================================================================
-require(sva);require(WGCNA)
+require(WGCNA);require(sva)
 require(ppcor);require(dplyr)
 require(edgeR);require(clusterProfiler)
 require(ggplot2);require(magrittr)
 require(biomaRt);require(gage);require(doParallel)
 require(limma);require(recount);require(pamr)
-
 #library(igraph);;library(ggplot2);library(gdata)
 #library(ggpubr);require(cowplot);library(extrafont)
 #library(plotly) ;library(geomnet);library(readxl);
@@ -154,7 +153,7 @@ sft_b_cl
 ### 10 works good. 10 - 0.832 and corresponging mean connectivity
 softPower_b = min(sft_b_cl$fitIndices[,1][which(sft_b_cl$fitIndices[,2] > 0.8)])
 # pre_checked
-softPower_b = 1
+softPower_b = 22
 MeanK_b = sft_b_cl$fitIndices[softPower_b,5]
 # Plot the results of threshold picking:
 sizeGrWindow(9,5)
