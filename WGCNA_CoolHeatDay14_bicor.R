@@ -1,8 +1,14 @@
 #================================================================================================
 ###                                       0. pkg prep                                      ######
 #================================================================================================
+#if (!requireNamespace("BiocManager", quietly = TRUE))
+#  install.packages("BiocManager")
+#BiocManager::install(c("WGCNA","gage","clusterProfiler","biomaRt"))
+#BiocManager::install(c("edgeR"))
+#install.packages(c("ppcor","magrittr"))
+
 require(WGCNA);require(ppcor);require(dplyr)
-require(edgeR);require(biomaRt);require(clusterProfiler)
+require(edgeR);require(clusterProfiler)
 require(ggplot2);require(magrittr)
 require(biomaRt);require(gage);require(doParallel)
 #library(igraph);;library(ggplot2);library(gdata)
@@ -60,6 +66,7 @@ remove_filter = function(networkData,thres){
   Results = list(remove_index=remove_index,networkData_filter = networkData_filter)
   return(Results)
 }
+
 networkData14_filter = remove_filter(networkData14,0.4)$networkData_filter
 #networkData42_filter = remove_filter(networkData42,0.4)$networkData_filter
 #networkData84_filter = remove_filter(networkData84,0.4)$networkData_filter
