@@ -5,7 +5,82 @@ require(edgeR);require(clusterProfiler)
 require(ggplot2);require(magrittr)
 require(biomaRt);require(gage);require(doParallel)
 require(limma);require(recount);require(pamr)
-load("networkData14 norm and factors.RData")
+options(stringsAsFactors = FALSE)
+enableWGCNAThreads()
+CowsID_ht = c("6334","8514","8971","8867","8841","8966")# ID of heat group
+CowsID_cl = c("8252","8832","8896","8983","8897","8862")# ID of cool group
+# (all the IDs) 27570 genes; 12 cows; 3 time points 
+networkData = read.csv("count_matrix.tsv",sep = "\t",header = T);rownames(networkData) = networkData[,1];networkData = networkData[,-1] 
+dim(networkData)
+## find index 
+# day 14
+names14_last3 = substr(names(networkData), nchar(names(networkData)[2])-2, nchar(names(networkData)[2])); pos14 = grep(".14",names14_last3)
+names14 = names(networkData)[pos14];pos14_ht = substr(names14,2,5) %in% CowsID_ht;pos14_cl = substr(names14,2,5) %in% CowsID_cl
+# day 42
+names42_last3 = substr(names(networkData), nchar(names(networkData)[2])-2, nchar(names(networkData)[2])); pos42 = grep(".42",names42_last3)
+names42 = names(networkData)[pos42];pos42_ht = substr(names42,2,5) %in% CowsID_ht;pos42_cl = substr(names42,2,5) %in% CowsID_cl
+# day 84
+names84_last3 = substr(names(networkData), nchar(names(networkData)[2])-2, nchar(names(networkData)[2])); pos84 = grep(".84",names84_last3)
+names84 = names(networkData)[pos84];pos84_ht = substr(names84,2,5) %in% CowsID_ht;pos84_cl = substr(names84,2,5) %in% CowsID_cl
+#compose index
+column_14_cl = pos14[pos14_cl];column_14_ht = pos14[pos14_ht]
+column_42_cl = pos42[pos42_cl];column_42_ht = pos42[pos42_ht]
+column_84_cl = pos84[pos84_cl];column_84_ht = pos84[pos84_ht]
+# -4 in day14; -4 in day 42; -7 in day84 (think about which one to respect)
+networkData14 = networkData[,c(column_14_cl,column_14_ht)]
+networkData42 = networkData[,c(column_42_cl,column_42_ht)]
+networkData84 = networkData[,c(column_84_cl,column_84_ht)]
+dim(networkData14);dim(networkData42);dim(networkData84)
+
+
+
+################################################################################
+#### substitute dataset for multiple scripts ###################################
+networkData14 = networkData84                ###################################
+#### substitute dataset for multiple scripts ###################################
+################################################################################
+
+
+########################################################################################################################
+# step 1 - filter out top 40% counts
+## filter out top 40% counts # function established for future use
+remove_filter = function(networkData,thres){
+  ID_meanexpr1 = data.frame(names = rownames(networkData), mean = apply(networkData, MARGIN = 1,mean));
+  ID_meanexpr2 = cbind(ID_meanexpr1,percent = ID_meanexpr1$mean/sum(ID_meanexpr1$mean))
+  ID_meanexpr3 = ID_meanexpr2[order(ID_meanexpr2$mean,decreasing = T),]
+  accumulative = numeric(nrow(ID_meanexpr3))
+  for (i in c(1:nrow(ID_meanexpr3))){
+    accum = sum(ID_meanexpr3$percent[1:i])
+    accumulative[i] = accum
+  }
+  remove_pos = (length(which(accumulative <= thres))+1)
+  remove_index = ID_meanexpr3$names[1:remove_pos]
+  networkData_filter = networkData[!(rownames(networkData)%in%remove_index),]
+  Results = list(remove_index=remove_index,networkData_filter = networkData_filter)
+  return(Results)
+}
+networkData14_filter = remove_filter(networkData14,0.4)$networkData_filter
+#networkData42_filter = remove_filter(networkData42,0.4)$networkData_filter
+#networkData84_filter = remove_filter(networkData84,0.4)$networkData_filter
+dim(networkData14_filter)#;dim(networkData42_filter);dim(networkData84_filter);
+
+# step 2 - normalization (0s out and normalization)
+#BiocManager::install("edgeR") 
+# zeros out!
+remove_index14 = which(rowSums(networkData14_filter) == 0);length(remove_index14)
+#remove_index42 = which(rowSums(networkData42_filter) == 0);length(remove_index42)
+#remove_index84 = which(rowSums(networkData84_filter) == 0);length(remove_index84)
+
+# normalization
+require(edgeR)
+networkData14_nm1 = networkData14_filter[-remove_index14,];dim(networkData14_nm1)
+networkData14_nmList = DGEList(counts = networkData14_nm1,group  = c(rep("CL",length(column_14_cl)),rep("HT",length(column_14_ht))))
+networkData14_nm2 = calcNormFactors(networkData14_nmList)
+networkData14_normalized_normfactors = networkData14_nm2$samples
+networkData14_normalized = data.frame(networkData14_nm2$counts)
+dim(networkData14_normalized)
+
+#load("networkData14 norm and factors.RData")
 # step 3 - log 2 trans
 # log trans
 networkData14_log2 = log2(networkData14_normalized+2)
@@ -49,7 +124,9 @@ datExpr14_cl = t(networkData14_final[,colnames(networkData14_final) %in% names(n
 datExpr14_ht = t(networkData14_final[,colnames(networkData14_final) %in% names(networkData)[column_84_ht] ])
 datExpr14_cl = data.frame(datExpr14_cl);datExpr14_ht = data.frame(datExpr14_ht)
 dim(datExpr14_cl);dim(datExpr14_ht)
-load("CoolHeatDay14_modulePreservation bicor.RData")
+
+##########
+print("check na results bicor")load("CoolHeatDay14_modulePreservation bicor.RData")
 load("CoolHeatday14 bicor.RData")
 ref=1; test = 2
 ### print results - short version
