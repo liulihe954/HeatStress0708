@@ -6,7 +6,6 @@
 #BiocManager::install(c("WGCNA","gage","clusterProfiler","biomaRt"))
 #BiocManager::install(c("edgeR"))
 #install.packages(c("ppcor","magrittr"))
-
 require(WGCNA);require(ppcor);require(dplyr)
 require(edgeR);require(clusterProfiler)
 require(ggplot2);require(magrittr)
@@ -16,6 +15,7 @@ require(biomaRt);require(gage);require(doParallel)
 #library(plotly) ;library(geomnet);library(readxl);
 #library(car) ## qqplot but didnt use
 #library(qqplotr)## qqplot: used 
+
 #================================================================================================
 ###                                       1. dataprep                                      ######
 #================================================================================================
