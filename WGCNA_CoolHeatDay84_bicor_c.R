@@ -94,6 +94,7 @@ networkData14_normalized = data.frame(networkData14_nm2$counts)
 dim(networkData14_normalized)
 save(networkData14_normalized_normfactors,networkData14_normalized,file = "networkData14 norm and factors.RData")
 
+#load("networkData14 norm and factors.RData")
 # step 3 - log 2 trans
 # log trans
 networkData14_log2 = log2(networkData14_normalized+2)
@@ -263,6 +264,7 @@ MEs14_b_cl = mergedMEs14_b_cl;
 # Save module colors and labels for use in subsequent parts
 save(MEs14_b_cl, moduleLabels14_b_cl, moduleColors14_b_cl, geneTree14_b_cl, file = "CoolHeatday14 bicor.RData")
 print("Step5 - mergeing finished")
+#load("CoolHeatday14 bicor.RData")
 #=================================================================================================
 #                              6. plotting heatmap                                            ###
 #=================================================================================================
@@ -312,10 +314,12 @@ mp14_b = modulePreservation(multiExpr14_b,multiColor14_b,referenceNetworks=1,ver
 stats14_b = mp14_b$preservation$Z$ref.cl$inColumnsAlsoPresentIn.ht
 Results_b_mp14_1 = stats14_b[order(-stats14_b[,2]),c(1:2)]
 save(mp14_b, file = "CoolHeatDay14_modulePreservation bicor.RData")
-# load("CoolHeatDay14_modulePreservation.RData")
+
+#load("CoolHeatDay14_modulePreservation bicor.RData")
 print("Step8 - mp finished and data saved")
 ################ output - shortest - only p summmary  ######################
 write.csv(Results_b_mp14_1,"module size and preservation statistics bicor day14.csv")
+
 ################ output - shortest - only p summmary  ######################
 # specify the reference and the test networks
 ref=1; test = 2
@@ -490,6 +494,7 @@ nonpres_index_b = (which(Zsummary14_b < 2))
 nonpres_modulenames_b = rownames(Z.PreservationStats14_b)[nonpres_index_b]
 GO_results_b = list()
 #
+#pdf(paste("GO Enrichment in modules bicor 84bicor_c.pdf"))
 for (i in c(1:(length(nonpres_modulenames_b)))){
   module_name = nonpres_modulenames_b[i]
   nopresID_GO = as.vector(colnames(datExpr14_cl)[which(moduleColors14_b_cl == module_name)])
@@ -497,6 +502,7 @@ for (i in c(1:(length(nonpres_modulenames_b)))){
   N = length(total.genes[total.genes %in% genesGO])
   S = length(sig.genes[sig.genes %in% genesGO])
   out = data.frame(GO=character(),Name=character(),totalG=numeric(),sigG=numeric(),Pvalue=numeric())
+  pdf(paste("GO Enrichment in modules bicor",module_name,".pdf"))
   for(j in 1:length(GO)){
     gENEs = subset(gene2, go_id == GO[i])$ensembl_gene_id 
     m = length(total.genes[total.genes %in% gENEs])
@@ -506,11 +512,10 @@ for (i in c(1:(length(nonpres_modulenames_b)))){
     tmp = data.frame(GO = GO[j], Name = Name[j], totalG = m, sigG = s, Pvalue = Pval)
     out = rbind(out,tmp)}
   # select those has 4 more gene in common and pvalue smaller thn 0.05
-  ot = subset(out,totalG > 4 & Pvalue < 0.05)
-  final = ot[order(ot$Pvalue),];colnames(final) = c("GOID","GO_Name", "Total_Genes", "Significant_Genes", "pvalue")
-  GO_results_b[[i]] = final
-  pdf(paste("GO Enrichment in modules bicor",module_name,".pdf"))
-  print(final %>%
+    ot = subset(out,totalG > 4 & Pvalue < 0.05)
+    final = ot[order(ot$Pvalue),];colnames(final) = c("GOID","GO_Name", "Total_Genes", "Significant_Genes", "pvalue")
+    GO_results_b[[i]] = final
+    print(final %>%
           top_n(dim(final)[1], wt= -pvalue)%>%
           mutate(hitsPerc = Significant_Genes*100/Total_Genes) %>% ## signi genes, v1 = all genes in the go.
           ggplot(aes(x = hitsPerc,
@@ -528,5 +533,6 @@ for (i in c(1:(length(nonpres_modulenames_b)))){
           theme(plot.title = element_text(size = 12,color = "black", face = "bold", vjust = 0.5, hjust = 0.5)))
   dev.off()
 }
+
 save(GO_results_b, file = "GO_results_b.RData")
 print("Step11 - GO finished and data saved")
