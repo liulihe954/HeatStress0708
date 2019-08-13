@@ -126,7 +126,7 @@ datExpr14_cl = data.frame(datExpr14_cl);datExpr14_ht = data.frame(datExpr14_ht)
 dim(datExpr14_cl);dim(datExpr14_ht)
 
 ##########
-print("check na results bicor")load("CoolHeatDay14_modulePreservation bicor.RData")
+load("CoolHeatDay14_modulePreservation bicor.RData")
 load("CoolHeatday14 bicor.RData")
 ref=1; test = 2
 ### print results - short version
