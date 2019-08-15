@@ -105,7 +105,6 @@ DataPre   = function(networkData, cousin = 0.4, n1, n2, perct){
        file = paste(deparse(substitute(networkData)),"prepare with corrections","_top",100*(1-perct),".RData",sep = ""))
   return(list(Processed_final = networkData_final))
 }
-
 DataPre_C = function(networkData, cousin = 0.4, n1, n2, perct){
   #function prepare
   remove_filter = function(networkData,thres){
@@ -177,6 +176,7 @@ DataPre_C = function(networkData, cousin = 0.4, n1, n2, perct){
        file = paste(deparse(substitute(networkData)),"prepare with corrections","_top",100*(1-perct),".RData",sep = ""))
   return(list(Corrected_log2_PC = networkData_final))
 }
+
 
 #=======================================day14=========================================================
 networkData14_perc30 = DataPre(networkData14, cousin = 0.4, n1 = 6, n2 = 6, perct = .70)

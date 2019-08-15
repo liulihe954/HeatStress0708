@@ -185,6 +185,7 @@ networkData14_perc20_C = DataPre_C(networkData14,cousin = 0.4, n1 = 6, n2 = 6, p
 networkData14_final <- networkData14_perc20$Processed_final
 networkData14_final_c <- networkData14_perc20_C$Corrected_log2_PC
 
+
 datExpr14_cl = t(networkData14_final[,colnames(networkData14_final) %in% names(networkData)[column_14_cl] ])
 datExpr14_ht = t(networkData14_final[,colnames(networkData14_final) %in% names(networkData)[column_14_ht] ])
 datExpr14_cl = data.frame(datExpr14_cl);datExpr14_ht = data.frame(datExpr14_ht)
@@ -220,6 +221,7 @@ datExpr84_cl = data.frame(datExpr84_cl);datExpr84_ht = data.frame(datExpr84_ht)
 datExpr84_cl_c = t(networkData84_final_c[,colnames(networkData84_final_c) %in% names(networkData)[column_84_cl] ])
 datExpr84_ht_c = t(networkData84_final_c[,colnames(networkData84_final_c) %in% names(networkData)[column_84_ht] ])
 datExpr84_cl_c = data.frame(datExpr84_cl_c);datExpr84_ht_c = data.frame(datExpr84_ht_c)
+
 
 #================================================================================================
 
