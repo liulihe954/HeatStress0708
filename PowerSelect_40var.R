@@ -10,7 +10,7 @@ require(limma);require(recount);require(pamr)
 ## read
 #setwd("/Users/liulihe95/Desktop/HeatStress0708");getwd()
 options(stringsAsFactors = FALSE)
-#enableWGCNAThreads()
+enableWGCNAThreads()
 CowsID_ht = c("6334","8514","8971","8867","8841","8966")# ID of heat group
 CowsID_cl = c("8252","8832","8896","8983","8897","8862")# ID of cool group
 # (all the IDs) 27570 genes; 12 cows; 3 time points 
