@@ -105,6 +105,7 @@ DataPre   = function(networkData, cousin = 0.4, n1, n2, perct){
        file = paste(deparse(substitute(networkData)),"prepare with corrections","_top",100*(1-perct),".RData",sep = ""))
   return(list(Processed_final = networkData_final))
 }
+
 DataPre_C = function(networkData, cousin = 0.4, n1, n2, perct){
   #function prepare
   remove_filter = function(networkData,thres){
@@ -177,13 +178,11 @@ DataPre_C = function(networkData, cousin = 0.4, n1, n2, perct){
   return(list(Corrected_log2_PC = networkData_final))
 }
 
-
-
 #=======================================day14=========================================================
-networkData14_perc20 = DataPre(networkData14, cousin = 0.4, n1 = 6, n2 = 6, perct = .80)
-networkData14_perc20_C = DataPre_C(networkData14,cousin = 0.4, n1 = 6, n2 = 6, perct = .80)
-networkData14_final <- networkData14_perc20$Processed_final
-networkData14_final_c <- networkData14_perc20_C$Corrected_log2_PC
+networkData14_perc30 = DataPre(networkData14, cousin = 0.4, n1 = 6, n2 = 6, perct = .70)
+networkData14_perc30_C = DataPre_C(networkData14,cousin = 0.4, n1 = 6, n2 = 6, perct = .70)
+networkData14_final <- networkData14_perc30$Processed_final
+networkData14_final_c <- networkData14_perc30_C$Corrected_log2_PC
 
 datExpr14_cl = t(networkData14_final[,colnames(networkData14_final) %in% names(networkData)[column_14_cl] ])
 datExpr14_ht = t(networkData14_final[,colnames(networkData14_final) %in% names(networkData)[column_14_ht] ])
@@ -194,10 +193,10 @@ datExpr14_ht_c = t(networkData14_final_c[,colnames(networkData14_final_c) %in% n
 datExpr14_cl_c = data.frame(datExpr14_cl_c);datExpr14_ht_c = data.frame(datExpr14_ht_c)
 
 #=======================================day42=========================================================
-networkData42_perc20 = DataPre(networkData42, cousin = 0.4, n1 = 6, n2 = 6, perct = .80)
-networkData42_perc20_C = DataPre_C(networkData42,cousin = 0.4, n1 = 6, n2 = 6, perct = .80)
-networkData42_final <- networkData42_perc20$Processed_final
-networkData42_final_c <- networkData42_perc20_C$Corrected_log2_PC
+networkData42_perc30 = DataPre(networkData42, cousin = 0.4, n1 = 6, n2 = 6, perct = .70)
+networkData42_perc30_C = DataPre_C(networkData42,cousin = 0.4, n1 = 6, n2 = 6, perct = .70)
+networkData42_final <- networkData42_perc30$Processed_final
+networkData42_final_c <- networkData42_perc30_C$Corrected_log2_PC
 
 datExpr42_cl = t(networkData42_final[,colnames(networkData42_final) %in% names(networkData)[column_42_cl] ])
 datExpr42_ht = t(networkData42_final[,colnames(networkData42_final) %in% names(networkData)[column_42_ht] ])
@@ -208,10 +207,10 @@ datExpr42_ht_c = t(networkData42_final_c[,colnames(networkData42_final_c) %in% n
 datExpr42_cl_c = data.frame(datExpr42_cl_c);datExpr42_ht_c = data.frame(datExpr42_ht_c)
 
 #=======================================day84=========================================================
-networkData84_perc20 = DataPre(networkData84, cousin = 0.4, n1 = 6, n2 = 6, perct = .80)
-networkData84_perc20_C = DataPre_C(networkData84,cousin = 0.4, n1 = 6, n2 = 6, perct = .80)
-networkData84_final <- networkData84_perc20$Processed_final
-networkData84_final_c <- networkData84_perc20_C$Corrected_log2_PC
+networkData84_perc30 = DataPre(networkData84, cousin = 0.4, n1 = 6, n2 = 6, perct = .70)
+networkData84_perc30_C = DataPre_C(networkData84,cousin = 0.4, n1 = 6, n2 = 6, perct = .70)
+networkData84_final <- networkData84_perc30$Processed_final
+networkData84_final_c <- networkData84_perc30_C$Corrected_log2_PC
 
 datExpr84_cl = t(networkData84_final[,colnames(networkData84_final) %in% names(networkData)[column_84_cl] ])
 datExpr84_ht = t(networkData84_final[,colnames(networkData84_final) %in% names(networkData)[column_84_ht] ])
@@ -227,70 +226,70 @@ powers = c(c(1:10), seq(from = 12, to=30, by=2))
 #================================================================================================
 ###                                     2. day14 cor                                       ######
 #================================================================================================
-sft_cl_14_cor = pickSoftThreshold(datExpr14_cl, powerVector = powers, verbose = 0)
+sft_cl_14_cor_30 = pickSoftThreshold(datExpr14_cl, powerVector = powers, verbose = 0)
 #================================================================================================
 ###                                     3. day14 cor_c                                     ######
 #================================================================================================
-sft_cl_14_cor_c = pickSoftThreshold(datExpr14_cl_c, powerVector = powers, verbose = 0)
+sft_cl_14_cor_c_30 = pickSoftThreshold(datExpr14_cl_c, powerVector = powers, verbose = 0)
 #================================================================================================
 ###                                     4. day14 bicor                                     ######
 #================================================================================================
-sft_cl_14_bicor = pickSoftThreshold(datExpr14_cl, powerVector = powers, corFnc = "bicor",verbose = 0)
+sft_cl_14_bicor_30 = pickSoftThreshold(datExpr14_cl, powerVector = powers, corFnc = "bicor",verbose = 0)
 #================================================================================================
 ###                                    5. day14 bicor_c                                    ######
 #================================================================================================
-sft_cl_14_bicor_c = pickSoftThreshold(datExpr14_cl_c, powerVector = powers, corFnc = "bicor",verbose = 0)
+sft_cl_14_bicor_c_30 = pickSoftThreshold(datExpr14_cl_c, powerVector = powers, corFnc = "bicor",verbose = 0)
 
-save(sft_cl_14_cor,
-     sft_cl_14_cor_c,
-     sft_cl_14_bicor,
-     sft_cl_14_bicor_c,
-     file = "soft_thres_four_comb_day14.RData")
+save(sft_cl_14_cor_30,
+     sft_cl_14_cor_c_30,
+     sft_cl_14_bicor_30,
+     sft_cl_14_bicor_c_30,
+     file = "soft_thres_four_comb_day14_30.RData")
 
 
 #================================================================================================
 ###                                     2. day42 cor                                       ######
 #================================================================================================
-sft_cl_42_cor = pickSoftThreshold(datExpr42_cl, powerVector = powers, verbose = 0)
+sft_cl_42_cor_30 = pickSoftThreshold(datExpr42_cl, powerVector = powers, verbose = 0)
 #================================================================================================
 ###                                     3. day14 cor_c                                     ######
 #================================================================================================
-sft_cl_42_cor_c = pickSoftThreshold(datExpr42_cl_c, powerVector = powers, verbose = 0)
+sft_cl_42_cor_c_30 = pickSoftThreshold(datExpr42_cl_c, powerVector = powers, verbose = 0)
 #================================================================================================
 ###                                     4. day14 bicor                                     ######
 #================================================================================================
-sft_cl_42_bicor = pickSoftThreshold(datExpr42_cl, powerVector = powers, corFnc = "bicor",verbose = 0)
+sft_cl_42_bicor_30 = pickSoftThreshold(datExpr42_cl, powerVector = powers, corFnc = "bicor",verbose = 0)
 #================================================================================================
 ###                                    5. day14 bicor_c                                    ######
 #================================================================================================
-sft_cl_42_bicor_c = pickSoftThreshold(datExpr42_cl_c, powerVector = powers, corFnc = "bicor",verbose = 0)
+sft_cl_42_bicor_c_30 = pickSoftThreshold(datExpr42_cl_c, powerVector = powers, corFnc = "bicor",verbose = 0)
 #================================================================================================
-save(sft_cl_42_cor,
-     sft_cl_42_cor_c,
-     sft_cl_42_bicor,
-     sft_cl_42_bicor_c,
-     file = "soft_thres_four_comb_day42.RData")
+save(sft_cl_42_cor_30,
+     sft_cl_42_cor_c_30,
+     sft_cl_42_bicor_30,
+     sft_cl_42_bicor_c_30,
+     file = "soft_thres_four_comb_day42_30.RData")
 
 #================================================================================================
 ###                                     2. day84 cor                                       ######
 #================================================================================================
-sft_cl_84_cor = pickSoftThreshold(datExpr84_cl, powerVector = powers, verbose = 0)
+sft_cl_84_cor_30 = pickSoftThreshold(datExpr84_cl, powerVector = powers, verbose = 0)
 #================================================================================================
 ###                                     3. day14 cor_c                                     ######
 #================================================================================================
-sft_cl_84_cor_c = pickSoftThreshold(datExpr84_cl_c, powerVector = powers, verbose = 0)
+sft_cl_84_cor_c_30 = pickSoftThreshold(datExpr84_cl_c, powerVector = powers, verbose = 0)
 #================================================================================================
 ###                                     4. day14 bicor                                     ######
 #================================================================================================
-sft_cl_84_bicor = pickSoftThreshold(datExpr84_cl, powerVector = powers, corFnc = "bicor",verbose = 0)
+sft_cl_84_bicor_30 = pickSoftThreshold(datExpr84_cl, powerVector = powers, corFnc = "bicor",verbose = 0)
 #================================================================================================
 ###                                    5. day14 bicor_c                                    ######
 #================================================================================================
-sft_cl_84_bicor_c = pickSoftThreshold(datExpr84_cl_c, powerVector = powers, corFnc = "bicor",verbose = 0)
+sft_cl_84_bicor_c_30 = pickSoftThreshold(datExpr84_cl_c, powerVector = powers, corFnc = "bicor",verbose = 0)
 #================================================================================================
-save(sft_cl_84_cor,
-     sft_cl_84_cor_c,
-     sft_cl_84_bicor,
-     sft_cl_84_bicor_c,
-     file = "soft_thres_four_comb_day84.RData")
+save(sft_cl_84_cor_30,
+     sft_cl_84_cor_c_30,
+     sft_cl_84_bicor_30,
+     sft_cl_84_bicor_c_30,
+     file = "soft_thres_four_comb_day84_30.RData")
 
