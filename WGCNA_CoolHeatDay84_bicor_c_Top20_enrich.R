@@ -22,21 +22,12 @@ print("datapre done!")
 #================================================================================================
 ###                                  2. weighted in day 14                                ######    
 #================================================================================================
-## pick soft thresholds
-
-#save
-#save(sft_b_cl,softPower_b,MeanK_b,file = "SoftThres_bicor_c_day84.RData")
-#laod("SoftThres_bicor_c_day84.RData")
 print("Step2 - soft thre plotted and Rdata saved")
 #==============================================================================================
 #                                 3. soft-threshold and dissimilarity                    ######
 #==============================================================================================
 # ref - cl; test - ht
 # dim(datExpr14_ht);dim(datExpr14_cl)
-# Peaerson Cor
-# save the matrix
-#save(adjacency14_b_cl,dissTOM14_b_cl,geneTree14_b_cl,adjacency14_b_ht,dissTOM14_b_ht,geneTree14_b_ht,file = "AllMatrixDay84_bicor_c.RData")
-load("AllMatrixDay84_bicor_c.RData")
 print("Step3 - adj matrix created and rdata saved")
 #==========================================================================================
 #                                    4.  plot trees                                  ######
@@ -47,7 +38,21 @@ print("Step4 - dissmi plottd and rdata saved")
 #                                5.cutting and merging                              ######
 #=========================================================================================
 # set the minimum module size relatively high:
-# Save module colors and labels for use in subsequent parts
+minModuleSize = 30;
+# Module identification using dynamic tree cut:
+dynamicMods14_b_cl = cutreeDynamic(dendro = geneTree14_b_cl, distM = dissTOM14_b_cl,
+                                   cutHeight=0.995, deepSplit = 1, pamRespectsDendro = FALSE,
+                                   minClusterSize = minModuleSize);
+table(dynamicMods14_b_cl)
+# Convert numeric lables into colors
+dynamicColors14_b_cl = labels2colors(dynamicMods14_b_cl)
+# Plot the dendrogram and colors underneath
+sizeGrWindow(8,16)
+
+print("Step5 - cutting finished")
+### Merging of modules whose expression profiles are very similar
+# Calculate eigengenes
+Save module colors and labels for use in subsequent parts
 #save(MEs14_b_cl, moduleLabels14_b_cl, moduleColors14_b_cl, geneTree14_b_cl, file = "CoolHeatDay14_bicor_c.RData")
 load("CoolHeatDay14_bicor_c.RData")
 print("Step5 - mergeing finished")
@@ -66,23 +71,65 @@ print("Step7 - cross condition dendrogram created")
 ######### To quantify this result module preservation statistics ######################
 # data pre and check data structure
 #save(mp14_b, file = "CoolHeatDay84_modulePreservation_bicor_c.RData")
-load("CoolHeatDay84_modulePreservation_bicor_c.RData")
+load("CoolHeatDay84_modulePreservation_bicor_c.RDat")
+#load("CoolHeatDay14_modulePreservation bicor.RData")
 print("Step8 - mp finished and data saved")
 ################ output - shortest - only p summmary  ######################
 #write.csv(Results_b_mp14_1,"module_size_and_preservation_statistics_bicor_c_day84.csv")
 
 ################ output - shortest - only p summmary  ######################
 # specify the reference and the test networks
+ref=1; test = 2
+### print results - short version
+statsObs14_b = cbind(mp14_b$quality$observed[[ref]][[test]][,-1], mp14_b$preservation$observed[[ref]][[test]][,-1])
+statsZ14_b = cbind(mp14_b$quality$Z[[ref]][[test]][, -1], mp14_b$preservation$Z[[ref]][[test]][,-1]);
+# Compare preservation to quality:
+print(cbind(statsObs14_b[,c("medianRank.pres", "medianRank.qual")],
+            signif(statsZ14_b[,c("Zsummary.pres", "Zsummary.qual")],2)))
+### print results - full
+Obs.PreservationStats14_b= mp14_b$preservation$observed[[ref]][[test]]
+Z.PreservationStats14_b=mp14_b$preservation$Z[[ref]][[test]]
+# Look at the observed preservation statistics
+# Obs.PreservationStats
+# Z statistics from the permutation test analysis Z.PreservationStats
 print("Step8 - preservation statistics calculated and saved")
 #===========================================================================================
 #                                9. mp visualization                                      ##
 #===========================================================================================
 ####### ###### ######   present Z summary ###### ###### ###### ###### ###### 
 # Let us now visualize the data.
+modColors14_b = rownames(Obs.PreservationStats14_b)
+moduleSize14_b = Obs.PreservationStats14_b$moduleSize
+# we will omit the grey module (background genes) and the gold module (random sample of genes)
+selectModules = !(modColors14_b %in% c("grey", "gold"))
+# Text labels for points
+point.label14_b = modColors14_b[selectModules]
+#Composite preservation statistics
+medianRank14_b=Obs.PreservationStats14_b$medianRank.pres
+Zsummary14_b=Z.PreservationStats14_b$Zsummary.pres
+#
 print("Step9 - preservation statistics calculated vis and saved")
 ############################################################################################################################
 ####### ###### ######   present individual Z  ###### ###### ###### ###### ###### 
+# Re-initialize module color labels and sizes
+ref = 1;test = 2
+# Module labels and module sizes are also contained in the results
+modColors14_b = rownames(statsZ14_b)
+moduleSizes14_b = mp14_b$quality$Z[[ref]][[test]][,1];
+# Exclude improper modules / leave grey and gold modules out
+plotMods = !(modColors14_b %in% c("grey", "gold"));
+# Create numeric labels for each module
+labs14_b= match(modColors14_b[plotMods], standardColors());
 
+# Compare preservation to quality:
+print(cbind(statsObs14_b[, c("medianRank.pres", "medianRank.qual")],
+            signif(statsZ14_b[, c("Zsummary.pres", "Zsummary.qual")], 2)))
+
+# Text labels for points
+text = modColors14_b[plotMods];
+# Auxiliary convenience variable
+plotData_b = cbind(mp14_b$preservation$observed[[ref]][[test]][,2], mp14_b$preservation$Z[[ref]][[test]][,2])
+# Plot each Z statistic in a separate plot.
 print("Step9 - all_module_preservation_statistics finished and data saved")
 #===========================================================================================
 #                                10. KEGG enrichment                                      ##
