@@ -73,6 +73,7 @@ dissTOM14_b_ht = 1-TOMsimilarity(adjacency14_b_ht, TOMType="unsigned")
 geneTree14_b_ht = hclust(as.dist(dissTOM14_b_ht), method="average")
 # save the matrix
 save(adjacency14_b_cl,dissTOM14_b_cl,geneTree14_b_cl,adjacency14_b_ht,dissTOM14_b_ht,geneTree14_b_ht,file = "AllMatrixDay14_bicor_c.RData")
+#load("AllMatrixDay14_bicor_c.RData")
 print("Step3 - adj matrix created and rdata saved")
 #==========================================================================================
 #                                    4.  plot trees                                  ######
@@ -140,6 +141,7 @@ moduleLabels14_b_cl = match(moduleColors14_b_cl, colorOrder) -1;
 MEs14_b_cl = mergedMEs14_b_cl;
 # Save module colors and labels for use in subsequent parts
 save(MEs14_b_cl, moduleLabels14_b_cl, moduleColors14_b_cl, geneTree14_b_cl, file = "CoolHeatDay_bicor_c_day14.RData")
+#load("CoolHeatDay_bicor_c_day14.RData")
 print("Step5 - mergeing finished")
 #=================================================================================================
 #                              6. plotting heatmap                                            ###
@@ -190,6 +192,7 @@ mp14_b = modulePreservation(multiExpr14_b,multiColor14_b,referenceNetworks=1,ver
 stats14_b = mp14_b$preservation$Z$ref.cl$inColumnsAlsoPresentIn.ht
 Results_b_mp14_1 = stats14_b[order(-stats14_b[,2]),c(1:2)]
 save(mp14_b, file = "CoolHeatDay14_modulePreservation_bicor_c.RData")
+#load("CoolHeatDay14_modulePreservation_bicor_c.RData")
 # load("CoolHeatDay14_modulePreservation.RData")
 print("Step8 - mp finished and data saved")
 ################ output - shortest - only p summmary  ######################
@@ -286,6 +289,7 @@ for (s in 1:ncol(statsZ14_b)){
 }
 dev.off()
 print("Step9 - all_module_preservation_statistics finished and data saved")
+
 #===========================================================================================
 #                                10. KEGG enrichment                                      ##
 #===========================================================================================
@@ -296,10 +300,29 @@ kegg.gs = sdb$kg.sets[sdb$sigmet.id]
 mart <- biomaRt::useMart(biomart="ENSEMBL_MART_ENSEMBL",
                          dataset="btaurus_gene_ensembl",
                          host="http://www.ensembl.org")
+
 # select and plot
 nonpres_index_b = (which(Zsummary14_b < 2))
 nonpres_modulenames_b = rownames(Z.PreservationStats14_b)[nonpres_index_b]
+nonpres_modulenames_b = nonpres_modulenames_b[-grep("gold",nonpres_modulenames_b)]
 KEGG_results_b = list()
+
+rm(i)
+i= 26
+module_name = nonpres_modulenames_b[i]
+nopresID = as.vector(colnames(datExpr14_cl)[which(moduleColors14_b_cl == module_name)])
+annot <- getBM(attributes = c("entrezgene_id"),
+               filters="ensembl_gene_id",
+               values = nopresID,
+               mart = mart )
+enrich <- enrichKEGG(gene = enterID, organism = 'bta', qvalueCutoff = 0.05, pvalueCutoff = 0.05)
+KEGG_results_b[[i]] = enrich
+# massage on the dataset (append two columns)
+overlap1 = sub('/.*', '',enrich$GeneRatio)
+total1 = sub('/.*', '',enrich$BgRatio)
+enrich_add = cbind(data.frame(enrich),total1 = as.numeric(total1),overlap1 = as.numeric(overlap1))
+
+
 pdf("KEGG_Enrichment_in_modules_bicor_c_day14.pdf")
 for (i in c(1:length(nonpres_modulenames_b))){
   #i = 3
@@ -365,6 +388,7 @@ genesGO = unique(subset(gene2,go_id != "")$ensembl_gene_id)
 ### select non-preserved modules
 nonpres_index_b = (which(Zsummary14_b < 2))
 nonpres_modulenames_b = rownames(Z.PreservationStats14_b)[nonpres_index_b]
+nonpres_modulenames_b = nonpres_modulenames_b[-grep("gold",nonpres_modulenames_b)]
 GO_results_b = list()
 #
 pdf("GO_Enrichment_in_modules_bicor_c_day14.pdf")
