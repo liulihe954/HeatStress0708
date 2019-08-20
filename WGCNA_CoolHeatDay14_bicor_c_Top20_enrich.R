@@ -46,40 +46,9 @@ print("Step4 - dissmi plottd and rdata saved")
 #                                5.cutting and merging                              ######
 #=========================================================================================
 # set the minimum module size relatively high:
-minModuleSize = 30;
-# Module identification using dynamic tree cut:
-dynamicMods14_b_cl = cutreeDynamic(dendro = geneTree14_b_cl, distM = dissTOM14_b_cl,
-                                   cutHeight=0.995, deepSplit = 1, pamRespectsDendro = FALSE,
-                                   minClusterSize = minModuleSize);
-table(dynamicMods14_b_cl)
-# Convert numeric lables into colors
-dynamicColors14_b_cl = labels2colors(dynamicMods14_b_cl)
 print("Step5 - cutting finished")
 ### Merging of modules whose expression profiles are very similar
 # Calculate eigengenes
-MEList14_b_cl = moduleEigengenes(datExpr14_cl,colors = dynamicColors14_b_cl)
-MEs14_b_cl = MEList14_b_cl$eigengenes
-#greyMEName = paste(moduleColor.getMEprefix(), "grey", sep = "") 
-#if (greyMEName %in% colnames(MEList14_b_cl$eigengenes))  { print("grey found")
-#  MEs14_b_cl = removeGreyME(MEList14_b_cl$eigengenes)}
-# Calculate dissimilarity of module eigengenes
-MEDiss14_b_cl = 1 - cor(MEs14_b_cl)
-# Cluster module eigengenes
-METree14_b_cl = hclust(as.dist(MEDiss14_b_cl), method = "average");
-# Plot the result of module eigengenes
-sizeGrWindow(8,16)
-# Call an automatic merging function
-merge14_b_cl = mergeCloseModules(datExpr14_cl, dynamicColors14_b_cl, cutHeight = MEDissThres, verbose = 3)
-# The merged module colors
-mergedColors14_b_cl = merge14_b_cl$colors
-# Eigengenes of the new merged modules:
-mergedMEs14_b_cl = merge14_b_cl$newMEs;
-# Rename to moduleColors
-moduleColors14_b_cl = mergedColors14_b_cl
-# Construct numerical labels corresponding to the colors
-colorOrder = c("grey", standardColors())
-moduleLabels14_b_cl = match(moduleColors14_b_cl, colorOrder) -1;
-MEs14_b_cl = mergedMEs14_b_cl;
 # Save module colors and labels for use in subsequent parts
 #save(MEs14_b_cl, moduleLabels14_b_cl, moduleColors14_b_cl, geneTree14_b_cl, file = "CoolHeatDay_bicor_c_day14.RData")
 load("CoolHeatDay_bicor_c_day14.RData")

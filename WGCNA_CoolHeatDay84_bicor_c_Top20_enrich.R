@@ -38,21 +38,6 @@ print("Step4 - dissmi plottd and rdata saved")
 #                                5.cutting and merging                              ######
 #=========================================================================================
 # set the minimum module size relatively high:
-minModuleSize = 30;
-# Module identification using dynamic tree cut:
-dynamicMods14_b_cl = cutreeDynamic(dendro = geneTree14_b_cl, distM = dissTOM14_b_cl,
-                                   cutHeight=0.995, deepSplit = 1, pamRespectsDendro = FALSE,
-                                   minClusterSize = minModuleSize);
-table(dynamicMods14_b_cl)
-# Convert numeric lables into colors
-dynamicColors14_b_cl = labels2colors(dynamicMods14_b_cl)
-# Plot the dendrogram and colors underneath
-sizeGrWindow(8,16)
-
-print("Step5 - cutting finished")
-### Merging of modules whose expression profiles are very similar
-# Calculate eigengenes
-Save module colors and labels for use in subsequent parts
 #save(MEs14_b_cl, moduleLabels14_b_cl, moduleColors14_b_cl, geneTree14_b_cl, file = "CoolHeatDay14_bicor_c.RData")
 load("CoolHeatDay14_bicor_c.RData")
 print("Step5 - mergeing finished")
@@ -122,13 +107,6 @@ plotMods = !(modColors14_b %in% c("grey", "gold"));
 labs14_b= match(modColors14_b[plotMods], standardColors());
 
 # Compare preservation to quality:
-print(cbind(statsObs14_b[, c("medianRank.pres", "medianRank.qual")],
-            signif(statsZ14_b[, c("Zsummary.pres", "Zsummary.qual")], 2)))
-
-# Text labels for points
-text = modColors14_b[plotMods];
-# Auxiliary convenience variable
-plotData_b = cbind(mp14_b$preservation$observed[[ref]][[test]][,2], mp14_b$preservation$Z[[ref]][[test]][,2])
 # Plot each Z statistic in a separate plot.
 print("Step9 - all_module_preservation_statistics finished and data saved")
 #===========================================================================================
