@@ -8,10 +8,11 @@ require(edgeR);require(clusterProfiler)
 require(ggplot2);require(magrittr)
 require(biomaRt);require(gage);require(doParallel)
 require(limma);require(recount);require(pamr)
+
 #================================================================================================
 ###                                       1. dataprep                                      ######
 #================================================================================================
-load("networkData84prepare with corrections_top20.RData")
+load("networkData14prepare with corrections_top20.RData")
 load('AllColumnsLables.RData')
 networkData14_final <- networkData_final
 datExpr14_cl = t(networkData14_final[,c(1:(.5*ncol(networkData14_final)))])
@@ -22,12 +23,19 @@ print("datapre done!")
 #================================================================================================
 ###                                  2. weighted in day 14                                ######    
 #================================================================================================
+## pick soft thresholds
+# Choose a set of soft-thresholding powers
+# Mean connectivity as a function of the soft-thresholding power
+#save(sft_b_cl,softPower_b,MeanK_b,file = "SoftThres_bicor_c_day14.RData")
 print("Step2 - soft thre plotted and Rdata saved")
 #==============================================================================================
 #                                 3. soft-threshold and dissimilarity                    ######
 #==============================================================================================
 # ref - cl; test - ht
 # dim(datExpr14_ht);dim(datExpr14_cl)
+# save the matrix
+#save(adjacency14_b_cl,dissTOM14_b_cl,geneTree14_b_cl,adjacency14_b_ht,dissTOM14_b_ht,geneTree14_b_ht,file = "AllMatrixDay14_bicor_c.RData")
+#load("AllMatrixDay14_bicor_c.RData")
 print("Step3 - adj matrix created and rdata saved")
 #==========================================================================================
 #                                    4.  plot trees                                  ######
@@ -46,21 +54,40 @@ dynamicMods14_b_cl = cutreeDynamic(dendro = geneTree14_b_cl, distM = dissTOM14_b
 table(dynamicMods14_b_cl)
 # Convert numeric lables into colors
 dynamicColors14_b_cl = labels2colors(dynamicMods14_b_cl)
-# Plot the dendrogram and colors underneath
-sizeGrWindow(8,16)
-
 print("Step5 - cutting finished")
 ### Merging of modules whose expression profiles are very similar
 # Calculate eigengenes
-Save module colors and labels for use in subsequent parts
-#save(MEs14_b_cl, moduleLabels14_b_cl, moduleColors14_b_cl, geneTree14_b_cl, file = "CoolHeatDay14_bicor_c.RData")
-load("CoolHeatDay14_bicor_c.RData")
+MEList14_b_cl = moduleEigengenes(datExpr14_cl,colors = dynamicColors14_b_cl)
+MEs14_b_cl = MEList14_b_cl$eigengenes
+#greyMEName = paste(moduleColor.getMEprefix(), "grey", sep = "") 
+#if (greyMEName %in% colnames(MEList14_b_cl$eigengenes))  { print("grey found")
+#  MEs14_b_cl = removeGreyME(MEList14_b_cl$eigengenes)}
+# Calculate dissimilarity of module eigengenes
+MEDiss14_b_cl = 1 - cor(MEs14_b_cl)
+# Cluster module eigengenes
+METree14_b_cl = hclust(as.dist(MEDiss14_b_cl), method = "average");
+# Plot the result of module eigengenes
+sizeGrWindow(8,16)
+# Call an automatic merging function
+merge14_b_cl = mergeCloseModules(datExpr14_cl, dynamicColors14_b_cl, cutHeight = MEDissThres, verbose = 3)
+# The merged module colors
+mergedColors14_b_cl = merge14_b_cl$colors
+# Eigengenes of the new merged modules:
+mergedMEs14_b_cl = merge14_b_cl$newMEs;
+# Rename to moduleColors
+moduleColors14_b_cl = mergedColors14_b_cl
+# Construct numerical labels corresponding to the colors
+colorOrder = c("grey", standardColors())
+moduleLabels14_b_cl = match(moduleColors14_b_cl, colorOrder) -1;
+MEs14_b_cl = mergedMEs14_b_cl;
+# Save module colors and labels for use in subsequent parts
+#save(MEs14_b_cl, moduleLabels14_b_cl, moduleColors14_b_cl, geneTree14_b_cl, file = "CoolHeatDay_bicor_c_day14.RData")
+load("CoolHeatDay_bicor_c_day14.RData")
+
 print("Step5 - mergeing finished")
-#load("CoolHeatday14 bicor.RData")
 #=================================================================================================
 #                              6. plotting heatmap                                            ###
 #=================================================================================================
-print("Step6 - heapmap created")
 #===============================================================================================
 #                           7. plot cross-condition dendrogram                               ###
 #===============================================================================================
@@ -70,13 +97,13 @@ print("Step7 - cross condition dendrogram created")
 #=================================================================================================
 ######### To quantify this result module preservation statistics ######################
 # data pre and check data structure
-#save(mp14_b, file = "CoolHeatDay84_modulePreservation_bicor_c.RData")
-load("CoolHeatDay84_modulePreservation_bicor_c.RData")
-#load("CoolHeatDay14_modulePreservation bicor.RData")
+#save(mp14_b, file = "CoolHeatDay14_modulePreservation_bicor_c.RData")
+load("CoolHeatDay14_modulePreservation_bicor_c.RData")
+#load("CoolHeatDay14_modulePreservation_bicor_c.RData")
+# load("CoolHeatDay14_modulePreservation.RData")
 print("Step8 - mp finished and data saved")
 ################ output - shortest - only p summmary  ######################
-#write.csv(Results_b_mp14_1,"module_size_and_preservation_statistics_bicor_c_day84.csv")
-
+#write.csv(Results_b_mp14_1,"module_size_and_preservation_statistics_bicor_day14.csv")
 ################ output - shortest - only p summmary  ######################
 # specify the reference and the test networks
 ref=1; test = 2
@@ -92,6 +119,8 @@ Z.PreservationStats14_b=mp14_b$preservation$Z[[ref]][[test]]
 # Look at the observed preservation statistics
 # Obs.PreservationStats
 # Z statistics from the permutation test analysis Z.PreservationStats
+#write.csv(Obs.PreservationStats14_b,"Obs.PreservationStats_bicor_c_day14.csv")
+#write.csv(Z.PreservationStats14_b,"Z.PreservationStats_bicor_c_day14.csv")
 print("Step8 - preservation statistics calculated and saved")
 #===========================================================================================
 #                                9. mp visualization                                      ##
@@ -122,15 +151,15 @@ plotMods = !(modColors14_b %in% c("grey", "gold"));
 labs14_b= match(modColors14_b[plotMods], standardColors());
 
 # Compare preservation to quality:
-print(cbind(statsObs14_b[, c("medianRank.pres", "medianRank.qual")],
-            signif(statsZ14_b[, c("Zsummary.pres", "Zsummary.qual")], 2)))
-
 # Text labels for points
-text = modColors14_b[plotMods];
+#text = modColors14_b[plotMods];
 # Auxiliary convenience variable
-plotData_b = cbind(mp14_b$preservation$observed[[ref]][[test]][,2], mp14_b$preservation$Z[[ref]][[test]][,2])
+#plotData_b = cbind(mp14_b$preservation$observed[[ref]][[test]][,2], mp14_b$preservation$Z[[ref]][[test]][,2])
+# Main titles for the plot
+# Start the plot: open a suitably sized graphical window and set sectioning and margins.
 # Plot each Z statistic in a separate plot.
 print("Step9 - all_module_preservation_statistics finished and data saved")
+
 #===========================================================================================
 #                                10. KEGG enrichment                                      ##
 #===========================================================================================
@@ -141,12 +170,30 @@ kegg.gs = sdb$kg.sets[sdb$sigmet.id]
 mart <- biomaRt::useMart(biomart="ENSEMBL_MART_ENSEMBL",
                          dataset="btaurus_gene_ensembl",
                          host="http://www.ensembl.org")
+
 # select and plot
 nonpres_index_b = (which(Zsummary14_b < 2))
 nonpres_modulenames_b = rownames(Z.PreservationStats14_b)[nonpres_index_b]
 nonpres_modulenames_b = nonpres_modulenames_b[-grep("gold",nonpres_modulenames_b)]
 KEGG_results_b = list()
-pdf("KEGG_Enrichment_in_modules_bicor_c_day84.pdf")
+
+rm(i)
+i= 26
+module_name = nonpres_modulenames_b[i]
+nopresID = as.vector(colnames(datExpr14_cl)[which(moduleColors14_b_cl == module_name)])
+annot <- getBM(attributes = c("entrezgene_id"),
+               filters="ensembl_gene_id",
+               values = nopresID,
+               mart = mart )
+enrich <- enrichKEGG(gene = enterID, organism = 'bta', qvalueCutoff = 0.05, pvalueCutoff = 0.05)
+KEGG_results_b[[i]] = enrich
+# massage on the dataset (append two columns)
+overlap1 = sub('/.*', '',enrich$GeneRatio)
+total1 = sub('/.*', '',enrich$BgRatio)
+enrich_add = cbind(data.frame(enrich),total1 = as.numeric(total1),overlap1 = as.numeric(overlap1))
+
+
+pdf("KEGG_Enrichment_in_modules_bicor_c_day14.pdf")
 for (i in c(1:length(nonpres_modulenames_b))){
   #i = 3
   module_name = nonpres_modulenames_b[i]
@@ -184,7 +231,7 @@ for (i in c(1:length(nonpres_modulenames_b))){
           theme(plot.title = element_text(size = 12,color = "black", face = "bold", vjust = 0.5, hjust = 0.5)))
 }
 dev.off()
-save(KEGG_results_b, file = "KEGG_results_bicor_c_day84.RData")
+save(KEGG_results_b, file = "KEGG_results_bicor_day14.RData")
 print("Step10 - KEGG finished and data saved")
 
 #===========================================================================================
@@ -214,8 +261,7 @@ nonpres_modulenames_b = rownames(Z.PreservationStats14_b)[nonpres_index_b]
 nonpres_modulenames_b = nonpres_modulenames_b[-grep("gold",nonpres_modulenames_b)]
 GO_results_b = list()
 #
-#pdf(paste("GO Enrichment in modules bicor 84bicor_c.pdf"))
-pdf("GO_Enrichment_in_modules_bicor_c_day84.pdf")
+pdf("GO_Enrichment_in_modules_bicor_c_day14.pdf")
 for (i in c(1:(length(nonpres_modulenames_b)))){
   module_name = nonpres_modulenames_b[i]
   nopresID_GO = as.vector(colnames(datExpr14_cl)[which(moduleColors14_b_cl == module_name)])
@@ -235,6 +281,7 @@ for (i in c(1:(length(nonpres_modulenames_b)))){
   ot = subset(out,totalG > 4 & Pvalue < 0.05)
   final = ot[order(ot$Pvalue),];colnames(final) = c("GOID","GO_Name", "Total_Genes", "Significant_Genes", "pvalue")
   GO_results_b[[i]] = final
+  
   print(final %>%
           top_n(dim(final)[1], wt= -pvalue)%>%
           mutate(hitsPerc = Significant_Genes*100/Total_Genes) %>% ## signi genes, v1 = all genes in the go.
@@ -253,5 +300,5 @@ for (i in c(1:(length(nonpres_modulenames_b)))){
           theme(plot.title = element_text(size = 12,color = "black", face = "bold", vjust = 0.5, hjust = 0.5)))
 }
 dev.off()
-save(GO_results_b, file = "GO_results_bicor_c_day84.RData")
+save(GO_results_b, file = "GO_results_bicro_c_day14.RData")
 print("Step11 - GO finished and data saved")
