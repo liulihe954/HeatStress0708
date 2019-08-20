@@ -139,29 +139,11 @@ kegg.gs = sdb$kg.sets[sdb$sigmet.id]
 mart <- biomaRt::useMart(biomart="ENSEMBL_MART_ENSEMBL",
                          dataset="btaurus_gene_ensembl",
                          host="http://www.ensembl.org")
-
 # select and plot
 nonpres_index_b = (which(Zsummary14_b < 2))
 nonpres_modulenames_b = rownames(Z.PreservationStats14_b)[nonpres_index_b]
 nonpres_modulenames_b = nonpres_modulenames_b[-grep("gold",nonpres_modulenames_b)]
 KEGG_results_b = list()
-
-rm(i)
-i= 26
-module_name = nonpres_modulenames_b[i]
-nopresID = as.vector(colnames(datExpr14_cl)[which(moduleColors14_b_cl == module_name)])
-annot <- getBM(attributes = c("entrezgene_id"),
-               filters="ensembl_gene_id",
-               values = nopresID,
-               mart = mart )
-enrich <- enrichKEGG(gene = enterID, organism = 'bta', qvalueCutoff = 0.05, pvalueCutoff = 0.05)
-KEGG_results_b[[i]] = enrich
-# massage on the dataset (append two columns)
-overlap1 = sub('/.*', '',enrich$GeneRatio)
-total1 = sub('/.*', '',enrich$BgRatio)
-enrich_add = cbind(data.frame(enrich),total1 = as.numeric(total1),overlap1 = as.numeric(overlap1))
-
-
 pdf("KEGG_Enrichment_in_modules_bicor_c_day14.pdf")
 for (i in c(1:length(nonpres_modulenames_b))){
   #i = 3
