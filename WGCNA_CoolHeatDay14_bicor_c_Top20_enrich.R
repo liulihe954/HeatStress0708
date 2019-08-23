@@ -139,14 +139,15 @@ kegg.gs = sdb$kg.sets[sdb$sigmet.id]
 mart <- biomaRt::useMart(biomart="ENSEMBL_MART_ENSEMBL",
                          dataset="btaurus_gene_ensembl",
                          host="http://www.ensembl.org")
+
 # select and plot
 nonpres_index_b = (which(Zsummary14_b < 2))
 nonpres_modulenames_b = rownames(Z.PreservationStats14_b)[nonpres_index_b]
 nonpres_modulenames_b = nonpres_modulenames_b[-grep("gold",nonpres_modulenames_b)]
 KEGG_results_b = list()
+
 pdf("KEGG_Enrichment_in_modules_bicor_c_day14.pdf")
 for (i in c(1:length(nonpres_modulenames_b))){
-  #i = 3
   module_name = nonpres_modulenames_b[i]
   nopresID = as.vector(colnames(datExpr14_cl)[which(moduleColors14_b_cl == module_name)])
   annot <- getBM(attributes = c("entrezgene_id"),
@@ -211,24 +212,24 @@ nonpres_index_b = (which(Zsummary14_b < 2))
 nonpres_modulenames_b = rownames(Z.PreservationStats14_b)[nonpres_index_b]
 nonpres_modulenames_b = nonpres_modulenames_b[-grep("gold",nonpres_modulenames_b)]
 GO_results_b = list()
-#
+
 pdf("GO_Enrichment_in_modules_bicor_c_day14.pdf")
 for (i in c(1:(length(nonpres_modulenames_b)))){
   module_name = nonpres_modulenames_b[i]
   nopresID_GO = as.vector(colnames(datExpr14_cl)[which(moduleColors14_b_cl == module_name)])
   sig.genes = nopresID_GO # total genes in the non-preserved module
   N = length(total.genes[total.genes %in% genesGO])
-  S = length(sig.genes[sig.genes %in% genesGO])
+  S = length(sig.genes[sig.genes %in% genesGO]) #
   out = data.frame(GO=character(),Name=character(),totalG=numeric(),sigG=numeric(),Pvalue=numeric())
   for(j in 1:length(GO)){
-    gENEs = subset(gene2, go_id == GO[i])$ensembl_gene_id 
-    m = length(total.genes[total.genes %in% gENEs])
-    s = length(sig.genes[sig.genes %in% gENEs])
+    gENEs = subset(gene2, go_id == GO[i])$ensembl_gene_id # all gene in target GO
+    m = length(total.genes[total.genes %in% gENEs]) # genes from target GO and in our dataset
+    s = length(sig.genes[sig.genes %in% gENEs]) # # genes from target GO also in the non-preserved module
     M = matrix(c(s,S-s,m-s,N-m-S+s),byrow = 2, nrow = 2)
     Pval = round(fisher.test(M, alternative ="g")$p.value, digits = 3)
     tmp = data.frame(GO = GO[j], Name = Name[j], totalG = m, sigG = s, Pvalue = Pval)
     out = rbind(out,tmp)}
-  # select those has 4 more gene in common and pvalue smaller thn 0.05
+  # select those has 4 more gene in common and pvalue smaller than 0.05
   ot = subset(out,totalG > 4 & Pvalue < 0.05)
   final = ot[order(ot$Pvalue),];colnames(final) = c("GOID","GO_Name", "Total_Genes", "Significant_Genes", "pvalue")
   GO_results_b[[i]] = final
