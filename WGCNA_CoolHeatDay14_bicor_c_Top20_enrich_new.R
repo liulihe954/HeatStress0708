@@ -255,7 +255,7 @@ for (i in c(1:(length(nonpres_modulenames_b)))){
   S = length(sig.genes[sig.genes %in% genesGO]) #
   out = data.frame(GO=character(),Name=character(),totalG=numeric(),sigG=numeric(),Pvalue=numeric())
   for(j in 1:length(GO)){
-    if (j%%50 = 0) {message("tryingd on GO ",j,"-",GO[j])}
+    #if (j%%50 = 0) {message("tryingd on GO ",j,"-",GO[j])}
     gENEs = subset(gene2, go_id == GO[i])$ensembl_gene_id # all gene in target GO
     m = length(total.genes[total.genes %in% gENEs]) # genes from target GO and in our dataset
     s = length(sig.genes[sig.genes %in% gENEs]) # # genes from target GO also in the non-preserved module

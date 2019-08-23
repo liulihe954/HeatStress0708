@@ -8,7 +8,7 @@ require(edgeR);require(clusterProfiler)
 require(ggplot2);require(magrittr)
 require(biomaRt);require(gage);require(doParallel)
 require(limma);require(recount);require(pamr)
-
+library(stringr)
 #================================================================================================
 ###                                       1. dataprep                                      ######
 #================================================================================================
