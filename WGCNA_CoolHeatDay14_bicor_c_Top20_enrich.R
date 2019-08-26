@@ -145,7 +145,7 @@ nonpres_index_b = (which(Zsummary14_b < 2))
 nonpres_modulenames_b = rownames(Z.PreservationStats14_b)[nonpres_index_b]
 nonpres_modulenames_b = nonpres_modulenames_b[-grep("gold",nonpres_modulenames_b)]
 KEGG_results_b = list()
-
+#
 pdf("KEGG_Enrichment_in_modules_bicor_c_day14.pdf")
 for (i in c(1:length(nonpres_modulenames_b))){
   module_name = nonpres_modulenames_b[i]
