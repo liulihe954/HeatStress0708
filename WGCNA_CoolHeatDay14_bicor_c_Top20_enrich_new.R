@@ -1,15 +1,8 @@
-# getwd()
-#================================================================================================
-###                                       0. pkg prep                                      ######
-#================================================================================================
-require(sva);require(WGCNA)
-require(ppcor);require(dplyr)
-require(edgeR);require(clusterProfiler)
-require(ggplot2);require(magrittr)
-require(biomaRt);require(gage);require(doParallel)
-require(limma);require(recount);require(pamr)
-library(stringr)
 
+#================================================================================================
+###                               0. pkg & functions prep                                  ######
+#================================================================================================
+source("Functions_Source.R")
 #================================================================================================
 ###                                       1. dataprep                                      ######
 #================================================================================================
@@ -133,158 +126,26 @@ print("Step9 - all_module_preservation_statistics finished and data saved")
 #===========================================================================================
 #                                10. KEGG enrichment                                      ##
 #===========================================================================================
-##prepare pathway - - - bos taurus
-sdb = kegg.gsets(species = "bta", id.type = "kegg", check.new=FALSE)
-kegg.gs = sdb$kg.sets[sdb$sigmet.id]
-#length(sdb$kg.sets);str(kegg.gs)
-mart <- biomaRt::useMart(biomart="ENSEMBL_MART_ENSEMBL",
-                         dataset="btaurus_gene_ensembl",
-                         host="http://www.ensembl.org")
-###
-# select and plot
+# Following are for testing 'wgcna' --- ignore unless you find them relevent
+ENS_ID_all <- colnames(datExpr14_cl)
 nonpres_index_b = (which(Zsummary14_b < 2))
 nonpres_modulenames_b = rownames(Z.PreservationStats14_b)[nonpres_index_b]
 nonpres_modulenames_b = nonpres_modulenames_b[-grep("gold",nonpres_modulenames_b)]
 KEGG_results_b = list()
-
-# ENS_ID_all is our top 20 percent from the dataset, BUT not necessary to be in the sdb entirely.
-ENS_ID_all <- colnames(datExpr14_cl)
-# with annotation (matching in the databset), it actually the MATCHIG (intersection) with our dataset.
-annot_all <- getBM(attributes = c("ensembl_gene_id","entrezgene_id"),
-                   filters="ensembl_gene_id",
-                   values = ENS_ID_all,
-                   mart = mart)
-# extract ENSEMBLE id for later use
-ENS_ID_all_annot <- as.vector(annot_all[,1])
-# extract ENSEMBLE id for later use
-ENTER_ID_all_annot <- as.vector(annot_all[,2])
-length(ENTER_ID_all_annot);length(ENTER_ID_all_annot)
-if (length(ENS_ID_all)- length(ENS_ID_all_annot)>0){
-  message("Note!! - we lost ",(-length(ENS_ID_all)+length(ENS_ID_all_annot))," nodes.")
-} else if (length(ENS_ID_all)- length(ENS_ID_all_annot) < 0){
-  message("Note!! - we gained ",(-length(ENS_ID_all)+ length(ENS_ID_all_annot))," nodes.")
-} else (message(" Perfectly matched! "))
-
-#
-#nonpres_modulenames_b = nonpres_modulenames_b[1:5]
-#
-pdf("KEGG_Enrichment_in_modules_bicor_c_day14_new.pdf")
-for (i in c(1:(length(nonpres_modulenames_b)))){
-  module_name = nonpres_modulenames_b[i]# get non preserved modules / (nodes)
-  nopresID = as.vector(colnames(datExpr14_cl)[which(moduleColors14_b_cl == module_name)])
-  nopresENTER = annot_all[ENS_ID_all_annot %in% nopresID,2] # Convert ENS ID to ENTERid
-  N = length(ENTER_ID_all_annot) # Big N - overlap of our dataset(top20) and the KEGG.db
-  S = length(ENS_ID_all_annot[ENS_ID_all_annot%in%nopresID]) # Big S, find those in both top 20 and no-pres modules
-  out = data.frame(KEGG=character(),Name=character(),totalG=numeric(),sigG=numeric(),Pvalue=numeric())
-  # trying to go through every single KEGG.db, so extract each one first
-  for (j in 1:length(names(kegg.gs))){
-    KEGG_Index = unlist(str_split(names(kegg.gs)[j]," ",2))[1]
-    KEGG_Name = unlist(str_split(names(kegg.gs)[j]," ",2))[2]
-    all_ENTER_temp = (as.vector(unlist(kegg.gs[j])))
-    # Calculate and overlap
-    m = length(ENTER_ID_all_annot[ENTER_ID_all_annot %in% all_ENTER_temp]) # genes from target GO and in our dataset
-    s = length(nopresENTER[nopresENTER %in% all_ENTER_temp]) # # genes from target GO also in the non-preserved module
-    # format a matrix
-    M = matrix(c(s,S-s,m-s,N-m-S+s),byrow = 2, nrow = 2)
-    Pval = round(fisher.test(M, alternative ="g")$p.value, digits = 3)
-    tmp = data.frame(KEGG = KEGG_Index, Name = KEGG_Name, totalG = m, sigG = s, Pvalue = Pval)
-    out = rbind(out,tmp)}
-    # select those has 4 more gene in common and pvalue smaller than 0.05
-  ot = subset(out,totalG > 4 & Pvalue < 0.1)
-  final = ot[order(ot$Pvalue),];colnames(final) = c("KEGG.ID","KEGG_Name", "Total_Genes", "Significant_Genes", "pvalue")
-  final = final %>% top_n(dim(final)[1], wt= -pvalue) %>% mutate(hitsPerc=Significant_Genes*100/Total_Genes)
-  KEGG_results_b[[i]] = final
-  # plotting
-  print(final %>% 
-          top_n(dim(final)[1], wt= -pvalue) %>% 
-          mutate(hitsPerc=Significant_Genes*100/Total_Genes)%>%
-          ggplot(aes(x=hitsPerc,
-                     y=KEGG_Name,
-                     colour=pvalue,
-                     size=Significant_Genes)) +
-          xlim(0,max(final$hitsPerc)+5)+
-          geom_point() +
-          theme_gray()+
-          labs(title= paste("KEGG Enrichment in module",module_name), x="Hits (%)", y="Kegg term", colour="p value", size="Count")+
-          theme(axis.text.x = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
-          theme(axis.text.y = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
-          theme(axis.title.x = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
-          theme(axis.title.y = element_text(size = 8, color = "black",vjust = 0.5, hjust = 0.5))+
-          theme(plot.title = element_text(size = 12,color = "black", face = "bold", vjust = 0.5, hjust = 0.5)))
-}
-dev.off()
-save(KEGG_results_b, file = "KEGG_results_bicor_c_top20_day14.RData")
-print("Step10 - KEGG finished and data saved")
-# 
+Kegg_Enrichment_Results = Kegg_Enrich_Plot(ENS_ID_all,
+                                           KEGGthres = 0.10,
+                                           TestingGroupAssignment = moduleColors14_b_cl, 
+                                           TestingSubsetNames = nonpres_modulenames_b,
+                                           keyword = "KEGG_Enrichment_Day14_bicor_c_new")
 #===========================================================================================
 #                             11. Gene Ontology enrichment                                ##
 #===========================================================================================
-#database2 = useMart("ensembl")
-#genome2 = useDataset("btaurus_gene_ensembl", mart = database2)
-#gene2 = getBM(c("ensembl_gene_id", "external_gene_name","go_id","name_1006"), mart = genome2)
-#
-## Prepare data for Gene Set Analysis
-total.genes = colnames(datExpr14_cl) # total genes in your dataset
-## Analysis bosTau annotation: GO
-database2 <- biomaRt::useMart(biomart="ensembl",
-                              dataset="btaurus_gene_ensembl",
-                              host="http://www.ensembl.org")
-gene2 <- getBM(attributes = c("ensembl_gene_id", "external_gene_name","go_id","name_1006"),
-               mart = database2)
-#
-dim(gene2); length(unique(gene2$ensembl_gene_id)); length(unique(gene2$go_id))
-goName = unique(gene2[,c(3,4)]); goName = goName[order(goName$go_id),]; goName = goName[-1,]
-GO = goName$go_id
-Name = goName$name_1006
-genesGO = unique(subset(gene2,go_id != "")$ensembl_gene_id)
-### select non-preserved modules
-nonpres_index_b = (which(Zsummary14_b < 2))
-nonpres_modulenames_b = rownames(Z.PreservationStats14_b)[nonpres_index_b]
-nonpres_modulenames_b = nonpres_modulenames_b[-grep("gold",nonpres_modulenames_b)]
+total.genes = colnames(datExpr14_cl)# total genes in your dataset
 GO_results_b = list()
-#
-#nonpres_modulenames_b = nonpres_modulenames_b[1:1]
-#
-pdf("GO_Enrichment_in_modules_bicor_c_day14_new_testing.pdf")
-for (i in c(1:(length(nonpres_modulenames_b)))){
-  message("working on module ",i,"-",nonpres_modulenames_b)
-  module_name = nonpres_modulenames_b[i]
-  nopresID_GO = as.vector(colnames(datExpr14_cl)[which(moduleColors14_b_cl == module_name)])
-  sig.genes = nopresID_GO # total genes in the non-preserved module
-  N = length(total.genes[total.genes %in% genesGO])
-  S = length(sig.genes[sig.genes %in% genesGO]) #
-  out = data.frame(GO=character(),Name=character(),totalG=numeric(),sigG=numeric(),Pvalue=numeric())
-  for(j in 1:length(GO)){
-    #if (j%%50 = 0) {message("tryingd on GO ",j,"-",GO[j])}
-    gENEs = subset(gene2, go_id == GO[i])$ensembl_gene_id # all gene in target GO
-    m = length(total.genes[total.genes %in% gENEs]) # genes from target GO and in our dataset
-    s = length(sig.genes[sig.genes %in% gENEs]) # # genes from target GO also in the non-preserved module
-    M = matrix(c(s,S-s,m-s,N-m-S+s),byrow = 2, nrow = 2)
-    Pval = round(fisher.test(M, alternative ="g")$p.value, digits = 3)
-    tmp = data.frame(GO = GO[j], Name = Name[j], totalG = m, sigG = s, Pvalue = Pval)
-    out = rbind(out,tmp)}
-  # select those has 4 more gene in common and pvalue smaller than 0.05
-  ot = subset(out,totalG > 4 & Pvalue < 0.1)
-  final = ot[order(ot$Pvalue),];colnames(final) = c("GOID","GO_Name", "Total_Genes", "Significant_Genes", "pvalue")
-  final = final %>% top_n(dim(final)[1], wt= -pvalue)%>%mutate(hitsPerc = Significant_Genes*100/Total_Genes)
-  GO_results_b[[i]] = final
-  print(final %>%
-          top_n(dim(final)[1], wt= -pvalue)%>%
-          mutate(hitsPerc = Significant_Genes*100/Total_Genes) %>% ## signi genes, v1 = all genes in the go.
-          ggplot(aes(x = hitsPerc,
-                     y = GO_Name,
-                     colour = pvalue,
-                     size = Significant_Genes)) +
-          #xlim(0,)+
-          geom_point() +
-          theme_gray()+
-          labs(title= paste("GO Enrichment in module",module_name), x="Hits (%)", y="GO term", colour="p value", size="Count")+
-          theme(axis.text.x = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
-          theme(axis.text.y = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
-          theme(axis.title.x = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
-          theme(axis.title.y = element_text(size = 8, color = "black",vjust = 0.5, hjust = 0.5))+
-          theme(plot.title = element_text(size = 12,color = "black", face = "bold", vjust = 0.5, hjust = 0.5)))
-}
-dev.off()
-save(GO_results_b, file = "GO_results_bicro_c__top20_day14_new.RData")
-print("Step11 - GO finished and data saved")
+GO_Enrichment_Results = Go_Enrich_Plot(total.genes,
+                                       GOthres = 0.05,
+                                       TestingGroupAssignment = moduleColors14_b_cl,
+                                       TestingSubsetNames = nonpres_modulenames_b,
+                                       keyword = "GO_Enrichment_Day14_bicor_c_new")
+
+

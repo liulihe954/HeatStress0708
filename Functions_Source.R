@@ -1,12 +1,18 @@
-#devtools::install_github("hadley/devtools")
+#===========================================================================================
+#                                0. Package preparations                                  ##
+#===========================================================================================
 #devtools::install_github("jakesherman/easypackages")
 library(easypackages)
 my_packages <- c("sva","WGCNA","ppcor","edgeR","clusterProfiler","magrittr",
                  "dplyr", "ggplot2", "biomaRt","gage","doParallel",
                  "limma","recount","pamr","stringr")
 libraries(my_packages)
-
-# Date processing
+#===========================================================================================
+#                                1. "Massage" - Data processing                           ##
+#===========================================================================================
+# Classical way, networkData(rawdata,genes in rows and samples in cols), 
+#                 n1-n2 (number of ref and treatmnent group)
+#                 perct (the percentage to REMOVE based on VARIANCE across two conditions)            
 DataPre   = function(networkData, cousin = 0.4, n1, n2, perct){
   #function prepare
   remove_filter = function(networkData,thres){
@@ -76,6 +82,8 @@ DataPre   = function(networkData, cousin = 0.4, n1, n2, perct){
        file = paste(deparse(substitute(networkData)),"prepare with corrections","_top",100*(1-perct),".RData",sep = ""))
   return(list(Processed_final = networkData_final))
 }
+# Same rationales but FANCY way, remove confounding artifacts
+# (ref - https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1700-9 )
 DataPre_C = function(networkData, cousin = 0.4, n1, n2, perct){
   #function prepare
   remove_filter = function(networkData,thres){
@@ -147,19 +155,19 @@ DataPre_C = function(networkData, cousin = 0.4, n1, n2, perct){
        file = paste(deparse(substitute(networkData)),"prepare with corrections","_top",100*(1-perct),".RData",sep = ""))
   return(list(Corrected_log2_PC = networkData_final))
 }
-
-# Enrichment and Plotting
-
 #===========================================================================================
-#                                10. KEGG enrichment                                      ##
+#                                2. KEGG enrichment                                      ##
 #===========================================================================================
-
 ##########################################################################################
-### Function starts from "ENS_ID_all", which is the collection of all genes in your dataset (in the form of ensembl iD)
-###                      "nonpres_modulenames_b", which is the "sig" module names
-###                      "moduleColors14_b_cl", which is the color/module assignments 
-##                        (for each loop we subsetting by matching the color name.assignment )
-###
+### Function necessities: "ENS_ID_all", which is the collection of all genes in your dataset (format - vector - ensembl iD)
+###                      "nonpres_modulenames_b", which is the "sig" module names (format - char - e.g. color names)
+###                      "moduleColors14_b_cl", which is the color/module assignments (format - char - same len with ENS_ID_all - this is the module assignment)
+###        
+###                  Motivation; double loop - 
+###                  for (i in seq_along(#modules)){
+###                         for (j in seq_along(#all_KEGG))
+###                              "fisher.test"$'signiciant_hits'
+###                   }
 ##########################################################################################
 Kegg_Enrich_Plot = function(ENS_ID_all,
                             TestingGroupAssignment, 
@@ -260,6 +268,9 @@ Kegg_Enrich_Plot = function(ENS_ID_all,
   message("Nice! - KEGG enrichment finished and data saved")
   return(Match_Annot)}
 
+
+
+# Following are for testing 'wgcna' --- ignore unless you find them relevent
 #ENS_ID_all <- colnames(datExpr14_cl)
 #nonpres_index_b = (which(Zsummary14_b < 2))
 #nonpres_modulenames_b = rownames(Z.PreservationStats14_b)[nonpres_index_b]
@@ -271,11 +282,14 @@ Kegg_Enrich_Plot = function(ENS_ID_all,
 #                               TestingGroupAssignment = moduleColors14_b_cl, 
 #                               TestingSubsetNames = nonpres_modulenames_b,
 #                               keyword = "KEGG_Enrichment_just_testing")
-
 #===========================================================================================
-#                              Gene Ontology enrichment                                   ##
+#                              3.Gene Ontology enrichment                                   ##
 #===========================================================================================
-#
+##########################################################################################
+### Function necessities: Same rationales with KEGG enrich 
+###                                    ---
+###                        but here we dont need convert from EnsemblID to EntrezID
+##########################################################################################
 Go_Enrich_Plot = function(total.genes = total.genes,
                           TestingGroupAssignment, 
                           TestingSubsetNames,
@@ -297,7 +311,6 @@ Go_Enrich_Plot = function(total.genes = total.genes,
   #dim(gene2); length(unique(gene2$ensembl_gene_id)); length(unique(gene2$go_id))
   goName = unique(gene2[,c(3,4)]);goName = goName[order(goName$go_id),];goName = goName[-1,]
   GO = goName$go_id;Name = goName$name_1006
-  #GO=GO[1:20]
   genesGO = unique(subset(gene2,go_id != "")$ensembl_gene_id)
   #length(genesGO)
   message("Total Number of module/subsets to check: ",length(TestingSubsetNames))
@@ -353,7 +366,6 @@ Go_Enrich_Plot = function(total.genes = total.genes,
           " at the significance level of ",GOthres)
   message("Nice! - GO enrichment finished and data saved")
   save(GO_results_b, file = paste(trimws(keyword),".RData",sep = ""))}
-
 
 #total.genes = colnames(datExpr14_cl) # total genes in your dataset
 #nonpres_index_b = (which(Zsummary14_b < 2))
