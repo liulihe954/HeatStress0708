@@ -369,11 +369,11 @@ Go_Enrich_Plot = function(total.genes = total.genes,
           theme(plot.title = element_text(size = 12,color = "black", face = "bold", vjust = 0.5, hjust = 0.5)))
   }
   dev.off()
+  save(GO_results_b, file = paste(trimws(keyword),".RData",sep = ""))
   message(total_enrich," significant GO terms found within ",
           length(TestingSubsetNames)," modules/subsets", 
           " at the significance level of ",GOthres)
-  message("Nice! - GO enrichment finished and data saved")
-  save(GO_results_b, file = paste(trimws(keyword),".RData",sep = ""))}
+  message("Nice! - GO enrichment finished and data saved")}
 
 #####################################################################################
 #=== Following are for testing 'wgcna' --- ignore unless you find them relevent ===#
