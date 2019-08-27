@@ -168,6 +168,10 @@ DataPre_C = function(networkData, cousin = 0.4, n1, n2, perct){
 ###                         for (j in seq_along(#all_KEGG))
 ###                              "fisher.test"$'signiciant_hits'
 ###                   }
+### Function output: a. a plot with all the enriched items, one page for each module.
+###                  b. .RData containing a long list, each element show all the enriched items for corresponding module.
+###                      same length with that of all non-preserved module
+###
 ##########################################################################################
 Kegg_Enrich_Plot = function(ENS_ID_all, # all genes in your dataset( vector - format - vector - ensembl iD)
                             TestingGroupAssignment, # color/module assignments 
@@ -285,9 +289,6 @@ Kegg_Enrich_Plot = function(ENS_ID_all, # all genes in your dataset( vector - fo
 #                               TestingSubsetNames = nonpres_modulenames_b,
 #                               keyword = "KEGG_Enrichment_just_testing")
 #####################################################################################
-
-
-
 
 #===========================================================================================
 #                              3.Gene Ontology enrichment                                   ##
