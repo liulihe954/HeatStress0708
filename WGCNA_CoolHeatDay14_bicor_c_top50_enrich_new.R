@@ -145,12 +145,13 @@ ENS_ID_all <- colnames(datExpr14_cl)
 nonpres_index_b = (which(Zsummary14_b < 2))
 nonpres_modulenames_b = rownames(Z.PreservationStats14_b)[nonpres_index_b]
 nonpres_modulenames_b = nonpres_modulenames_b[-grep("gold",nonpres_modulenames_b)]
+
 KEGG_results_b = list()
 Kegg_Enrichment_Results = Kegg_Enrich_Plot(ENS_ID_all,
                                            KEGGthres = 0.10,
                                            TestingGroupAssignment = moduleColors14_b_cl, 
                                            TestingSubsetNames = nonpres_modulenames_b,
-                                           keyword = "KEGG_Enrichment_Day14_bicor_c_top50_new")
+                                           keyword = "KEGG_Enrichment_Enrichment_JUST_TESTING_PLOT")
 #===========================================================================================
 #                             11. Gene Ontology enrichment                                ##
 #===========================================================================================
@@ -160,5 +161,5 @@ GO_Enrichment_Results = Go_Enrich_Plot(total.genes,
                                        GOthres = 0.10,
                                        TestingGroupAssignment = moduleColors14_b_cl,
                                        TestingSubsetNames = nonpres_modulenames_b,
-                                       keyword = "GO_Enrichment_Day14_bicor_c_top50_new")
+                                       keyword = "GO_Enrichment_JUST_TESTING_PLOT")
 print("Step11 - GO finished and data saved")
