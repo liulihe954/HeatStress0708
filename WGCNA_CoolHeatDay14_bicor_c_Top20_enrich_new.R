@@ -126,25 +126,25 @@ print("Step9 - all_module_preservation_statistics finished and data saved")
 #                                10. KEGG enrichment                                      ##
 #===========================================================================================
 # Following are for testing 'wgcna' --- ignore unless you find them relevent
-ENS_ID_all <- colnames(datExpr14_cl)
+#ENS_ID_all <- colnames(datExpr14_cl)
 nonpres_index_b = (which(Zsummary14_b < 2))
 nonpres_modulenames_b = rownames(Z.PreservationStats14_b)[nonpres_index_b]
 nonpres_modulenames_b = nonpres_modulenames_b[-grep("gold",nonpres_modulenames_b)]
-KEGG_results_b = list()
-Kegg_Enrichment_Results = Kegg_Enrich_Plot(ENS_ID_all,
-                                           KEGGthres = 0.10,
-                                           TestingGroupAssignment = moduleColors14_b_cl, 
-                                           TestingSubsetNames = nonpres_modulenames_b,
-                                           keyword = "KEGG_Enrichment_Day14_bicor_c_new")
+#KEGG_results_b = list()
+#Kegg_Enrichment_Results = Kegg_Enrich_Plot(ENS_ID_all,
+#                                           KEGGthres = 0.05,
+#                                           TestingGroupAssignment = moduleColors14_b_cl, 
+#                                           TestingSubsetNames = nonpres_modulenames_b,
+#                                           keyword = "KEGG_Enrichment_Day14_bicor_c_new")
 #===========================================================================================
 #                             11. Gene Ontology enrichment                                ##
 #===========================================================================================
 total.genes = colnames(datExpr14_cl)# total genes in your dataset
 GO_results_b = list()
 GO_Enrichment_Results = Go_Enrich_Plot(total.genes,
-                                       GOthres = 0.10,
+                                       GOthres = 0.50,
                                        TestingGroupAssignment = moduleColors14_b_cl,
                                        TestingSubsetNames = nonpres_modulenames_b,
-                                       keyword = "GO_Enrichment_Day14_bicor_c_new")
+                                       keyword = "GO_Enrichment_Day14_bicor_c_new_z50")
 
 
