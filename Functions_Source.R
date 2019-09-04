@@ -309,6 +309,7 @@ Go_Enrich_Plot = function(total.genes = total.genes,
                           keyword = "GO_Enrichment_in_modules_bicor_c_day14_new_testing"){
   # 
   total_enrich = 0
+  raw_pvalue_all = numeric()
   library(biomaRt);library(gage);library(magrittr)# load pkg
   ## Analysis bosTau annotation: GO
   database2 <- biomaRt::useMart(biomart=biomart,
@@ -344,6 +345,7 @@ Go_Enrich_Plot = function(total.genes = total.genes,
       tmp = data.frame(GO = GO[j], Name = Name[j], totalG = m, sigG = s, Pvalue = Pval)
       out = rbind(out,tmp)}
     # select those has 4 more gene in common and pvalue smaller than 0.05
+    raw_pvalue_all = append(raw_pvalue_all,out$Pvalue,length(raw_pvalue_all))
     ot = subset(out,totalG > 4 & Pvalue < GOthres)
     final = ot[order(ot$Pvalue),];colnames(final) = c("GOID","GO_Name", "Total_Genes", "Significant_Genes", "pvalue")
     final = final %>% top_n(dim(final)[1], wt= -pvalue)%>%mutate(hitsPerc = Significant_Genes*100/Total_Genes)
@@ -369,7 +371,14 @@ Go_Enrich_Plot = function(total.genes = total.genes,
           theme(plot.title = element_text(size = 12,color = "black", face = "bold", vjust = 0.5, hjust = 0.5)))
   }
   dev.off()
-  save(GO_results_b, file = paste(trimws(keyword),".RData",sep = ""))
+  raw_pvalue_index = seq(0.05,1,by=0.05)
+  raw_pvalue_sum = numeric()
+  for( z in seq_along(raw_pvalue_index)){
+    raw_pvalue_sum[z] = length(which(raw_pvalue_all <= raw_pvalue_index[z]))
+  }
+  raw_pvalue_distribution = data.frame(index = raw_pvalue_index,counts_GO = raw_pvalue_sum)
+  raw_pvalue_distribution
+  save(GO_results_b, raw_pvalue_distribution, file = paste(trimws(keyword),".RData",sep = ""))
   message(total_enrich," significant GO terms found within ",
           length(TestingSubsetNames)," modules/subsets", 
           " at the significance level of ",GOthres)
