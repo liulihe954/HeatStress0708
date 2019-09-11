@@ -148,18 +148,18 @@ nonpres_modulenames_b = nonpres_modulenames_b[-grep("gold",nonpres_modulenames_b
 
 KEGG_results_b = list()
 Kegg_Enrichment_Results = Kegg_Enrich_Plot(ENS_ID_all,
-                                           KEGGthres = 0.10,
+                                           KEGGthres = 0.05,
                                            TestingGroupAssignment = moduleColors14_b_cl, 
                                            TestingSubsetNames = nonpres_modulenames_b,
-                                           keyword = "KEGG_Enrichment_Enrichment_JUST_TESTING_PLOT")
+                                           keyword = "KEGG_Enrichment_Enrichment_bicor_c_top50_z5_0911")
 #===========================================================================================
 #                             11. Gene Ontology enrichment                                ##
 #===========================================================================================
 total.genes = colnames(datExpr14_cl)# total genes in your dataset
 GO_results_b = list()
 GO_Enrichment_Results = Go_Enrich_Plot(total.genes,
-                                       GOthres = 0.10,
+                                       GOthres = 0.25,
                                        TestingGroupAssignment = moduleColors14_b_cl,
                                        TestingSubsetNames = nonpres_modulenames_b,
-                                       keyword = "GO_Enrichment_JUST_TESTING_PLOT")
+                                       keyword = "GO_Enrichment_bicor_c_top50__z25_0911")
 print("Step11 - GO finished and data saved")

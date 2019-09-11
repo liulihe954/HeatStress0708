@@ -150,7 +150,7 @@ Kegg_Enrichment_Results = Kegg_Enrich_Plot(ENS_ID_all,
                                            KEGGthres = 0.10,
                                            TestingGroupAssignment = moduleColors14_b_cl, 
                                            TestingSubsetNames = nonpres_modulenames_b,
-                                           keyword = "KEGG_Enrichment_Day84_bicor_c_top50_new")
+                                           keyword = "KEGG_Enrichment_Day84_bicor_c_top50_z5_0911")
 #===========================================================================================
 #                             11. Gene Ontology enrichment                                ##
 #===========================================================================================
@@ -160,5 +160,5 @@ GO_Enrichment_Results = Go_Enrich_Plot(total.genes,
                                        GOthres = 0.10,
                                        TestingGroupAssignment = moduleColors14_b_cl,
                                        TestingSubsetNames = nonpres_modulenames_b,
-                                       keyword = "GO_Enrichment_Day84_bicor_c_top50_new")
+                                       keyword = "GO_Enrichment_Day84_bicor_c_top50_z25_0911")
 print("Step11 - GO finished and data saved")
