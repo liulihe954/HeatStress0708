@@ -399,3 +399,29 @@ Go_Enrich_Plot = function(total.genes = total.genes,
 #                           TestingSubsetNames = nonpres_modulenames_b,
 #                           keyword = "GO_Enrichment_just_testing")
 #####################################################################################
+#######################################################################################
+#   Function Parse_KEGG funtion, --- unlist the list and put them in one data.frame   #
+#######################################################################################
+Parse_KEGG_Results = function(KEGG_results_b){
+  all_enrich_KEGG = data.frame(ID=character(),
+                               Description=character(),
+                               GeneRatio=character(),
+                               BgRatio=character(),
+                               pvalue=numeric(),
+                               p.adjust=numeric(),
+                               qvalue=numeric(),
+                               geneID=character(),
+                               Count=numeric(),
+                               stringsAsFactors=FALSE)
+  for (i in 1:length(KEGG_results_b)){
+    len = dim(data.frame(KEGG_results_b[i]))[1]
+    if (len> 0){
+      all_enrich_KEGG = rbind(all_enrich_KEGG,data.frame(KEGG_results_b[i]))
+    }
+  }
+  #all_enrich_KEGG <- all_enrich_KEGG %>% dplyr::group_by(KEGG.ID) %>% dplyr::distinct()
+  total_hits = dim(all_enrich_KEGG)[1]
+  total_modules = length(KEGG_results_b)
+  print(paste(total_hits,"hits found in",total_modules,"non-preserved modules"))
+  return(ParseResults = all_enrich_KEGG)
+}
