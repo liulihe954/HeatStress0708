@@ -310,7 +310,9 @@ Go_Enrich_Plot = function(total.genes = total.genes,
   # 
   total_enrich = 0
   raw_pvalue_all = numeric()
-  library(biomaRt);library(gage);library(magrittr)# load pkg
+  GO_results_b = list()
+  GO_results_b_raw = list()
+  library(ggplot2);library(biomaRt);library(gage);library(magrittr)# load pkg
   ## Analysis bosTau annotation: GO
   database2 <- biomaRt::useMart(biomart=biomart,
                                 dataset=dataset,
@@ -333,7 +335,15 @@ Go_Enrich_Plot = function(total.genes = total.genes,
     sig.genes = nopresID_GO # total genes in the non-preserved module
     N = length(total.genes[total.genes %in% genesGO])
     S = length(sig.genes[sig.genes %in% genesGO]) #
-    out = data.frame(GO=character(),Name=character(),totalG=numeric(),sigG=numeric(),Pvalue=numeric())
+    ExternalLoss_total = paste((length(total.genes) - N),(length(total.genes) - N)/N,sep = "/")
+    ExternalLoss_sig = paste((length(sig.genes) - S),(length(sig.genes) - S)/S,sep = "/")
+    out = data.frame(GO=character(),
+                     Name=character(),
+                     totalG=numeric(),
+                     sigG=numeric(),
+                     Pvalue=numeric(),
+                     ExternalLoss_total = ExternalLoss_total,
+                     ExternalLoss_sig = ExternalLoss_sig)
     message("Module size of ",TestingSubsetNames[i],": ", length(nopresID_GO))
     for(j in 1:length(GO)){
       if (j%%100 == 0) {message("tryingd on GO ",j," - ",GO[j]," - ",Name[j])}
@@ -342,33 +352,47 @@ Go_Enrich_Plot = function(total.genes = total.genes,
       s = length(sig.genes[sig.genes %in% gENEs]) # # genes from target GO also in the non-preserved module
       M = matrix(c(s,S-s,m-s,N-m-S+s),byrow = 2, nrow = 2)
       Pval = round(fisher.test(M, alternative ="g")$p.value, digits = 3)
-      tmp = data.frame(GO = GO[j], Name = Name[j], totalG = m, sigG = s, Pvalue = Pval)
+      tmp = data.frame(GO = GO[j], 
+                       Name = Name[j], 
+                       totalG = m, 
+                       sigG = s, 
+                       Pvalue = Pval, 
+                       ExternalLoss_total = ExternalLoss_total,
+                       ExternalLoss_sig = ExternalLoss_sig)
       out = rbind(out,tmp)}
-    # select those has 4 more gene in common and pvalue smaller than 0.05
+    # put all palues in a box
     raw_pvalue_all = append(raw_pvalue_all,out$Pvalue,length(raw_pvalue_all))
+    # raw complilation starts
+    #ot_raw = subset(out,totalG > 4 & Pvalue < GOthres)
+    final_raw = out[order(out$Pvalue),];colnames(final_raw) = c("GOID","GO_Name", "Total_Genes", "Significant_Genes", "pvalue_r")
+    final_raw = final_raw %>% top_n(dim(final_raw)[1], wt= -pvalue_r)%>%mutate(hitsPerc = Significant_Genes*100/Total_Genes)
+    GO_results_b_raw[[i]] = final_raw;names(GO_results_b_raw)[i] = paste(TestingSubsetNames[i],"with",dim(final_raw)[1],"enriched GO raw")
+    # raw complilation ends
+    # selection starts - select those has 4 more gene in common and pvalue smaller than 0.05
     ot = subset(out,totalG > 4 & Pvalue < GOthres)
     final = ot[order(ot$Pvalue),];colnames(final) = c("GOID","GO_Name", "Total_Genes", "Significant_Genes", "pvalue")
     final = final %>% top_n(dim(final)[1], wt= -pvalue)%>%mutate(hitsPerc = Significant_Genes*100/Total_Genes)
     GO_results_b[[i]] = final;names(GO_results_b)[i] = paste(TestingSubsetNames[i],"with",dim(final)[1],"enriched GO")
+    # selection ends
     message("Significant Enrichment Hits:",nrow(final))
     total_enrich = total_enrich + nrow(final)
     #
     print(final %>%
-          top_n(dim(final)[1], wt= -pvalue)%>%
-          mutate(hitsPerc = Significant_Genes*100/Total_Genes) %>% ## signi genes, v1 = all genes in the go.
-          ggplot(aes(x = hitsPerc,
+            top_n(dim(final)[1], wt= -pvalue)%>%
+            mutate(hitsPerc = Significant_Genes*100/Total_Genes) %>% ## signi genes, v1 = all genes in the go.
+            ggplot(aes(x = hitsPerc,
                        y = GO_Name,
                        colour = pvalue,
                        size = Significant_Genes)) +
             #xlim(0,)+
-          geom_point() +
-          theme_gray()+
-          labs(title= paste("GO Enrichment in module",module_name), x="Hits (%)", y="GO term", colour="p value", size="Count")+
-          theme(axis.text.x = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
-          theme(axis.text.y = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
-          theme(axis.title.x = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
-          theme(axis.title.y = element_text(size = 8, color = "black",vjust = 0.5, hjust = 0.5))+
-          theme(plot.title = element_text(size = 12,color = "black", face = "bold", vjust = 0.5, hjust = 0.5)))
+            geom_point() +
+            theme_gray()+
+            labs(title= paste("GO Enrichment in module",module_name), x="Hits (%)", y="GO term", colour="p value", size="Count")+
+            theme(axis.text.x = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
+            theme(axis.text.y = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
+            theme(axis.title.x = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
+            theme(axis.title.y = element_text(size = 8, color = "black",vjust = 0.5, hjust = 0.5))+
+            theme(plot.title = element_text(size = 12,color = "black", face = "bold", vjust = 0.5, hjust = 0.5)))
   }
   dev.off()
   raw_pvalue_index = seq(0.05,1,by=0.05)
@@ -378,7 +402,7 @@ Go_Enrich_Plot = function(total.genes = total.genes,
   }
   raw_pvalue_distribution = data.frame(index = raw_pvalue_index,counts_GO = raw_pvalue_sum)
   raw_pvalue_distribution
-  save(GO_results_b, raw_pvalue_distribution, file = paste(trimws(keyword),".RData",sep = ""))
+  save(GO_results_b, GO_results_b_raw, raw_pvalue_distribution, file = paste(trimws(keyword),".RData",sep = ""))
   message(total_enrich," significant GO terms found within ",
           length(TestingSubsetNames)," modules/subsets", 
           " at the significance level of ",GOthres)

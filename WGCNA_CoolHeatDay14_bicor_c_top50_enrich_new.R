@@ -163,3 +163,54 @@ GO_Enrichment_Results = Go_Enrich_Plot(total.genes,
                                        TestingSubsetNames = nonpres_modulenames_b,
                                        keyword = "GO_Enrichment_bicor_c_top50__z25_0911")
 print("Step11 - GO finished and data saved")
+
+
+
+
+GO_Enrichment_Results_megenta4 = Go_Enrich_Plot(total.genes,
+                                       GOthres = 0.05,
+                                       TestingGroupAssignment = moduleColors14_b_cl,
+                                       TestingSubsetNames = nonpres_modulenames_b,
+                                       keyword = "GO_Enrichment_bicor_c_top50__z25_0911_megenta4")
+
+ls()
+nonpres_modulenames_b = nonpres_modulenames_b[49]
+
+
+load("GO_Enrichment_bicor_c_top50__z25_0911_megenta4.RData")
+ls()
+
+test = data.frame(GO_results_b_raw)
+
+class(moduleColors14_b_cl)
+
+library(tidyverse)
+test_filter = list(one = data.frame(A = sample(100:200,10), B = runif(10))) %>% filter(A < 150)
+test_filter = list(one = data.frame(A = sample(100:200,10), B = runif(10))) %>% append(.,.) 
+
+whicht((test_filter[1]))
+
+
+filter(data.frame(test_filter[1]), < 150)
+
+install.packages("rlist")
+require(rlist)
+x <- list(p1 = list(type='A',score=list(c1=10,c2=8)),
+          p2 = list(type='B',score=list(c1=9,c2=9)),
+          p3 = list(type='B',score=list(c1=9,c2=7)))
+list.filter(x, type=='B')
+list.filter(x, min(score$c1, score$c2) >= 8)
+list.filter(x, type=='B', score$c2 >= 8)
+
+?list.filter()
+?listFilterValues()
+
+?sample()
+
+names(test)
+require(DOSE)
+require(clusterProfiler)
+data(geneList)
+gene = names(geneList)[abs(geneList) > 2]
+david = enrichDAVID(gene = gene, idType="ENTREZ_GENE_ID", 
+                    listType="Gene", annotation="KEGG_PATHWAY")
