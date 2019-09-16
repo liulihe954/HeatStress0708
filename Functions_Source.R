@@ -184,11 +184,12 @@ Kegg_Enrich_Plot = function(ENS_ID_all, # all genes in your dataset( vector - fo
                             host="http://www.ensembl.org",
                             attributes = c("ensembl_gene_id","entrezgene_id"), # the items you need to retrive from the database
                             filters="ensembl_gene_id", # with which keywords we match
-                            keyword){ # keyword is just for easy file naming, the keyword you provide will show as the main part as the output file name. e.g. "Day14_bicor_c_enrich"
-  ##############           Matching (ens -> entrez); then plotting     #############################        
-  # Load database from the downtown and try to match
-  total_enrich = 0 # for counting the total enriched pathways
-  library(biomaRt);library(gage);library(magrittr);library(stringr) # load functions source
+                            keyword){
+  total_enrich = 0
+  raw_pvalue_all = numeric()
+  KEGG_results_b = list()
+  KEGG_results_b_raw = list()
+  library(biomaRt);library(gage);library(magrittr);library(stringr);library(ggplot2) # load functions source
   sdb = kegg.gsets(species = species, id.type = id.type, check.new = F) # get database1
   kegg.gs = sdb$kg.sets[sdb$sigmet.id] # organize database
   #length(sdb$kg.sets);str(kegg.gs)
@@ -200,7 +201,7 @@ Kegg_Enrich_Plot = function(ENS_ID_all, # all genes in your dataset( vector - fo
   annot_all <- getBM(attributes = attributes,
                      filters = filters,
                      values = ENS_ID_all,
-                     mart = mart) 
+                     mart = mart) %>% tidyr::drop_na(.)
   # extract EnsemblID for later use
   ENS_ID_all_annot <- as.vector(annot_all[,1])
   # extract EntrezID for later use
@@ -214,16 +215,16 @@ Kegg_Enrich_Plot = function(ENS_ID_all, # all genes in your dataset( vector - fo
   } else if (length(ENS_ID_all)- length(ENS_ID_all_annot) < 0){
     message("Note!! - Matching Done! we gained ",(-length(ENS_ID_all) + length(ENS_ID_all_annot))," nodes.")
   } else (message(" Matching Done! Perfectly matched! "))
-   ###############################Matching done; now plotting #################################
+  ###############################Matching done; now plotting #################################
   # the output is a pdf and every single page will be the point plot of the enriched item of a specific module.
   pdf(paste(trimws(keyword),".pdf",sep = ""))
   for (i in c(1:(length(TestingSubsetNames)))){
     if (i%%5==0){message("Now digging in module #",i)} # can change the 
-    module_name = TestingSubsetNames[i]# get non preserved modules / (nodes)
-    nopresID = as.vector(ENS_ID_all[which(TestingGroupAssignment == module_name)]) # Matching every module
+    #module_name = TestingSubsetNames[i]# get non preserved modules / (nodes)
+    nopresID = as.vector(ENS_ID_all[which( TestingGroupAssignment == module_name)]) # Matching every module
     nopresENTER = annot_all[ENS_ID_all_annot %in% nopresID,2] # Note. multiple EntrezID could point to single EnsemblID!!
     N = length(ENTER_ID_all_annot) # Big N - overlap of our dataset(top20) and the KEGG.db
-    S = length(ENS_ID_all_annot[ENS_ID_all_annot%in%nopresID]) # Big S, find those in both top 20 and no-pres modules
+    S = length(ENTER_ID_all_annot[ENTER_ID_all_annot%in%nopresENTER]) # Big S, find those in both top 20 and no-pres modules
     out = data.frame(KEGG=character(),Name=character(),totalG=numeric(),sigG=numeric(),Pvalue=numeric()) # formating
     # Double loop: trying to go through every single KEGG.db, so extract each one first
     for (j in 1:length(names(kegg.gs))){
@@ -239,39 +240,61 @@ Kegg_Enrich_Plot = function(ENS_ID_all, # all genes in your dataset( vector - fo
       Pval = round(fisher.test(M, alternative ="g")$p.value, digits = 3)
       tmp = data.frame(KEGG = KEGG_Index, Name = KEGG_Name, totalG = m, sigG = s, Pvalue = Pval)
       out = rbind(out,tmp)}
+    # put the pvalues in a box
+    raw_pvalue_all = append(raw_pvalue_all,out$Pvalue,length(raw_pvalue_all))
     # select those has 4 more gene in common and pvalue smaller than 0.05
-    ot = subset(out,totalG > 4 & Pvalue < KEGGthres)
+    # selection vs raw
+    ot = subset(out,totalG > 4 & Pvalue < KEGGthres) # select
+    ot_raw = out # no-select; keep all
+    # 
     final = ot[order(ot$Pvalue),];colnames(final) = c("KEGG.ID","KEGG_Name", "Total_Genes", "Significant_Genes", "pvalue")
     final = final %>% top_n(dim(final)[1], wt= -pvalue) %>% mutate(hitsPerc=Significant_Genes*100/Total_Genes)
     KEGG_results_b[[i]] = final
     total_enrich = total_enrich + nrow(final)
+    # 
+    final_raw = ot_raw[order(ot_raw$Pvalue),];colnames(final_raw) = c("KEGG.ID","KEGG_Name", "Total_Genes", "Significant_Genes", "pvalue")
+    final_raw = final_raw %>% top_n(dim(final_raw)[1], wt= -pvalue) %>% mutate(hitsPerc=Significant_Genes*100/Total_Genes)
+    KEGG_results_b_raw[[i]] = final_raw
     # plotting
     print(final %>% 
-          top_n(dim(final)[1], wt= -pvalue) %>% 
-          mutate(hitsPerc=Significant_Genes*100/Total_Genes)%>%
-          ggplot(aes(x=hitsPerc,
+            top_n(dim(final)[1], wt= -pvalue) %>% 
+            mutate(hitsPerc=Significant_Genes*100/Total_Genes)%>%
+            ggplot(aes(x=hitsPerc,
                        y=KEGG_Name,
                        colour=pvalue,
                        size=Significant_Genes)) +
-          xlim(0,max(final$hitsPerc)+5)+
-          geom_point() +
-          theme_gray()+
-          labs(title= paste("KEGG Enrichment in module",module_name), x="Hits (%)", y="Kegg term", colour="p value", size="Count")+
-          theme(axis.text.x = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
-          theme(axis.text.y = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
-          theme(axis.title.x = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
-          theme(axis.title.y = element_text(size = 8, color = "black",vjust = 0.5, hjust = 0.5))+
-          theme(plot.title = element_text(size = 12,color = "black", face = "bold", vjust = 0.5, hjust = 0.5)))
+            xlim(0,max(final$hitsPerc)+5)+
+            geom_point() +
+            theme_gray()+
+            labs(title= paste("KEGG Enrichment in module",module_name), x="Hits (%)", y="Kegg term", colour="p value", size="Count")+
+            theme(axis.text.x = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
+            theme(axis.text.y = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
+            theme(axis.title.x = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
+            theme(axis.title.y = element_text(size = 8, color = "black",vjust = 0.5, hjust = 0.5))+
+            theme(plot.title = element_text(size = 12,color = "black", face = "bold", vjust = 0.5, hjust = 0.5)))
   }
   dev.off()
-  save(KEGG_results_b, file = paste(trimws(keyword),".RData",sep = ""))
+  raw_pvalue_index = seq(0.05,1,by=0.05)
+  raw_pvalue_sum = numeric()
+  for( z in seq_along(raw_pvalue_index)){
+    raw_pvalue_sum[z] = length(which(raw_pvalue_all <= raw_pvalue_index[z]))
+  }
+  raw_pvalue_distribution = data.frame(index = raw_pvalue_index,counts_GO = raw_pvalue_sum)
+  save(ENS_ID_all_annot,
+       ENTER_ID_all_annot,
+       KEGG_results_b,
+       KEGG_results_b_raw,
+       raw_pvalue_all, 
+       file = paste(trimws(keyword),".RData",sep = ""))
   message(total_enrich," significantly pathways found within ",
           length(TestingSubsetNames)," modules/subsets", 
           " at the significance level of ",KEGGthres)
   message("Nice! - KEGG enrichment finished and data saved")
   Match_Annot=list(All_Ens_ID_after_annot=ENS_ID_all_annot,
                    All_Entrez_ID_after_annot=ENTER_ID_all_annot,
-                   Enrich_Compile = KEGG_results_b)
+                   Enrich_Compile = KEGG_results_b,
+                   Enrich_Compile_raw = KEGG_results_b_raw,
+                   All_pvalue_distribution =  raw_pvalue_distribution)
   return(Match_Annot)}
 
 #####################################################################################
@@ -342,8 +365,8 @@ Go_Enrich_Plot = function(total.genes = total.genes,
                      totalG=numeric(),
                      sigG=numeric(),
                      Pvalue=numeric(),
-                     ExternalLoss_total = ExternalLoss_total,
-                     ExternalLoss_sig = ExternalLoss_sig)
+                     ExternalLoss_total = character(),
+                     ExternalLoss_sig = character())
     message("Module size of ",TestingSubsetNames[i],": ", length(nopresID_GO))
     for(j in 1:length(GO)){
       if (j%%100 == 0) {message("tryingd on GO ",j," - ",GO[j]," - ",Name[j])}
@@ -364,13 +387,13 @@ Go_Enrich_Plot = function(total.genes = total.genes,
     raw_pvalue_all = append(raw_pvalue_all,out$Pvalue,length(raw_pvalue_all))
     # raw complilation starts
     #ot_raw = subset(out,totalG > 4 & Pvalue < GOthres)
-    final_raw = out[order(out$Pvalue),];colnames(final_raw) = c("GOID","GO_Name", "Total_Genes", "Significant_Genes", "pvalue_r")
+    final_raw = out[order(out$Pvalue),];colnames(final_raw) = c("GOID","GO_Name", "Total_Genes", "Significant_Genes", "pvalue_r","ExternalLoss_total","InternalLoss_sig")
     final_raw = final_raw %>% top_n(dim(final_raw)[1], wt= -pvalue_r)%>%mutate(hitsPerc = Significant_Genes*100/Total_Genes)
     GO_results_b_raw[[i]] = final_raw;names(GO_results_b_raw)[i] = paste(TestingSubsetNames[i],"with",dim(final_raw)[1],"enriched GO raw")
     # raw complilation ends
     # selection starts - select those has 4 more gene in common and pvalue smaller than 0.05
     ot = subset(out,totalG > 4 & Pvalue < GOthres)
-    final = ot[order(ot$Pvalue),];colnames(final) = c("GOID","GO_Name", "Total_Genes", "Significant_Genes", "pvalue")
+    final = ot[order(ot$Pvalue),];colnames(final) = c("GOID","GO_Name", "Total_Genes", "Significant_Genes", "pvalue","ExternalLoss_total","InternalLoss_sig")
     final = final %>% top_n(dim(final)[1], wt= -pvalue)%>%mutate(hitsPerc = Significant_Genes*100/Total_Genes)
     GO_results_b[[i]] = final;names(GO_results_b)[i] = paste(TestingSubsetNames[i],"with",dim(final)[1],"enriched GO")
     # selection ends
