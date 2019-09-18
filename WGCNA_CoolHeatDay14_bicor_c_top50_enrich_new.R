@@ -145,6 +145,9 @@ ENS_ID_all <- colnames(datExpr14_cl)
 nonpres_index_b = (which(Zsummary14_b < 2))
 nonpres_modulenames_b = rownames(Z.PreservationStats14_b)[nonpres_index_b]
 nonpres_modulenames_b = nonpres_modulenames_b[-grep("gold",nonpres_modulenames_b)]
+nonpres_modulenames_b = nonpres_modulenames_b[49]
+nonpres_modulenames_b
+
 
 KEGG_results_b = list()
 Kegg_Enrichment_Results = Kegg_Enrich_Plot(ENS_ID_all,
@@ -162,23 +165,26 @@ GO_Enrichment_Results = Go_Enrich_Plot(total.genes,
                                        TestingGroupAssignment = moduleColors14_b_cl,
                                        TestingSubsetNames = nonpres_modulenames_b,
                                        keyword = "GO_Enrichment_bicor_c_top50__z25_0911")
+
 print("Step11 - GO finished and data saved")
 
 
-
-
-GO_Enrichment_Results_megenta4 = Go_Enrich_Plot(total.genes,
-                                       GOthres = 0.05,
-                                       TestingGroupAssignment = moduleColors14_b_cl,
-                                       TestingSubsetNames = nonpres_modulenames_b,
-                                       keyword = "GO_Enrichment_bicor_c_top50__z25_0911_megenta4")
-
+setwd("/Users/liulihe95/Desktop/CoolHeat_Results_Top50/Day14")
+load("GO_Enrichment_bicor_c_top50__z25_0911.RData")
 ls()
-nonpres_modulenames_b = nonpres_modulenames_b[49]
-
-
+load("KEGG_Enrichment_Enrichment_bicor_c_top50_z5_0911.RData")
+ls()
 load("GO_Enrichment_bicor_c_top50__z25_0911_megenta4.RData")
 ls()
+
+
+nopresID_GO = as.vector(colnames(datExpr14_cl)[which( moduleColors14_b_cl == nonpres_modulenames_b[49])])
+nopresID_GO2 = as.vector(colnames(datExpr14_cl)[which( moduleColors14_b_cl == nonpres_modulenames_b[50])])
+write.table(nopresID_GO,"test1.txt",row.names=FALSE,eol = "\t",quote = F)
+write.table(nopresID_GO2,"test2.txt",row.names=FALSE,eol = "\t",quote = F)
+
+(KEGG_results_b[49])
+(GO_results_b[49])
 
 test = data.frame(GO_results_b_raw)
 
