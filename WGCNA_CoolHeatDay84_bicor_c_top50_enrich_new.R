@@ -145,20 +145,21 @@ ENS_ID_all <- colnames(datExpr14_cl)
 nonpres_index_b = (which(Zsummary14_b < 2))
 nonpres_modulenames_b = rownames(Z.PreservationStats14_b)[nonpres_index_b]
 nonpres_modulenames_b = nonpres_modulenames_b[-grep("gold",nonpres_modulenames_b)]
-KEGG_results_b = list()
-Kegg_Enrichment_Results = Kegg_Enrich_Plot(ENS_ID_all,
-                                           KEGGthres = 0.05,
-                                           TestingGroupAssignment = moduleColors14_b_cl, 
-                                           TestingSubsetNames = nonpres_modulenames_b,
-                                           keyword = "KEGG_Enrichment_Day84_bicor_c_top50_z5_0911")
+
+#KEGG_results_b = list()
+#Kegg_Enrichment_Results = Kegg_Enrich_Plot(ENS_ID_all,
+#                                           KEGGthres = 0.05,
+#                                           TestingGroupAssignment = moduleColors14_b_cl, 
+#                                           TestingSubsetNames = nonpres_modulenames_b,
+#                                           keyword = "KEGG_Enrichment_Day84_bicor_c_top50_z5_0911")
 #===========================================================================================
 #                             11. Gene Ontology enrichment                                ##
 #===========================================================================================
 total.genes = colnames(datExpr14_cl)# total genes in your dataset
 GO_results_b = list()
 GO_Enrichment_Results = Go_Enrich_Plot(total.genes,
-                                       GOthres = 0.25,
+                                       GOthres = 0.05,
                                        TestingGroupAssignment = moduleColors14_b_cl,
                                        TestingSubsetNames = nonpres_modulenames_b,
-                                       keyword = "GO_Enrichment_Day84_bicor_c_top50_z25_0911")
+                                       keyword = "GO_Enrichment_Day84_bicor_c_top50_z005_0920")
 print("Step11 - GO finished and data saved")

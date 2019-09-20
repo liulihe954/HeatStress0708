@@ -145,78 +145,22 @@ ENS_ID_all <- colnames(datExpr14_cl)
 nonpres_index_b = (which(Zsummary14_b < 2))
 nonpres_modulenames_b = rownames(Z.PreservationStats14_b)[nonpres_index_b]
 nonpres_modulenames_b = nonpres_modulenames_b[-grep("gold",nonpres_modulenames_b)]
-nonpres_modulenames_b = nonpres_modulenames_b[49]
-nonpres_modulenames_b
 
-
-KEGG_results_b = list()
-Kegg_Enrichment_Results = Kegg_Enrich_Plot(ENS_ID_all,
-                                           KEGGthres = 0.05,
-                                           TestingGroupAssignment = moduleColors14_b_cl, 
-                                           TestingSubsetNames = nonpres_modulenames_b,
-                                           keyword = "KEGG_Enrichment_Enrichment_bicor_c_top50_z5_0911")
+#KEGG_results_b = list()
+#Kegg_Enrichment_Results = Kegg_Enrich_Plot(ENS_ID_all,
+#                                           KEGGthres = 0.05,
+#                                           TestingGroupAssignment = moduleColors14_b_cl, 
+#                                           TestingSubsetNames = nonpres_modulenames_b,
+#                                           keyword = "KEGG_Enrichment_Enrichment_bicor_c_top50_z5_0911")
 #===========================================================================================
 #                             11. Gene Ontology enrichment                                ##
 #===========================================================================================
 total.genes = colnames(datExpr14_cl)# total genes in your dataset
 GO_results_b = list()
 GO_Enrichment_Results = Go_Enrich_Plot(total.genes,
-                                       GOthres = 0.25,
+                                       GOthres = 0.05,
                                        TestingGroupAssignment = moduleColors14_b_cl,
                                        TestingSubsetNames = nonpres_modulenames_b,
-                                       keyword = "GO_Enrichment_bicor_c_top50__z25_0911")
+                                       keyword = "GO_Enrichment_bicor_c_top50__z005_0920")
 
 print("Step11 - GO finished and data saved")
-
-
-setwd("/Users/liulihe95/Desktop/CoolHeat_Results_Top50/Day14")
-load("GO_Enrichment_bicor_c_top50__z25_0911.RData")
-ls()
-load("KEGG_Enrichment_Enrichment_bicor_c_top50_z5_0911.RData")
-ls()
-load("GO_Enrichment_bicor_c_top50__z25_0911_megenta4.RData")
-ls()
-
-
-nopresID_GO = as.vector(colnames(datExpr14_cl)[which( moduleColors14_b_cl == nonpres_modulenames_b[49])])
-nopresID_GO2 = as.vector(colnames(datExpr14_cl)[which( moduleColors14_b_cl == nonpres_modulenames_b[50])])
-write.table(nopresID_GO,"test1.txt",row.names=FALSE,eol = "\t",quote = F)
-write.table(nopresID_GO2,"test2.txt",row.names=FALSE,eol = "\t",quote = F)
-
-(KEGG_results_b[49])
-(GO_results_b[49])
-
-test = data.frame(GO_results_b_raw)
-
-class(moduleColors14_b_cl)
-
-library(tidyverse)
-test_filter = list(one = data.frame(A = sample(100:200,10), B = runif(10))) %>% filter(A < 150)
-test_filter = list(one = data.frame(A = sample(100:200,10), B = runif(10))) %>% append(.,.) 
-
-whicht((test_filter[1]))
-
-
-filter(data.frame(test_filter[1]), < 150)
-
-install.packages("rlist")
-require(rlist)
-x <- list(p1 = list(type='A',score=list(c1=10,c2=8)),
-          p2 = list(type='B',score=list(c1=9,c2=9)),
-          p3 = list(type='B',score=list(c1=9,c2=7)))
-list.filter(x, type=='B')
-list.filter(x, min(score$c1, score$c2) >= 8)
-list.filter(x, type=='B', score$c2 >= 8)
-
-?list.filter()
-?listFilterValues()
-
-?sample()
-
-names(test)
-require(DOSE)
-require(clusterProfiler)
-data(geneList)
-gene = names(geneList)[abs(geneList) > 2]
-david = enrichDAVID(gene = gene, idType="ENTREZ_GENE_ID", 
-                    listType="Gene", annotation="KEGG_PATHWAY")
