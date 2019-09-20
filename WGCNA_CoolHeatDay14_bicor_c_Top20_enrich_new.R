@@ -142,9 +142,9 @@ nonpres_modulenames_b = nonpres_modulenames_b[-grep("gold",nonpres_modulenames_b
 total.genes = colnames(datExpr14_cl)# total genes in your dataset
 GO_results_b = list()
 GO_Enrichment_Results = Go_Enrich_Plot(total.genes,
-                                       GOthres = 0.50,
+                                       GOthres = 0.05,
                                        TestingGroupAssignment = moduleColors14_b_cl,
                                        TestingSubsetNames = nonpres_modulenames_b,
-                                       keyword = "GO_Enrichment_Day14_bicor_c_new_z50")
+                                       keyword = "GO_Enrichment_Day14_bicor_c_new_z005_0920")
 
 
