@@ -340,10 +340,10 @@ Go_Enrich_Plot = function(total.genes = total.genes,
   database = useMart(biomart)
   genome = useDataset(dataset, mart = database)
   gene = getBM(attributes,mart = genome)
-  goName = unique(gene[,c(2,3)]); goName = goName[order(goName$go_id),];goName = goName[-1,]
+  goName = unique(gene[,c(2,3)]);goName = goName[order(goName$go_id),];goName = goName[-1,]
   GO = goName$go_id
   Name = goName$name_1006
-  genesGO = unique(subset(gene,go_id != "")$external_gene_name)[-1]
+  genesGO = unique(subset(gene,go_id != "")$ensembl_gene_id)[-1]
   #length(genesGO)
   message("Total Number of module/subsets to check: ",length(TestingSubsetNames))
   message("Total Number of GO sets to check: ",length(GO)," with total number of names: ",length(Name))
