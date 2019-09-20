@@ -328,7 +328,7 @@ Go_Enrich_Plot = function(total.genes = total.genes,
                           biomart="ensembl",
                           dataset="btaurus_gene_ensembl",
                           host="http://www.ensembl.org",
-                          attributes = c("ensembl_gene_id", "external_gene_name","go_id","name_1006"),
+                          attributes = c("external_gene_name","go_id","name_1006"),
                           keyword = "GO_Enrichment_in_modules_bicor_c_day14_new_testing"){
   # 
   total_enrich = 0
