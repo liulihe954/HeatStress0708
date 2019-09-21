@@ -130,7 +130,6 @@ print("Step9 - all_module_preservation_statistics finished and data saved")
 nonpres_index_b = (which(Zsummary14_b < 2))
 nonpres_modulenames_b = rownames(Z.PreservationStats14_b)[nonpres_index_b]
 nonpres_modulenames_b = nonpres_modulenames_b[-grep("gold",nonpres_modulenames_b)]
-nonpres_modulenames_b = nonpres_modulenames_b [12:13]
 #KEGG_results_b = list()
 #Kegg_Enrichment_Results = Kegg_Enrich_Plot(ENS_ID_all,
 #                                           KEGGthres = 0.05,

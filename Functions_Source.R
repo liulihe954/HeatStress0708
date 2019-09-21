@@ -320,7 +320,7 @@ Kegg_Enrich_Plot = function(ENS_ID_all, # all genes in your dataset( vector - fo
 ### Function necessities: Same rationales with KEGG enrich 
 ###                                    ---
 ###                        !but here we dont need convert from EnsemblID to EntrezID!
-##########################################################################################
+##############################################################################################
 Go_Enrich_Plot = function(total.genes = total.genes,
                           TestingGroupAssignment, 
                           TestingSubsetNames,
@@ -328,7 +328,7 @@ Go_Enrich_Plot = function(total.genes = total.genes,
                           biomart="ensembl",
                           dataset="btaurus_gene_ensembl",
                           host="http://www.ensembl.org",
-                          attributes = c("external_gene_name","go_id","name_1006"),
+                          attributes = c("ensembl_gene_id","go_id","name_1006"),
                           keyword = "GO_Enrichment_in_modules_bicor_c_day14_new_testing"){
   # 
   total_enrich = 0
@@ -343,7 +343,7 @@ Go_Enrich_Plot = function(total.genes = total.genes,
   goName = unique(gene[,c(2,3)]);goName = goName[order(goName$go_id),];goName = goName[-1,]
   GO = goName$go_id
   Name = goName$name_1006
-  genesGO = unique(subset(gene,go_id != "")$ensembl_gene_id)[-1]
+  genesGO = unique(subset(gene,go_id != "")$ensembl_gene_id)
   #length(genesGO)
   message("Total Number of module/subsets to check: ",length(TestingSubsetNames))
   message("Total Number of GO sets to check: ",length(GO)," with total number of names: ",length(Name))
@@ -368,11 +368,11 @@ Go_Enrich_Plot = function(total.genes = total.genes,
     message("Module size of ",TestingSubsetNames[i],": ", length(nopresID_GO))
     for(j in 1:length(GO)){
       if (j%%100 == 0) {message("tryingd on GO ",j," - ",GO[j]," - ",Name[j])}
-      gENEs = subset(gene, go_id == GO[i])$ensembl_gene_id # all gene in target GO
+      gENEs = subset(gene, go_id == GO[j])$ensembl_gene_id # all gene in target GO
       m = length(total.genes[total.genes %in% gENEs]) # genes from target GO and in our dataset
       s = length(sig.genes[sig.genes %in% gENEs]) # # genes from target GO also in the non-preserved module
       M = matrix(c(s,S-s,m-s,N-m-S+s),byrow = 2, nrow = 2)
-      Pval = round(fisher.test(M, alternative ="g")$p.value, digits = 3)
+      Pval = fisher.test(M, alternative ="g")$p.value
       tmp = data.frame(GO = GO[j], 
                        Name = Name[j], 
                        totalG = m, 
@@ -405,7 +405,7 @@ Go_Enrich_Plot = function(total.genes = total.genes,
     #                   y = GO_Name,
     #                   colour = pvalue,
     #                   size = Significant_Genes)) +
-            #xlim(0,)+
+    #xlim(0,)+
     #        geom_point() +
     #        theme_gray()+
     #        labs(title= paste("GO Enrichment in module",module_name), x="Hits (%)", y="GO term", colour="p value", size="Count")+
@@ -428,7 +428,6 @@ Go_Enrich_Plot = function(total.genes = total.genes,
           length(TestingSubsetNames)," modules/subsets", 
           " at the significance level of ",GOthres)
   message("Nice! - GO enrichment finished and data saved")}
-
 
 #####################################################################################
 #=== Following are for testing 'wgcna' --- ignore unless you find them relevent ===#
@@ -472,4 +471,3 @@ Parse_KEGG_Results = function(KEGG_results_b){
   return(ParseResults = all_enrich_KEGG)
 }
 
-1
