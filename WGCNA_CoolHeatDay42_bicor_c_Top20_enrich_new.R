@@ -137,12 +137,12 @@ nonpres_modulenames_b = nonpres_modulenames_b[-grep("gold",nonpres_modulenames_b
 #                             11. Gene Ontology enrichment                                ##
 #===========================================================================================
 total.genes = colnames(datExpr14_cl)# total genes in your dataset
-GO_results_b = list()
-GO_Enrichment_Results = Go_Enrich_Plot(total.genes,
-                                       GOthres = 0.05,
-                                       TestingGroupAssignment = moduleColors14_b_cl,
-                                       TestingSubsetNames = nonpres_modulenames_b,
-                                       keyword = "GO_Enrichment_Day42_bicor_c_new_z005_0920")
+#GO_results_b = list()
+#GO_Enrichment_Results = Go_Enrich_Plot(total.genes,
+#                                       GOthres = 0.05,
+#                                       TestingGroupAssignment = moduleColors14_b_cl,
+#                                       TestingSubsetNames = nonpres_modulenames_b,
+#                                       keyword = "GO_Enrichment_Day42_bicor_c_new_z005_0920")
 
 #===========================================================================================
 #                              12. Interpro enrichment                                    ##
