@@ -296,7 +296,30 @@ Kegg_Enrich_Plot = function(ENS_ID_all, # all genes in your dataset( vector - fo
                    Enrich_Compile_raw = KEGG_results_b_raw,
                    All_pvalue_distribution =  raw_pvalue_distribution)
   return(Match_Annot)}
-
+#####################################################################################
+Parse_KEGG_Results = function(KEGG_results_b){
+  all_enrich_KEGG = data.frame(ID=character(),
+                               Description=character(),
+                               GeneRatio=character(),
+                               BgRatio=character(),
+                               pvalue=numeric(),
+                               p.adjust=numeric(),
+                               qvalue=numeric(),
+                               geneID=character(),
+                               Count=numeric(),
+                               stringsAsFactors=FALSE)
+  for (i in 1:length(KEGG_results_b)){
+    len = dim(data.frame(KEGG_results_b[i]))[1]
+    if (len> 0){
+      all_enrich_KEGG = rbind(all_enrich_KEGG,data.frame(KEGG_results_b[i]))
+    }
+  }
+  #all_enrich_KEGG <- all_enrich_KEGG %>% dplyr::group_by(KEGG.ID) %>% dplyr::distinct()
+  total_hits = dim(all_enrich_KEGG)[1]
+  total_modules = length(KEGG_results_b)
+  print(paste(total_hits,"hits found in",total_modules,"non-preserved modules"))
+  return(ParseResults = all_enrich_KEGG)
+}
 #####################################################################################
 #=== Following are for testing 'wgcna' --- ignore unless you find them relevent ===#
 #####################################################################################
@@ -446,28 +469,259 @@ Go_Enrich_Plot = function(total.genes = total.genes,
 #                           keyword = "GO_Enrichment_just_testing")
 #####################################################################################
 #######################################################################################
-#   Function Parse_KEGG funtion, --- unlist the list and put them in one data.frame   #
+#   Function Parse_GO funtion, --- unlist the list and put them in one data.frame   #
 #######################################################################################
-Parse_KEGG_Results = function(KEGG_results_b){
-  all_enrich_KEGG = data.frame(ID=character(),
-                               Description=character(),
-                               GeneRatio=character(),
-                               BgRatio=character(),
-                               pvalue=numeric(),
-                               p.adjust=numeric(),
-                               qvalue=numeric(),
-                               geneID=character(),
-                               Count=numeric(),
-                               stringsAsFactors=FALSE)
-  for (i in 1:length(KEGG_results_b)){
-    len = dim(data.frame(KEGG_results_b[i]))[1]
+Parse_GO_Results = function(GO_results_b){
+  all_enrich_GO = data.frame(ID=character(),
+                             Description=character(),
+                             GeneRatio=character(),
+                             BgRatio=character(),
+                             pvalue=numeric(),
+                             p.adjust=numeric(),
+                             qvalue=numeric(),
+                             geneID=character(),
+                             Count=numeric(),
+                             stringsAsFactors=FALSE)
+  for (i in 1:length(GO_results_b)){
+    len = dim(data.frame(GO_results_b[i]))[1]
     if (len> 0){
-      all_enrich_KEGG = rbind(all_enrich_KEGG,data.frame(KEGG_results_b[i]))
+      all_enrich_GO = rbind(all_enrich_GO,data.frame(GO_results_b[i]))
     }
   }
   #all_enrich_KEGG <- all_enrich_KEGG %>% dplyr::group_by(KEGG.ID) %>% dplyr::distinct()
-  total_hits = dim(all_enrich_KEGG)[1]
-  total_modules = length(KEGG_results_b)
+  total_hits = dim(all_enrich_GO)[1]
+  total_modules = length(GO_results_b)
   print(paste(total_hits,"hits found in",total_modules,"non-preserved modules"))
-  return(ParseResults = all_enrich_KEGG)
+  return(ParseResults = all_enrich_GO)
 }
+
+#######################################################################################
+#         Function Semantic similarity plotting, calculate correlation score          #
+#######################################################################################
+ReduceDim_GO_Plot = function(Enrich_Out,
+                             GOthres = 0.001,
+                             label_size1 = 0.4,
+                             label_size2 = 0.4,
+                             label_size3 = 0.4,
+                             Database = "org.Bt.eg.db",
+                             measure="Jiang",combine=NULL,
+                             Dataset_Name){
+  # load libraries + download ref database
+  library(GOSemSim);library(corrplot);library(tidyverse)
+  do.call(library,list(Database))
+  semData_BP <- godata(paste(Database), ont="BP", computeIC=T)
+  semData_MF <- godata(paste(Database), ont="MF", computeIC=T)
+  semData_CC <- godata(paste(Database), ont="CC", computeIC=T)
+  # selection + formating: for each category we have one vector containing all the sig GO terms
+  BP_List = dplyr::filter(Enrich_Out,pvalue<=GOthres & namespace_1003 == "biological_process") %>% 
+    dplyr::select(go_id) %>% unlist();attributes(BP_List) = NULL # name is an attribute and we dont them, so set null
+  CC_List = dplyr::filter(Enrich_Out,pvalue<=GOthres & namespace_1003 == "cellular_component") %>% 
+    dplyr::select(go_id) %>% unlist();attributes(CC_List) = NULL
+  MF_List = dplyr::filter(Enrich_Out,pvalue<=GOthres & namespace_1003 == "molecular_function") %>% 
+    dplyr::select(go_id) %>% unlist();attributes(MF_List) = NULL
+  ### Now we are trying to get all similarity matrix ready. N x N, symetric, diag = 1
+  # For BP
+  goSimMatrix_BP = GOSemSim::mgoSim(BP_List,
+                                    BP_List,
+                                    semData=semData_BP,measure=measure,combine = combine)
+  suspectID_BP = rownames(goSimMatrix_BP)[is.na(goSimMatrix_BP[,1])]
+  if (length(suspectID_BP) != 0){BP_List_new = setdiff(BP_List,suspectID_BP)
+  message(length(suspectID_BP)," invalid ID captured in BP: ",suspectID_BP,", thus been removed!")
+  } else {BP_List_new = BP_List;message("Nice! All IDs are valid in BP!")}
+  goSimMatrix_BP_new = GOSemSim::mgoSim(BP_List_new,
+                                        BP_List_new,
+                                        semData=semData_BP,measure=measure,combine = combine)
+  colnames(goSimMatrix_BP_new) = paste(BP_List_new,Enrich_Out$GO_Name[(Enrich_Out$go_id %in% BP_List_new)])
+  rownames(goSimMatrix_BP_new) = paste(Enrich_Out$GO_Name[(Enrich_Out$go_id %in% BP_List_new)],BP_List_new)
+  # For CC
+  goSimMatrix_CC = GOSemSim::mgoSim(CC_List,
+                                    CC_List,
+                                    semData=semData_CC,measure=measure,combine = combine)
+  suspectID_CC = rownames(goSimMatrix_CC)[is.na(goSimMatrix_CC[,1])]
+  if (length(suspectID_CC) != 0){CC_List_new = setdiff(CC_List,suspectID_CC)
+  message(length(suspectID_CC)," invalid ID captured in CC: ",suspectID_CC,", thus been removed!")
+  } else {CC_List_new = CC_List;message("Nice! All IDs are valid in CC!")}
+  goSimMatrix_CC_new = GOSemSim::mgoSim(CC_List_new,
+                                        CC_List_new,
+                                        semData=semData_CC,measure=measure,combine =combine)
+  colnames(goSimMatrix_CC_new) = paste(CC_List_new,Enrich_Out$GO_Name[(Enrich_Out$go_id %in% CC_List_new)])
+  rownames(goSimMatrix_CC_new) = paste(Enrich_Out$GO_Name[(Enrich_Out$go_id %in% CC_List_new)],CC_List_new)
+  # For MF
+  goSimMatrix_MF = GOSemSim::mgoSim(MF_List,
+                                    MF_List,
+                                    semData=semData_MF,measure=measure,combine = combine)
+  suspectID_MF = rownames(goSimMatrix_MF)[is.na(goSimMatrix_MF[,1])]
+  if (length(suspectID_MF) != 0){MF_List_new = setdiff(MF_List,suspectID_MF)
+  message(length(suspectID_MF)," invalid ID captured in MF: ",suspectID_MF,", thus been removed!")
+  } else {MF_List_new = MF_List;message("Nice! All IDs are valid in MF!")}
+  goSimMatrix_MF_new = GOSemSim::mgoSim(MF_List_new,
+                                        MF_List_new,
+                                        semData=semData_MF,measure=measure,combine = combine)
+  colnames(goSimMatrix_MF_new) = paste(MF_List_new,Enrich_Out$GO_Name[(Enrich_Out$go_id %in% MF_List_new)])
+  rownames(goSimMatrix_MF_new) = paste(Enrich_Out$GO_Name[(Enrich_Out$go_id %in% MF_List_new)],MF_List_new)
+  # Now we take the results and plot
+  pdf(paste("Semantic_Similarity_Measure_",Dataset_Name,"_",formatC(GOthres, format = "e", digits = 0),".pdf",sep = ""))
+  corrplot(goSimMatrix_CC_new,title = "Semantic_Similarity_Measure_CC",
+           tl.col = "black", tl.cex = label_size1, 
+           method = "shade", order = "hclust", 
+           hclust.method = "centroid", is.corr = FALSE,mar=c(0,0,1,0))
+  corrplot(goSimMatrix_BP_new,title = "Semantic_Similarity_Measure_BP",
+           tl.col = "black", tl.cex = label_size2, 
+           method = "shade", order = "hclust", 
+           hclust.method = "centroid", is.corr = FALSE,mar=c(0,0,1,0))
+  corrplot(goSimMatrix_MF_new,title = "Semantic_Similarity_Measure_MF",
+           tl.col = "black", tl.cex = label_size3, 
+           method = "shade", order = "hclust", 
+           hclust.method = "centroid", is.corr = FALSE,mar=c(0,0,1,0))
+  dev.off()
+  message(dim(goSimMatrix_CC_new)[1],",",
+          dim(goSimMatrix_BP_new)[1],",",
+          dim(goSimMatrix_MF_new)[1]," GOs ploted in CC, BP and MF, respectively",
+          ", cutting at, ",GOthres)
+  require(openxlsx)
+  CorMatrix <- list("CorMat_BP" = data.frame(goSimMatrix_BP), 
+                    "CorMat_CC" = data.frame(goSimMatrix_CC),
+                    "CorMat_MF" = data.frame(goSimMatrix_MF))
+  write.xlsx(CorMatrix, row.names=TRUE,
+             file = paste("Semantic_Similarity_Measure_",
+                                     Dataset_Name,"_",
+                          formatC(GOthres, format = "e", digits = 0),".xlsx",sep = ""))
+  save(goSimMatrix_CC,goSimMatrix_BP,goSimMatrix_MF,
+       file = paste("Semantic_Similarity_Measure_",Dataset_Name,"_",formatC(GOthres, format = "e", digits = 0),".RData",sep = ""))
+  message("Nice! Excels, Plots exported and RData saved!")
+}
+#===========================================================================================
+#                              5.Interpro enrichment                                   ##
+#===========================================================================================
+InterPro_Enrich = function(total_genes_all,
+                           sig_genes_all,
+                           TestingSubsetNames,
+                           IPthres = 0.05,
+                           biomart="ensembl",
+                           dataset="btaurus_gene_ensembl",
+                           Identifier = "ensembl_gene_id",
+                           attributes = c("ensembl_gene_id","external_gene_name","interpro","interpro_description"),
+                           keyword = "Interpro_Enrichment"){
+  total_enrich = 0
+  raw_pvalue_all = numeric()
+  Interpro_results_b = list()
+  Interpro_results_b_raw = list()
+  library(ggplot2);library(biomaRt);library(gage);library(magrittr);#library(tidyverse)# load pkg
+  ## GetInterpro : bosTau 
+  database = useMart(biomart)
+  genome = useDataset(dataset, mart = database)
+  gene = getBM(attributes,mart = genome)
+  ##
+  InterproName = unique(gene[,c("interpro","interpro_description")]) %>% arrange(interpro)
+  Interpro = na.omit(InterproName$interpro)[-1]
+  Name = na.omit(InterproName$interpro_description)[-1]
+  #
+  if (Identifier == "ensembl_gene_id"){genesInterpro = unique(subset(gene,interpro != "")$ensembl_gene_id)
+  } else if (Identifier == "external_gene_name") {
+    genesInterpro= unique(subset(gene,interpro != "")$external_gene_name);
+    genesInterpro = genesInterpro[-1]
+  } else {message("Sorry, we only have ensembel and names available as identifier, please use one of the followings: 
+                  ensembl_gene_id OR external_gene_name.")}
+  message("Total Number of module/subsets to check: ",length(TestingSubsetNames))
+  message("Total Number of Interpro domains to check: ",length(Interpro)," with total number of names: ",length(Name))
+  #pdf(paste(trimws(keyword),".pdf",sep = ""))
+  for (i in c(1:(length(TestingSubsetNames)))){
+    message("working on dataset #",i," - ",TestingSubsetNames[i])
+    sig.genes = unlist(sig_genes_all[i]);attributes(sig.genes) = NULL
+    total.genes = unlist(total_genes_all[i]);attributes(total.genes) = NULL
+    head(genesInterpro)
+    # total genes in the non-preserved module
+    N = length(total.genes[total.genes %in% genesInterpro])
+    S = length(sig.genes[sig.genes %in% genesInterpro]) #
+    ExternalLoss_total = paste((length(total.genes) - N),round((length(total.genes) - N)/N,3),sep = "/")
+    ExternalLoss_sig = paste((length(sig.genes) - S),round((length(sig.genes) - S)/S,3),sep = "/")
+    out = data.frame(Interpro=character(),
+                     Name=character(),
+                     totalG=numeric(),
+                     sigG=numeric(),
+                     Pvalue=numeric(),
+                     ExternalLoss_total = character(),
+                     ExternalLoss_sig = character())
+    message("Module size of ",TestingSubsetNames[i],": ", length(sig.genes))
+    for(j in 1:length(Interpro)){
+      if (j%%100 == 0) {message("tryingd on Interpro ",j," - ",Interpro[j]," - ",Name[j])}
+      if (Identifier == "ensembl_gene_id"){
+        gENEs = subset(gene, interpro == Interpro[j])$ensembl_gene_id
+      } else if (Identifier == "external_gene_name") {
+        gENEs = subset(gene, interpro == Interpro[j])$external_gene_name
+      }
+      m = length(total.genes[total.genes %in% gENEs]) # genes from target interpro and in our dataset
+      s = length(sig.genes[sig.genes %in% gENEs]) # # genes from target interpro also in the non-preserved module
+      M = matrix(c(s,S-s,m-s,N-m-S+s),byrow = 2, nrow = 2)
+      Pval = round(fisher.test(M, alternative ="g")$p.value,100)
+      tmp = data.frame(Interpro = Interpro[j], 
+                       Name = Name[j], 
+                       totalG = m, 
+                       sigG = s, 
+                       Pvalue = Pval, 
+                       ExternalLoss_total = ExternalLoss_total,
+                       ExternalLoss_sig = ExternalLoss_sig)
+      out = rbind(out,tmp)}
+    # put all palues in a box
+    raw_pvalue_all = append(raw_pvalue_all,out$Pvalue,length(raw_pvalue_all))
+    # raw complilation starts
+    final_raw = out[order(out$Pvalue),];colnames(final_raw) = c("InterproID","Interpro_Name", "Total_Genes", "Significant_Genes", "pvalue_r","ExternalLoss_total","InternalLoss_sig")
+    final_raw = final_raw %>% dplyr::mutate(hitsPerc = Significant_Genes*100 / Total_Genes)
+    Interpro_results_b_raw[[i]] = final_raw; names(Interpro_results_b_raw)[i] = paste(TestingSubsetNames[i],"with",dim(final_raw)[1],"enriched Interpro raw")
+    # raw complilation ends
+    # selection starts - select those has 4 more gene in common and pvalue smaller than 0.05
+    ot = subset(out,totalG > 4 & Pvalue <= IPthres)
+    final = ot[order(ot$Pvalue),];colnames(final) = c("InterproID","Interpro_Name", "Total_Genes", "Significant_Genes", "pvalue_r","ExternalLoss_total","InternalLoss_sig")
+    final = final %>% mutate(hitsPerc = (Significant_Genes*100)/Total_Genes)
+    Interpro_results_b[[i]] = final;names(Interpro_results_b)[i] = paste(TestingSubsetNames[i],"with",dim(final)[1],"enriched Interpro")
+    # selection ends
+    message("Significant Enrichment Hits:",nrow(final))
+    total_enrich = total_enrich + nrow(final)
+    ##
+    #   print(final %>% 
+    #           top_n(dim(final)[1], wt= -pvalue)%>% 
+    #           ggplot(final, aes( x = hitsPerc,
+    #                      y = GO_Name,
+    #                      colour = pvalue,
+    #                      size = Significant_Genes)) +
+    #           geom_point() +
+    #           theme_gray()+
+    #          labs(title= paste("GO Enrichment in module",
+    #                              TestingSubsetNames[i])), 
+    #                              x="Hits (%)", y="GO term", 
+    #                              colour="p value", size="Count")+
+    #      theme(axis.text.x = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
+    #      theme(axis.text.y = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
+    #      theme(axis.title.x = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
+    #      theme(axis.title.y = element_text(size = 8, color = "black",vjust = 0.5, hjust = 0.5))+
+    #      theme(plot.title = element_text(size = 12,color = "black", face = "bold", vjust = 0.5, hjust = 0.5))
+  }
+  #  dev.off()
+  raw_pvalue_index = seq(0.05,1,by=0.05)
+  raw_pvalue_sum = numeric()
+  for( z in seq_along(raw_pvalue_index)){raw_pvalue_sum[z] = length(which(raw_pvalue_all <= raw_pvalue_index[z]))}
+  raw_pvalue_distribution = data.frame(index = raw_pvalue_index,counts_Interpro = raw_pvalue_sum)
+  #raw_pvalue_distribution
+  save(Interpro_results_b, Interpro_results_b_raw, raw_pvalue_distribution, file = paste(trimws(keyword),".RData",sep = ""))
+  message(total_enrich," significant Interpro domains found within ",
+          length(TestingSubsetNames)," modules/subsets", 
+          " at the significance level of ",IPthres)
+  message("Nice! - Interpro enrichment finished and data saved")}
+#######################################################################################
+#   Function Parse_Interpro funtion, --- unlist the list and put them in one data.frame#
+#######################################################################################
+Parse_Interpro_Results = function(Interpro_results_b){
+  all_enrich_Interpro = data.frame()
+  for (i in 1:length(Interpro_results_b)){
+    len = dim(data.frame(Interpro_results_b[i]))[1]
+    if (len> 0){
+      all_enrich_Interpro = rbind(all_enrich_Interpro,data.frame(Interpro_results_b[i]))
+    }
+  }
+  #all_enrich_KEGG <- all_enrich_KEGG %>% dplyr::group_by(KEGG.ID) %>% dplyr::distinct()
+  total_hits = dim(all_enrich_Interpro)[1]
+  total_modules = length(Interpro_results_b)
+  print(paste(total_hits,"hits found in",total_modules,"tested modules"))
+  return(ParseResults = all_enrich_Interpro)
+}
+

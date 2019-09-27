@@ -143,3 +143,26 @@ GO_Enrichment_Results = Go_Enrich_Plot(total.genes,
                                        TestingGroupAssignment = moduleColors14_b_cl,
                                        TestingSubsetNames = nonpres_modulenames_b,
                                        keyword = "GO_Enrichment_Day42_bicor_c_new_z005_0920")
+
+#===========================================================================================
+#                              12. Interpro enrichment                                    ##
+#===========================================================================================
+ch.total.genes = list();np.genes = list()
+for (i in seq_along(nonpres_modulenames_b)){
+  np.genes[[i]] = as.vector(colnames(datExpr42_cl)[which(moduleColors42_b_cl == nonpres_modulenames_b[i])])
+  ch.total.genes[[i]] = colnames(datExpr42_cl)
+  names(np.genes)[i] = nonpres_modulenames_b[i]
+  names(ch.total.genes)[i] = nonpres_modulenames_b[i]
+}
+
+Interpro_Enrichment_Results= InterPro_Enrich(
+  total_genes_all =ch.total.genes,
+  sig_genes_all = np.genes ,
+  TestingSubsetNames = nonpres_modulenames_b,
+  IPthres = 0.05,
+  biomart="ensembl",
+  dataset="btaurus_gene_ensembl",
+  Identifier = "ensembl_gene_id",
+  attributes = c("ensembl_gene_id","external_gene_name","interpro","interpro_description"),
+  keyword = "Interpro_Enrichment_Day42_bicor_c_005_0927")
+ 
