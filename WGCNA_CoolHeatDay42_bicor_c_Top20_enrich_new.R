@@ -149,8 +149,8 @@ total.genes = colnames(datExpr14_cl)# total genes in your dataset
 #===========================================================================================
 ch.total.genes = list();np.genes = list()
 for (i in seq_along(nonpres_modulenames_b)){
-  np.genes[[i]] = as.vector(colnames(datExpr42_cl)[which(moduleColors42_b_cl == nonpres_modulenames_b[i])])
-  ch.total.genes[[i]] = colnames(datExpr42_cl)
+  np.genes[[i]] = as.vector(colnames(datExpr14_cl)[which(moduleColors14_b_cl == nonpres_modulenames_b[i])])
+  ch.total.genes[[i]] = colnames(datExpr14_cl)
   names(np.genes)[i] = nonpres_modulenames_b[i]
   names(ch.total.genes)[i] = nonpres_modulenames_b[i]
 }
