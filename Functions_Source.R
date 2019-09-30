@@ -593,20 +593,23 @@ ReduceDim_GO_Plot = function(Enrich_Out,
 #===========================================================================================
 #                              5.Interpro enrichment                                   ##
 #===========================================================================================
-InterPro_Enrich = function(total_genes_all,
-                           sig_genes_all,
+#########################################################################################################################
+#########################################################################################################################
+InterPro_Enrich = function(total.genes,
+                           sig.genes,
                            TestingSubsetNames,
                            IPthres = 0.05,
                            biomart="ensembl",
                            dataset="btaurus_gene_ensembl",
-                           Identifier = "ensembl_gene_id",
+                           #host="http://www.ensembl.org",
+                           Identifier = "external_gene_name",
                            attributes = c("ensembl_gene_id","external_gene_name","interpro","interpro_description"),
                            keyword = "Interpro_Enrichment"){
   total_enrich = 0
   raw_pvalue_all = numeric()
   Interpro_results_b = list()
   Interpro_results_b_raw = list()
-  library(ggplot2);library(biomaRt);library(gage);library(magrittr);#library(tidyverse)# load pkg
+  library(ggplot2);library(biomaRt);library(gage);library(magrittr);library(tidyverse)# load pkg
   ## GetInterpro : bosTau 
   database = useMart(biomart)
   genome = useDataset(dataset, mart = database)
@@ -622,14 +625,14 @@ InterPro_Enrich = function(total_genes_all,
     genesInterpro = genesInterpro[-1]
   } else {message("Sorry, we only have ensembel and names available as identifier, please use one of the followings: 
                   ensembl_gene_id OR external_gene_name.")}
+  #length(genesGO)
   message("Total Number of module/subsets to check: ",length(TestingSubsetNames))
   message("Total Number of Interpro domains to check: ",length(Interpro)," with total number of names: ",length(Name))
   #pdf(paste(trimws(keyword),".pdf",sep = ""))
   for (i in c(1:(length(TestingSubsetNames)))){
     message("working on dataset #",i," - ",TestingSubsetNames[i])
-    sig.genes = unlist(sig_genes_all[i]);attributes(sig.genes) = NULL
-    total.genes = unlist(total_genes_all[i]);attributes(total.genes) = NULL
-    head(genesInterpro)
+    sig.genes = unlist(sig.genes[i]);attributes(sig.genes) = NULL
+    total.genes = unlist(total.genes[i]);attributes(total.genes) = NULL
     # total genes in the non-preserved module
     N = length(total.genes[total.genes %in% genesInterpro])
     S = length(sig.genes[sig.genes %in% genesInterpro]) #
@@ -644,7 +647,7 @@ InterPro_Enrich = function(total_genes_all,
                      ExternalLoss_sig = character())
     message("Module size of ",TestingSubsetNames[i],": ", length(sig.genes))
     for(j in 1:length(Interpro)){
-      if (j%%100 == 0) {message("tryingd on Interpro ",j," - ",Interpro[j]," - ",Name[j])}
+      if (j%%1000 == 0) {message("tryingd on Interpro ",j," - ",Interpro[j]," - ",Name[j])}
       if (Identifier == "ensembl_gene_id"){
         gENEs = subset(gene, interpro == Interpro[j])$ensembl_gene_id
       } else if (Identifier == "external_gene_name") {
@@ -707,9 +710,7 @@ InterPro_Enrich = function(total_genes_all,
           length(TestingSubsetNames)," modules/subsets", 
           " at the significance level of ",IPthres)
   message("Nice! - Interpro enrichment finished and data saved")}
-#######################################################################################
-#   Function Parse_Interpro funtion, --- unlist the list and put them in one data.frame#
-#######################################################################################
+#########################################################################################################################
 Parse_Interpro_Results = function(Interpro_results_b){
   all_enrich_Interpro = data.frame()
   for (i in 1:length(Interpro_results_b)){
@@ -718,10 +719,12 @@ Parse_Interpro_Results = function(Interpro_results_b){
       all_enrich_Interpro = rbind(all_enrich_Interpro,data.frame(Interpro_results_b[i]))
     }
   }
+  colnames(all_enrich_Interpro) = c("InterproID","Interpro_Name","Total_Genes","Significant_Genes","pvalue","ExternalLoss_total","InternalLoss_sig","hitsPerc")
   #all_enrich_KEGG <- all_enrich_KEGG %>% dplyr::group_by(KEGG.ID) %>% dplyr::distinct()
   total_hits = dim(all_enrich_Interpro)[1]
   total_modules = length(Interpro_results_b)
   print(paste(total_hits,"hits found in",total_modules,"tested modules"))
   return(ParseResults = all_enrich_Interpro)
 }
-
+#########################################################################################################################
+#########################################################################################################################
