@@ -185,6 +185,7 @@ Kegg_Enrich_Plot = function(ENS_ID_all, # all genes in your dataset( vector - fo
                             attributes = c("ensembl_gene_id","entrezgene_id"), # the items you need to retrive from the database
                             filters="ensembl_gene_id", # with which keywords we match
                             keyword){
+  #
   total_enrich = 0
   raw_pvalue_all = numeric()
   KEGG_results_b = list()
