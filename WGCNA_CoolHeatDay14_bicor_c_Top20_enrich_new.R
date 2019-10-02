@@ -239,9 +239,9 @@ NCBI2Reactome_lowest_path_bt = dplyr::filter(NCBI2Reactome_lowest_path, V6 == "B
 #head(NCBI2Reactome_lowest_path_bt,10)
 # all_path
 NCBI2Reactome_all_path = read.csv("NCBI2Reactome_All_Levels.txt",sep = "\t",header = F)
-NCBI2Reactome_all_path_bt = dplyr::filter(NCBI2Reactome_all_path,V6 == "Bos taurus") %>% 
-  dplyr::select(V1,V2,V4,V5,V6) %>% 
-  rename(EntrezID = V1,ReactomeID = V2,Reactome_Description = V4, Source = V5,Species = V6)
+NCBI2Reactome_all_path_bt = dplyr::filter(NCBI2Reactome_all_path, V6 == "Bos taurus") %>% 
+  dplyr::select(V1,V2,V4,V5,V6) %>%
+  dplyr::rename(EntrezID=V1, ReactomeID = V2,Reactome_Description = V4, Source = V5,Species = V6)
 #head(NCBI2Reactome_all_path_bt)
 # all_react
 NCBI2Reactome_all_react = read.csv("NCBI2Reactome_PE_Reactions.txt",sep = "\t",header = F)
