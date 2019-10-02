@@ -155,16 +155,16 @@ for (i in seq_along(nonpres_modulenames_b)){
   names(ch.total.genes)[i] = nonpres_modulenames_b[i]
 }
 
-Interpro_Enrichment_Results= InterPro_Enrich(
-  total_genes_all =ch.total.genes,
-  sig_genes_all = np.genes ,
-  TestingSubsetNames = nonpres_modulenames_b,
-  IPthres = 0.05,
-  biomart="ensembl",
-  dataset="btaurus_gene_ensembl",
-  Identifier = "ensembl_gene_id",
-  attributes = c("ensembl_gene_id","external_gene_name","interpro","interpro_description"),
-  keyword = "Interpro_Enrichment_Day42_bicor_c_005_0927")
+#Interpro_Enrichment_Results= InterPro_Enrich(
+#  total_genes_all =ch.total.genes,
+#  sig_genes_all = np.genes ,
+#  TestingSubsetNames = nonpres_modulenames_b,
+#  IPthres = 0.05,
+#  biomart="ensembl",
+#  dataset="btaurus_gene_ensembl",
+#  Identifier = "ensembl_gene_id",
+#  attributes = c("ensembl_gene_id","external_gene_name","interpro","interpro_description"),
+#  keyword = "Interpro_Enrichment_Day42_bicor_c_005_0927")
  
 
 #===========================================================================================
