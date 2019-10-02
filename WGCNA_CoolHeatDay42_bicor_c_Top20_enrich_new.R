@@ -295,7 +295,7 @@ Reactome_Enrich_all_path_1001 = Reactome_Enrich(total_genes_all=Total_list_out_e
 ##  run analysis   ##
 ####################
 # just in case that does not work
-keyword = "MESH_Enrichment_1001_day42"
+keyword = "MeshDB"
 DB = paste(keyword,".RData",sep = "")
 load(DB)
 ###

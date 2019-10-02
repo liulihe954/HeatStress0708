@@ -790,7 +790,8 @@ MESH_Enrich = function(total_genes_all,
   #  dplyr::left_join(Match_List,by= c("MESHID" = "MESHID"))
   #
   # alternatively
-  DB = paste(keyword,".RData",sep = "")
+  keyword_outer = "MeshDB"
+  DB = paste(keyword_outer,".RData",sep = "")
   load(DB)
   #
   # Get index
