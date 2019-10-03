@@ -367,6 +367,7 @@ Go_Enrich_Plot = function(total.genes = total.genes,
   goName = unique(gene[,c(2,3)]);goName = goName[order(goName$go_id),];goName = goName[-1,]
   GO = goName$go_id
   Name = goName$name_1006
+  #length(GO)
   genesGO = unique(subset(gene,go_id != "")$ensembl_gene_id)[-1]
   #length(genesGO)
   message("Total Number of module/subsets to check: ",length(TestingSubsetNames))
@@ -475,18 +476,19 @@ Go_Enrich_Plot = function(total.genes = total.genes,
 Parse_GO_Results = function(GO_results_b){
   all_enrich_GO = data.frame(ID=character(),
                              Description=character(),
-                             GeneRatio=character(),
-                             BgRatio=character(),
+                             Total_gene=numeric(),
+                             Significant_gene=numeric(),
                              pvalue=numeric(),
-                             p.adjust=numeric(),
-                             qvalue=numeric(),
-                             geneID=character(),
-                             Count=numeric(),
+                             ExternalLoss_total = character(),
+                             InternalLoss_total = character(),
+                             HitPerc = numeric(),
                              stringsAsFactors=FALSE)
   for (i in 1:length(GO_results_b)){
     len = dim(data.frame(GO_results_b[i]))[1]
     if (len> 0){
-      all_enrich_GO = rbind(all_enrich_GO,data.frame(GO_results_b[i]))
+      tmp = data.frame(GO_results_b[i])
+      names(tmp) = names(all_enrich_GO)
+      all_enrich_GO = rbind(all_enrich_GO,tmp)
     }
   }
   #all_enrich_KEGG <- all_enrich_KEGG %>% dplyr::group_by(KEGG.ID) %>% dplyr::distinct()
@@ -501,9 +503,9 @@ Parse_GO_Results = function(GO_results_b){
 #######################################################################################
 ReduceDim_GO_Plot = function(Enrich_Out,
                              GOthres = 0.001,
-                             label_size1 = 0.4,
-                             label_size2 = 0.4,
-                             label_size3 = 0.4,
+                             label_sizeCC = 0.4,
+                             label_sizeBP = 0.4,
+                             label_sizeMF = 0.4,
                              Database = "org.Bt.eg.db",
                              measure="Jiang",combine=NULL,
                              Dataset_Name){
@@ -564,15 +566,15 @@ ReduceDim_GO_Plot = function(Enrich_Out,
   # Now we take the results and plot
   pdf(paste("Semantic_Similarity_Measure_",Dataset_Name,"_",formatC(GOthres, format = "e", digits = 0),".pdf",sep = ""))
   corrplot(goSimMatrix_CC_new,title = "Semantic_Similarity_Measure_CC",
-           tl.col = "black", tl.cex = label_size1, 
+           tl.col = "black", tl.cex = label_sizeCC, 
            method = "shade", order = "hclust", 
            hclust.method = "centroid", is.corr = FALSE,mar=c(0,0,1,0))
   corrplot(goSimMatrix_BP_new,title = "Semantic_Similarity_Measure_BP",
-           tl.col = "black", tl.cex = label_size2, 
+           tl.col = "black", tl.cex = label_sizeBP, 
            method = "shade", order = "hclust", 
            hclust.method = "centroid", is.corr = FALSE,mar=c(0,0,1,0))
   corrplot(goSimMatrix_MF_new,title = "Semantic_Similarity_Measure_MF",
-           tl.col = "black", tl.cex = label_size3, 
+           tl.col = "black", tl.cex = label_sizeMF, 
            method = "shade", order = "hclust", 
            hclust.method = "centroid", is.corr = FALSE,mar=c(0,0,1,0))
   dev.off()

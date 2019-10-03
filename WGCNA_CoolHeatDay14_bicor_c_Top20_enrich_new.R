@@ -2,6 +2,7 @@
 ###                               0. pkg & functions prep                                  ######
 #================================================================================================
 source("Functions_Source.R") 
+
 #setwd("/Users/liulihe95/Desktop/CoolHeat_Results_Top20/Day14_test/")
 #================================================================================================
 ###                                       1. dataprep                                      ######
@@ -138,6 +139,7 @@ nonpres_modulenames_b = nonpres_modulenames_b[-grep("gold",nonpres_modulenames_b
 #                                           TestingGroupAssignment = moduleColors14_b_cl, 
 #                                           TestingSubsetNames = nonpres_modulenames_b,
 #                                           keyword = "KEGG_Enrichment_Day14_bicor_c_new")
+
 #===========================================================================================
 #                             11. Gene Ontology enrichment                                ##
 #===========================================================================================
@@ -148,6 +150,34 @@ GO_results_b = list()
 #                                       TestingGroupAssignment = moduleColors14_b_cl,
 #                                       TestingSubsetNames = nonpres_modulenames_b,
 #                                       keyword = "GO_Enrichment_Day14_bicor_c_new_z005_0920")
+
+#setwd("../CoolHeat_Results_Top20/Day14/")
+load("GO_Enrichment_Day14_bicor_c_new_z005_0920.RData")
+GO_Enrichment_Day14_bicor_c_new_z005_0920 = Parse_GO_Results(GO_results_b)
+
+
+# get the spavcename index 
+biomart="ensembl";dataset="btaurus_gene_ensembl";attributes = c("go_id","namespace_1003")
+database = useMart(biomart);genome = useDataset(dataset, mart = database);gene = getBM(attributes,mart = genome)
+namespace_index = dplyr::filter(gene,go_id != "",namespace_1003 != "")
+
+# parse 1 by 1, and attach the space name in the end
+compile_select_index = c("go_id","GO_Name","Total_Genes","Significant_Genes","pvalue","hitsPerc")
+### select one of the modules
+GO_Enrichment_Day14_bicor_c_new_z005_0920_18 = Parse_GO_Results(GO_results_b[44])
+names(GO_Enrichment_Day14_bicor_c_new_z005_0920_18) = c("go_id","GO_Name","Total_Genes","Significant_Genes","pvalue","ExternalLoss_total","InternalLoss_sig","hitsPerc")
+GO_Enrichment_Day14_bicor_c_new_z005_0920_18_enrich = dplyr::select(GO_Enrichment_Day14_bicor_c_new_z005_0920_18,compile_select_index) %>% dplyr::inner_join(namespace_index,by = "go_id")
+# plot
+
+#head(GO_Enrichment_Day14_bicor_c_new_z005_0920)
+names(GO_results_b)[44]
+
+ReduceDim_GO_Plot(GO_Enrichment_Day14_bicor_c_new_z005_0920_18_enrich,GOthres = 0.05, 
+                  label_sizeCC = 1,label_sizeMF = .8,
+                  Dataset_Name = "Day14_module_18")
+
+
+
 
 #===========================================================================================
 #                               12. Interpro enrichment                                   ##
@@ -171,7 +201,74 @@ for (i in seq_along(nonpres_modulenames_b)){
 #  Identifier = "ensembl_gene_id",
 #  attributes = c("ensembl_gene_id","external_gene_name","interpro","interpro_description"),
 #  keyword = "Interpro_Enrichment_Day14_bicor_c_005_0927")
- 
+ getwd()
+list.files()
+load("Interpro_Enrichment_Day14_bicor_c_005_0927.RData")
+
+Interpro_Enrichment_Day14_bicor_c_new_z005_0920 = Parse_Interpro_Results(Interpro_results_b[44])
+
+
+Parse_Interpro_Results = function(Interpro_results_b){
+  all_enrich_Interpro = data.frame(InterproID = character(),
+                                   Interpro_Name= character(),
+                                   Total_Genes = numeric(),
+                                   Significant_Genes = numeric(),
+                                   pvalue_r = numeric(),
+                                   ExternalLoss_total = character(),
+                                   InternalLoss_sig = character(),
+                                   hitsPerc = numeric())
+  for (i in 1:length(Interpro_results_b)){
+    len = dim(data.frame(Interpro_results_b[i]))[1]
+    if (len> 0){
+      tmp = data.frame(Interpro_results_b[i])
+      names(tmp) = names(all_enrich_Interpro)
+      all_enrich_Interpro = rbind(all_enrich_Interpro,tmp)
+    }
+  }
+  #all_enrich_KEGG <- all_enrich_KEGG %>% dplyr::group_by(KEGG.ID) %>% dplyr::distinct()
+  total_hits = dim(all_enrich_Interpro)[1]
+  total_modules = length(Interpro_results_b)
+  print(paste(total_hits,"hits found in",total_modules,"tested modules"))
+  return(ParseResults = all_enrich_Interpro)
+}
+
+
+
+
+names(Interpro_Enrichment_Day14_bicor_c_new_z005_0920 )
+final = Interpro_Enrichment_Day14_bicor_c_new_z005_0920 
+final = dplyr::top_n(final,dim(final)[1], wt= -pvalue_r)
+final$pvalue_r = round(final$pvalue_r,5)
+final$hitsPerc = round(final$hitsPerc,5)
+
+pdf("day14_module44.pdf")
+a = ggplot(final,
+           aes(x = hitsPerc,y = Interpro_Name,colour = pvalue_r, size = Significant_Genes)) +
+           geom_point() +
+           theme_gray() +
+            labs(title= paste("Interpro Enrichment in module","plum2"), x="Hits (%)", y="Interpro term", colour="p value", size="Count")+
+        theme(axis.text.x = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
+        theme(axis.text.y = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
+        theme(axis.title.x = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
+        theme(axis.title.y = element_text(size = 8, color = "black",vjust = 0.5, hjust = 0.5))+
+        theme(plot.title = element_text(size = 12,color = "black", face = "bold", vjust = 0.5, hjust = 0.5))
+print(a)
+dev.off()
+
+print(ggplot(final, aes( x = hitsPerc,
+                         y = GO_Name,
+                         colour = pvalue,
+                         size = Significant_Genes)) +
+        geom_point() +
+        theme_gray()+
+        labs(title= paste("Interpro Enrichment in module",
+                          TestingSubsetNames[i])), x="Hits (%)", y="Interpro term", colour="p value", size="Count")+
+  theme(axis.text.x = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
+  theme(axis.text.y = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
+  theme(axis.title.x = element_text(size = 8,color = "black",vjust = 0.5, hjust = 0.5))+
+  theme(axis.title.y = element_text(size = 8, color = "black",vjust = 0.5, hjust = 0.5))+
+  theme(plot.title = element_text(size = 12,color = "black", face = "bold", vjust = 0.5, hjust = 0.5))
+
 #===========================================================================================
 #                                13. Transfer Identifier                                  ##
 #===========================================================================================
