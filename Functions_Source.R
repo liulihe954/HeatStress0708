@@ -3,12 +3,15 @@
 #===========================================================================================
 #devtools::install_github("jakesherman/easypackages")
 library(easypackages)
-my_packages <- c("sva","WGCNA","ppcor","edgeR","clusterProfiler","magrittr",
-                 "dplyr", "ggplot2", "biomaRt","gage","doParallel",
-                 "limma","recount","pamr","stringr")
+my_packages <- c("WGCNA","ppcor","edgeR","clusterProfiler","magrittr","gage","doParallel",
+                 "recount","pamr","stringr")
 libraries(my_packages)
 library(readxl);library(ggplot2);library(biomaRt);library(tidyverse)
 library(biomaRt);library(GOSemSim);library(corrplot);library(limma)
+library(org.Bt.eg.db)
+library(meshr)
+library(MeSH.db)
+library(MeSH.Bta.eg.db)
 #===========================================================================================
 #                                1. "Massage" - Data processing                           ##
 #===========================================================================================
@@ -200,8 +203,8 @@ Parse_Results = function(Results_List,keyword = "Which D.B"){
   return(ParseResults = all_enrich)
 }
 ##############################################################################################################
-Go_Enrich_Plot = function(total.genes,
-                          sig.genes,
+Go_Enrich_Plot = function(total_genes_all,
+                          sig_genes_all,
                           TestingSubsetNames,
                           GOthres = 0.05,
                           biomart="ensembl",
@@ -403,8 +406,8 @@ ReduceDim_GO_Plot = function(Enrich_Out,
   message("Nice! Excels, Plots exported and RData saved!")
 }
 #########################################################################################################################
-InterPro_Enrich = function(total.genes,
-                           sig.genes,
+InterPro_Enrich = function(total_genes_all,
+                           sig_genes_all,
                            TestingSubsetNames,
                            IPthres = 0.05,
                            biomart="ensembl",
@@ -911,3 +914,84 @@ Kegg_Enrich_Plot = function(sig_genes_all,
           length(TestingSubsetNames)," modules/subsets", 
           " at the significance level of ",KEGGthres)
   message("Nice! - KEGG enrichment finished and data saved")}
+#########################################################################################################################
+ConvertNformat = function(bg_gene,
+                          TestingSubsetNames,
+                          TestingModAssign,
+                          keyword = "Ensembl2Entrez_Convert"){
+  # Get match information
+  key.symbol = AnnotationDbi::keys(org.Bt.eg.db,  keytype = c("ENSEMBL"))
+  entrezUniverse = AnnotationDbi::select(org.Bt.eg.db, as.character(key.symbol), 
+                                         columns = c("ENTREZID"),keytype = "ENSEMBL") %>% 
+    dplyr::distinct(ENSEMBL,.keep_all= TRUE)
+  #
+  library(tidyverse)
+  Gather_all = data.frame(ENSEMBL  =  bg_gene,
+                          assign = TestingModAssign) %>% 
+    dplyr::left_join(entrezUniverse, by  = c("ENSEMBL" = "ENSEMBL"))
+  names( Gather_all)[3] = "ENTREZID_final"
+  #
+  Sig_list_out = list();Total_list_out = list()
+  Sig_list_out_entrez = list();Total_list_out_entrez = list()
+  Sig_list_out_ens = list();Total_list_out_ens = list()
+  for (i in seq_along(TestingSubsetNames)){
+    #
+    target = TestingSubsetNames[i]
+    tmp01 = dplyr::filter(Gather_all,assign == target)
+    names(tmp01)[3] = "ENTREZID_final"
+    Sig_list_out[[i]] = tmp01;names(Sig_list_out)[i] = TestingSubsetNames[i]
+    tmp1 = dplyr::select(tmp01,ENTREZID_final) %>% dplyr::distinct() %>% na.omit();attributes(tmp1) = NULL
+    Sig_list_out_entrez[[i]] = tmp1
+    names(Sig_list_out_entrez)[i] = TestingSubsetNames[i]
+    tmp2 = dplyr::select(tmp01,ENSEMBL) %>% dplyr::distinct() %>% na.omit();attributes(tmp1) = NULL
+    Sig_list_out_ens[[i]] = tmp2;names(Sig_list_out_ens)[i] = TestingSubsetNames[i]
+    names(Sig_list_out_entrez)[i] = TestingSubsetNames[i]
+    
+  }
+  Total_list_out_tmp = list(unique(Gather_all$ENTREZID_final));names(Total_list_out_tmp) = "total_genes_entrez"
+  Total_list_out_entrez = rep(Total_list_out_tmp, length(Sig_list_out_entrez))
+  Total_list_out_tmp2 = list(unique(Gather_all$ENSEMBL));names(Total_list_out_tmp2) = "total_genes_ens"
+  Total_list_out_ens = rep(Total_list_out_tmp2, length(Sig_list_out_ens))
+  
+  save(Sig_list_out,
+       Sig_list_out_entrez,Total_list_out_entrez,
+       Sig_list_out_ens,Total_list_out_ens,
+       file = paste(trimws(keyword),".RData",sep = ""))
+  message("Nice! Conversion finished")
+}
+#########################################################################################################################
+# Read in database
+# lowest_path
+NCBI2Reactome_lowest_path = read.csv("NCBI2Reactome.txt",sep = "\t",header = F)
+NCBI2Reactome_lowest_path_bt = dplyr::filter(NCBI2Reactome_lowest_path, V6 == "Bos taurus") %>% 
+  dplyr::select(V1,V2,V4,V5,V6) %>% 
+  dplyr::rename(EntrezID = V1,ReactomeID = V2,Reactome_Description = V4, Source = V5,Species = V6)
+#head(NCBI2Reactome_lowest_path_bt,10)
+# all_path
+NCBI2Reactome_all_path = read.csv("NCBI2Reactome_All_Levels.txt",sep = "\t",header = F)
+NCBI2Reactome_all_path_bt = 
+  dplyr::filter(NCBI2Reactome_all_path,V6 == "Bos taurus") %>% 
+  dplyr::select(V1,V2,V4,V5,V6) %>% 
+  dplyr::rename(EntrezID = V1,
+                ReactomeID = V2,
+                Reactome_Description = V4, 
+                Source = V5, 
+                Species = V6)
+#head(NCBI2Reactome_all_path_bt)
+# all_react
+NCBI2Reactome_all_react = read.csv("NCBI2Reactome_PE_Reactions.txt",sep = "\t",header = F)
+NCBI2Reactome_all_react_bt = 
+  dplyr::filter(NCBI2Reactome_all_react,V8 == "Bos taurus") %>% 
+  dplyr::select(V1,V4,V6,V2,V3,V7,V8) %>% 
+  dplyr::rename(EntrezID = V1,ReactomeID = V4, 
+                Reaction_Description = V6,
+                ProteinID = V2,
+                Protein_Description = V3,
+                Source = V7, Species = V8)
+#head(NCBI2Reactome_all_react_bt,50)
+
+# turn data input as charactor
+NCBI2Reactome_all_react_bt[] <-   lapply(NCBI2Reactome_all_react_bt, function(x) if(is.factor(x)) as.character(x) else x)
+NCBI2Reactome_lowest_path_bt[] <- lapply(NCBI2Reactome_lowest_path_bt, function(x) if(is.factor(x)) as.character(x) else x)
+NCBI2Reactome_all_path_bt[] <-   lapply(NCBI2Reactome_all_path_bt, function(x) if(is.factor(x)) as.character(x) else x)
+
