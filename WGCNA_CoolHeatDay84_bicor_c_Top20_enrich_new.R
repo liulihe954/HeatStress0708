@@ -107,189 +107,102 @@ print("Step9 - all_module_preservation_statistics finished and data saved")
 
 
 #===========================================================================================
+#                                10. Data structure pre                                   ##
+#                                  format and concersion to entrez
+#===========================================================================================
+nonpres_index_b = (which(Zsummary14_b < 2))
+nonpres_modulenames_b = rownames(Z.PreservationStats14_b)[nonpres_index_b]
+nonpres_modulenames_b = nonpres_modulenames_b[-grep("gold",nonpres_modulenames_b)]
+#
+TestingModAssign84 = moduleColors14_b_cl
+bg_gene84 = colnames(datExpr14_cl)
+TestingSubsetNames84 = nonpres_modulenames_b 
+Convert = ConvertNformat(bg_gene84,
+                         TestingSubsetNames84,
+                         TestingModAssign84,
+                         keyword = "Ensembl2Entrez_Convert_day84")
+load("Ensembl2Entrez_Convert_day84.RData")
+
+#str(Sig_list_out_entrez)
+#str(Total_list_out_entrez)
+#===========================================================================================
 #                                10. KEGG enrichment                                      ##
 #===========================================================================================
-# Following are for testing 'wgcna' --- ignore unless you find them relevent
-#ENS_ID_all <- colnames(datExpr14_cl)
-nonpres_index_b = (which(Zsummary14_b < 2))
-nonpres_modulenames_b = rownames(Z.PreservationStats14_b)[nonpres_index_b]
-nonpres_modulenames_b = nonpres_modulenames_b[-grep("gold",nonpres_modulenames_b)]
-#KEGG_results_b = list()
-#Kegg_Enrichment_Results = Kegg_Enrich_Plot(ENS_ID_all,
-#                                           KEGGthres = 0.05,
-#                                           TestingGroupAssignment = moduleColors14_b_cl, 
-#                                           TestingSubsetNames = nonpres_modulenames_b,
-#                                           keyword = "KEGG_Enrichment_Day84_bicor_c_new")
-#===========================================================================================
-#                             11. Gene Ontology enrichment                                ##
-#===========================================================================================
-total.genes = colnames(datExpr14_cl)# total genes in your dataset
-GO_results_b = list()
-#GO_Enrichment_Results = Go_Enrich_Plot(total.genes,
-#                                       GOthres = 0.05,
-#                                       TestingGroupAssignment = moduleColors14_b_cl,
-#                                       TestingSubsetNames = nonpres_modulenames_b,
-#                                       keyword = "GO_Enrichment_Day84_bicor_c_new_z005_0920")
-#===========================================================================================
-#                               12.  Interpro  enrichment                                ##
-#===========================================================================================
-ch.total.genes = list();np.genes = list()
-for (i in seq_along(nonpres_modulenames_b)){
-  np.genes[[i]] = as.vector(colnames(datExpr14_cl)[which(moduleColors14_b_cl == nonpres_modulenames_b[i])])
-  ch.total.genes[[i]] = colnames(datExpr14_cl)
-  names(np.genes)[i] = nonpres_modulenames_b[i]
-  names(ch.total.genes)[i] = nonpres_modulenames_b[i]
-}
-
-#Interpro_Enrichment_Results = InterPro_Enrich(
-#  total_genes_all =ch.total.genes,
-#  sig_genes_all = np.genes ,
-#  TestingSubsetNames = nonpres_modulenames_b,
-#  IPthres = 0.05,
-#  biomart="ensembl",
-#  dataset="btaurus_gene_ensembl",
-#  Identifier = "ensembl_gene_id",
-#  attributes = c("ensembl_gene_id","external_gene_name","interpro","interpro_description"),
-#  keyword = "Interpro_Enrichment_Day84_bicor_c_005_0927")
-
-
-#===========================================================================================
-#                                13. Transfer Identifier                                  ##
-#===========================================================================================
-total_genes_all = ch.total.genes
-sig_genes_all = np.genes
-TestingSubsetNames = nonpres_modulenames_b
-
-# Here we have the data compilation
-# List with lenght 5 (one for each, easier for looping)
-#    sig_genes_all
-#    total_genes_all
-#
-# Now we convert
-# two steps - 
-# 1. using alias2Symbol(): get the symbol
-# 2, convert using biomart
-# Potentially loose some, but that's life
-## transform ensemble ID or External Gene name to EntrezID
-ensembl_try=useMart("ENSEMBL_MART_ENSEMBL",dataset="btaurus_gene_ensembl")
-attributes_try = c("ensembl_gene_id","entrezgene_accession","entrezgene_id") #"entrezgene_accession"
-gene_try = getBM(attributes=attributes_try,mart = ensembl_try)
-match_source = dplyr::select(gene_try,ensembl_gene_id,entrezgene_id)
-#
-for (i in seq_along(ch.total.genes)){
-  sig_genes_all[[i]] = as.character(na.omit(match_source$entrezgene_id[match_source$ensembl_gene_id %in% np.genes[[i]]]))
-  names(sig_genes_all)[i] = names(np.genes)[i]
-  #message("we lost",length(np.genes[[i]])-length(sig_genes_all[[i]]))
-  total_genes_all[[i]] = as.character(na.omit(match_source$entrezgene_id[match_source$ensembl_gene_id %in% ch.total.genes[[i]]]))
-  #message("we lost",length(ch.total.genes[[i]])-length(total_genes_all[[i]]))
-  names(total_genes_all)[i] = names(ch.total.genes)[i]
-}
-
-#str(total_genes_all)
-#str(sig_genes_all)
-
-
-# print out
-#require(openxlsx)
-#write.xlsx(Sig_list_out,file = "test_convert_sig.xlsx")
-#write.xlsx(Total_list_out,file = "test_convert_total.xlsx")
-
-# Keep only the entrez ID: then we have one vector for each element of the list (some format as always)
-Sig_list_out_entrez = sig_genes_all
-Total_list_out_entrez = total_genes_all
-#for (i in c(1:5)){
-#  Sig_list_out_entrez[[i]] = data.frame(Sig_list_out[[i]])$entrezgene_id
-#  names(Sig_list_out_entrez)[i] = names(Sig_list_out)[i]
-#  Total_list_out_entrez[[i]] = data.frame(Total_list_out[[i]])$entrezgene_id
-#  names(Total_list_out_entrez)[i] = names(Total_list_out)[i]
-#}
-#===========================================================================================
-#                                14. Reactome enrichment                                  ##
-#===========================================================================================
-nonpres_index_b = (which(Zsummary14_b < 2))
-nonpres_modulenames_b = rownames(Z.PreservationStats14_b)[nonpres_index_b]
-nonpres_modulenames_b = nonpres_modulenames_b[-grep("gold",nonpres_modulenames_b)]
-
-
-# Read in database
-# lowest_path
-NCBI2Reactome_lowest_path = read.csv("NCBI2Reactome.txt",sep = "\t",header = F)
-NCBI2Reactome_lowest_path_bt = dplyr::filter(NCBI2Reactome_lowest_path, V6 == "Bos taurus") %>% 
-  dplyr::select(V1,V2,V4,V5,V6) %>% 
-  dplyr::rename(EntrezID = V1,ReactomeID = V2,Reactome_Description = V4, Source = V5,Species = V6)
-#head(NCBI2Reactome_lowest_path_bt,10)
-# all_path
-NCBI2Reactome_all_path = read.csv("NCBI2Reactome_All_Levels.txt",sep = "\t",header = F)
-NCBI2Reactome_all_path_bt = dplyr::filter(NCBI2Reactome_all_path, V6 == "Bos taurus") %>% 
-  dplyr::select(V1,V2,V4,V5,V6) %>%
-  dplyr::rename(EntrezID=V1, ReactomeID = V2,Reactome_Description = V4, Source = V5,Species = V6)
-#head(NCBI2Reactome_all_path_bt)
-# all_react
-NCBI2Reactome_all_react = read.csv("NCBI2Reactome_PE_Reactions.txt",sep = "\t",header = F)
-NCBI2Reactome_all_react_bt = dplyr::filter(NCBI2Reactome_all_react,V8 == "Bos taurus") %>% 
-  dplyr::select(V1,V2,V3,V4,V6,V7,V8) %>% 
-  dplyr::rename(EntrezID = V1,ReactomeID = V2, 
-                Reaction_Description = V3,
-                ProteinID = V4,
-                Protein_Description = V6,
-                Source = V7, Species = V8)
-
-# turn data input as charactor
-NCBI2Reactome_all_react_bt[] <-   lapply(NCBI2Reactome_all_react_bt, function(x) if(is.factor(x)) as.character(x) else x)
-NCBI2Reactome_lowest_path_bt[] <- lapply(NCBI2Reactome_lowest_path_bt, function(x) if(is.factor(x)) as.character(x) else x)
-NCBI2Reactome_all_path_bt[] <-   lapply(NCBI2Reactome_all_path_bt, function(x) if(is.factor(x)) as.character(x) else x)
-# data massage done 
-
-###
-### just for testing
-#Total_list_out_entrez_test = Total_list_out_entrez[1:2]
-#Sig_list_out_entrez_test = Sig_list_out_entrez[1:2]
+#nonpres_index_b = (which(Zsummary14_b < 2))
+#nonpres_modulenames_b = rownames(Z.PreservationStats14_b)[nonpres_index_b]
+#nonpres_modulenames_b = nonpres_modulenames_b[-grep("gold",nonpres_modulenames_b)]
+str(Sig_list_out_entrez)
+str(Total_list_out_entrez)
+str(Sig_list_out)
+Kegg_Enrichment_pval005_1014 = Kegg_Enrich_Plot(sig_genes_all = Sig_list_out_entrez,
+                                                total_genes_all = Total_list_out_entrez,
+                                                TestingSubsetNames = TestingSubsetNames84,
+                                                KEGGthres = 0.05, 
+                                                species = "bta", 
+                                                id.type = "kegg",
+                                                Sig_list_out =Sig_list_out,
+                                                keyword = "Kegg_Enrichment_pval005_1014_Day84")
+#==============================================================================================
+#                                      11. Mesh enrichment                                   ##
+#==============================================================================================
 #TestingSubsetNames
-#InputSource = NCBI2Reactome_all_react_bt
-## testing ends
-
-# here we have out list of genes
-Sig_list_out_entrez = sig_genes_all
-Total_list_out_entrez = total_genes_all
-
+MESH_Enrichment_1014 = MESH_Enrich(total_genes_all = Total_list_out_entrez,
+                                   sig_genes_all = Sig_list_out_entrez,
+                                   TestingSubsetNames = TestingSubsetNames84,
+                                   Meshthres = 0.05,
+                                   Sig_list_out = Sig_list_out,
+                                   MeshCate = c("D","G"),
+                                   dataset="MeSH.Bta.eg.db",
+                                   keyword = "MESH_Enrichment_1014_Day84")
+#===========================================================================================
+#                             12. Reactome  enrichment                                    ##
+#===========================================================================================
 ## all react
-Reactome_Enrich_all_react_1001 = Reactome_Enrich(total_genes_all=Total_list_out_entrez,
+Reactome_Enrich_all_react_1014 = Reactome_Enrich(total_genes_all=Total_list_out_entrez,
                                                  sig_genes_all=Sig_list_out_entrez,
-                                                 TestingSubsetNames = nonpres_modulenames_b,
+                                                 TestingSubsetNames = TestingSubsetNames84,
                                                  InputSource=  NCBI2Reactome_all_react_bt,
+                                                 Sig_list_out = Sig_list_out,
                                                  Reacthres = 0.05,
-                                                 keyword = "Reactome_Enrichment_all_react_1001_day84")
+                                                 keyword = "Reactome_Enrichment_all_react_1014_Day84")
 ## lowest path
-Reactome_Enrich_lowest_path_1001 = Reactome_Enrich(total_genes_all=Total_list_out_entrez,
+Reactome_Enrich_lowest_path_1014 = Reactome_Enrich(total_genes_all=Total_list_out_entrez,
                                                    sig_genes_all=Sig_list_out_entrez,
-                                                   TestingSubsetNames = nonpres_modulenames_b,
-                                                   InputSource=  NCBI2Reactome_alowest_path_bt,
+                                                   TestingSubsetNames = TestingSubsetNames84,
+                                                   InputSource=  NCBI2Reactome_lowest_path_bt,
+                                                   Sig_list_out = Sig_list_out,
                                                    Reacthres = 0.05,
-                                                   keyword = "Reactome_Enrich_lowest_path_1001_day84")
+                                                   keyword = "Reactome_Enrich_lowest_path_1014_Day84")
 ## all path
-Reactome_Enrich_all_path_1001 = Reactome_Enrich(total_genes_all=Total_list_out_entrez,
+Reactome_Enrich_all_path_1014 = Reactome_Enrich(total_genes_all=Total_list_out_entrez,
                                                 sig_genes_all=Sig_list_out_entrez,
-                                                TestingSubsetNames = nonpres_modulenames_b,
+                                                TestingSubsetNames = TestingSubsetNames84,
                                                 InputSource=  NCBI2Reactome_all_path_bt,
+                                                Sig_list_out = Sig_list_out,
                                                 Reacthres = 0.05,
-                                                keyword = "Reactome_Enrich_all_path_1001_day84")
+                                                keyword = "Reactome_Enrich_all_path_1011_Day14_Day84")
 
 
 #===========================================================================================
-#                                 15. Mesh enrichment                                   ##
+#                             13. Gene Ontology enrichment                                ##
 #===========================================================================================
-#####################
-##  run analysis   ##
-####################
-# just in case that does not work
-keyword = "MeshDB"
-DB = paste(keyword,".RData",sep = "")
-load(DB)
-###
-MESH_Enrich_Result1001 = MESH_Enrich(total_genes_all= Total_list_out_entrez,
-                                     sig_genes_all = Sig_list_out_entrez,
-                                     TestingSubsetNames = nonpres_modulenames_b,
-                                     Meshthres = 0.05,
-                                     dataset="MeSH.Bta.eg.db",
-                                     keyword = "MESH_Enrichment_1001_day84")
- 
+Enrich_Results_thres005_1014 = Go_Enrich_Plot(total_genes_all = Total_list_out_ens,
+                                              sig_genes_all = Sig_list_out_ens,
+                                              TestingSubsetNames = TestingSubsetNames84,
+                                              GOthres = 0.05,
+                                              keyword = "GO_Enrichment_pval005_1014_Day14_Day84")
+
+#===========================================================================================
+#                             14. Interpro enrichment                                    ##
+#===========================================================================================
+Interpro_Enrich_Results_thres005_1014 = 
+  InterPro_Enrich(total_genes_all = Total_list_out_ens,
+                  sig_genes_all = Sig_list_out_ens,
+                  TestingSubsetNames = TestingSubsetNames84,
+                  IPthres = 0.05,
+                  biomart="ensembl",
+                  dataset="btaurus_gene_ensembl",
+                  Identifier = "ensembl_gene_id",
+                  attributes = c("ensembl_gene_id","external_gene_name","interpro","interpro_description"),
+                  keyword = "Interpro_Enrichment_thres005_1014_Day84")
+
