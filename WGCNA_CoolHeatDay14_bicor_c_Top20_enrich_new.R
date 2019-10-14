@@ -146,7 +146,6 @@ load("Ensembl2Entrez_Convert_day14.RData")
 #nonpres_modulenames_b = nonpres_modulenames_b[-grep("gold",nonpres_modulenames_b)]
 str(Sig_list_out_entrez)
 str(Total_list_out_entrez)
-TestingSubsetNames
 str(Sig_list_out)
 
 Kegg_Enrichment_pval005_1014 = Kegg_Enrich_Plot(sig_genes_all = Sig_list_out_entrez,
