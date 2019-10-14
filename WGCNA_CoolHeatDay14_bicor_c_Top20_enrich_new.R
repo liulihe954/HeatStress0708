@@ -165,7 +165,7 @@ Kegg_Enrichment_pval005_1014 = Kegg_Enrich_Plot(sig_genes_all = Sig_list_out_ent
 #TestingSubsetNames
 MESH_Enrichment_1014 = MESH_Enrich(total_genes_all = Total_list_out_entrez,
                                    sig_genes_all = Sig_list_out_entrez,
-                                   TestingSubsetNames,
+                                   TestingSubsetNames = TestingSubsetNames14,
                                    Meshthres = 0.05,
                                    Sig_list_out = Sig_list_out,
                                    MeshCate = c("D","G"),
@@ -177,7 +177,7 @@ MESH_Enrichment_1014 = MESH_Enrich(total_genes_all = Total_list_out_entrez,
 ## all react
 Reactome_Enrich_all_react_1014 = Reactome_Enrich(total_genes_all=Total_list_out_entrez,
                                                  sig_genes_all=Sig_list_out_entrez,
-                                                 TestingSubsetNames = TestingSubsetNames,
+                                                 TestingSubsetNames = TestingSubsetNames14,
                                                  InputSource=  NCBI2Reactome_all_react_bt,
                                                  Sig_list_out = Sig_list_out,
                                                  Reacthres = 0.05,
@@ -185,7 +185,7 @@ Reactome_Enrich_all_react_1014 = Reactome_Enrich(total_genes_all=Total_list_out_
 ## lowest path
 Reactome_Enrich_lowest_path_1014 = Reactome_Enrich(total_genes_all=Total_list_out_entrez,
                                                    sig_genes_all=Sig_list_out_entrez,
-                                                   TestingSubsetNames = TestingSubsetNames,
+                                                   TestingSubsetNames = TestingSubsetNames14,
                                                    InputSource=  NCBI2Reactome_lowest_path_bt,
                                                    Sig_list_out = Sig_list_out,
                                                    Reacthres = 0.05,
@@ -193,7 +193,7 @@ Reactome_Enrich_lowest_path_1014 = Reactome_Enrich(total_genes_all=Total_list_ou
 ## all path
 Reactome_Enrich_all_path_1014 = Reactome_Enrich(total_genes_all=Total_list_out_entrez,
                                                 sig_genes_all=Sig_list_out_entrez,
-                                                TestingSubsetNames = TestingSubsetNames,
+                                                TestingSubsetNames = TestingSubsetNames14,
                                                 InputSource=  NCBI2Reactome_all_path_bt,
                                                 Sig_list_out = Sig_list_out,
                                                 Reacthres = 0.05,
@@ -207,7 +207,7 @@ str(Sig_list_out_ens)
 str(Total_list_out_ens)
 Enrich_Results_thres005_1014 = Go_Enrich_Plot(total_genes_all = Total_list_out_ens,
                                          sig_genes_all = Sig_list_out_ens,
-                                         TestingSubsetNames = TestingSubsetNames,
+                                         TestingSubsetNames = TestingSubsetNames14,
                                          GOthres = 0.05,
                                          keyword = "GO_Enrichment_pval005_1014_Day14_Day14")
 
@@ -217,7 +217,7 @@ Enrich_Results_thres005_1014 = Go_Enrich_Plot(total_genes_all = Total_list_out_e
 Interpro_Enrich_Results_thres005_1014 = 
   InterPro_Enrich(total_genes_all = Total_list_out_ens,
                   sig_genes_all = Sig_list_out_ens,
-                  TestingSubsetNames,
+                  TestingSubsetNames = TestingSubsetNames14,
                   IPthres = 0.05,
                   biomart="ensembl",
                   dataset="btaurus_gene_ensembl",
