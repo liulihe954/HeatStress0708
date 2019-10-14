@@ -149,7 +149,7 @@ str(Total_list_out_entrez)
 TestingSubsetNames
 str(Sig_list_out)
 
-test = Kegg_Enrich_Plot(sig_genes_all = Sig_list_out_entrez,
+Kegg_Enrichment_pval005_1014 = Kegg_Enrich_Plot(sig_genes_all = Sig_list_out_entrez,
                         total_genes_all = Total_list_out_entrez,
                         TestingSubsetNames = TestingSubsetNames14,
                         KEGGthres = 0.05, 
@@ -163,36 +163,35 @@ test = Kegg_Enrich_Plot(sig_genes_all = Sig_list_out_entrez,
 #                                      11. Mesh enrichment                                   ##
 #==============================================================================================
 #TestingSubsetNames
-MESH_Enrichment_1010 = MESH_Enrich(total_genes_all = Total_list_out_entrez,
+MESH_Enrichment_1014 = MESH_Enrich(total_genes_all = Total_list_out_entrez,
                                    sig_genes_all = Sig_list_out_entrez,
                                    TestingSubsetNames,
                                    Meshthres = 0.05,
                                    Sig_list_out = Sig_list_out,
                                    MeshCate = c("D","G"),
                                    dataset="MeSH.Bta.eg.db",
-                                   keyword = "MESH_Enrichment_1011_Day14")
-
+                                   keyword = "MESH_Enrichment_1014_Day14")
 #===========================================================================================
 #                             12. Reactome  enrichment                                    ##
 #===========================================================================================
 ## all react
-Reactome_Enrich_all_react_1001 = Reactome_Enrich(total_genes_all=Total_list_out_entrez,
+Reactome_Enrich_all_react_1014 = Reactome_Enrich(total_genes_all=Total_list_out_entrez,
                                                  sig_genes_all=Sig_list_out_entrez,
                                                  TestingSubsetNames = TestingSubsetNames,
                                                  InputSource=  NCBI2Reactome_all_react_bt,
                                                  Sig_list_out = Sig_list_out,
                                                  Reacthres = 0.05,
-                                                 keyword = "Reactome_Enrichment_all_react_1011_Day14")
+                                                 keyword = "Reactome_Enrichment_all_react_1014_Day14")
 ## lowest path
-Reactome_Enrich_lowest_path_1001 = Reactome_Enrich(total_genes_all=Total_list_out_entrez,
+Reactome_Enrich_lowest_path_1014 = Reactome_Enrich(total_genes_all=Total_list_out_entrez,
                                                    sig_genes_all=Sig_list_out_entrez,
                                                    TestingSubsetNames = TestingSubsetNames,
                                                    InputSource=  NCBI2Reactome_lowest_path_bt,
                                                    Sig_list_out = Sig_list_out,
                                                    Reacthres = 0.05,
-                                                   keyword = "Reactome_Enrich_lowest_path_1011_Day14")
+                                                   keyword = "Reactome_Enrich_lowest_path_1014_Day14")
 ## all path
-Reactome_Enrich_all_path_1001 = Reactome_Enrich(total_genes_all=Total_list_out_entrez,
+Reactome_Enrich_all_path_1014 = Reactome_Enrich(total_genes_all=Total_list_out_entrez,
                                                 sig_genes_all=Sig_list_out_entrez,
                                                 TestingSubsetNames = TestingSubsetNames,
                                                 InputSource=  NCBI2Reactome_all_path_bt,
@@ -206,7 +205,7 @@ Reactome_Enrich_all_path_1001 = Reactome_Enrich(total_genes_all=Total_list_out_e
 #===========================================================================================
 str(Sig_list_out_ens)
 str(Total_list_out_ens)
-Enrich_Results_thres005 = Go_Enrich_Plot(total_genes_all = Total_list_out_ens,
+Enrich_Results_thres005_1014 = Go_Enrich_Plot(total_genes_all = Total_list_out_ens,
                                          sig_genes_all = Sig_list_out_ens,
                                          TestingSubsetNames = TestingSubsetNames,
                                          GOthres = 0.05,
@@ -216,7 +215,7 @@ Enrich_Results_thres005 = Go_Enrich_Plot(total_genes_all = Total_list_out_ens,
 #===========================================================================================
 #                             14. Interpro enrichment                                    ##
 #===========================================================================================
-Interpro_Enrich_Results_thres005 = 
+Interpro_Enrich_Results_thres005_1014 = 
   InterPro_Enrich(total_genes_all = Total_list_out_ens,
                   sig_genes_all = Sig_list_out_ens,
                   TestingSubsetNames,
