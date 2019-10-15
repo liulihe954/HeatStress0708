@@ -146,6 +146,27 @@ load("Ensembl2Entrez_Convert_day42.RData")
 str(Sig_list_out_entrez)
 str(Total_list_out_entrez)
 str(Sig_list_out)
+Kegg_Enrichment_pval005_1014 = Kegg_Enrich_Plot(sig_genes_all = Sig_list_out_entrez,
+                                                total_genes_all = Total_list_out_entrez,
+                                                TestingSubsetNames = TestingSubsetNames42,
+                                                KEGGthres = 0.05, 
+                                                species = "bta", 
+                                                id.type = "kegg",
+                                                Sig_list_out =Sig_list_out,
+                                                keyword = "Kegg_Enrichment_pval005_1014_Day42")
+
+#==============================================================================================
+#                                      11. Mesh enrichment                                   ##
+#==============================================================================================
+#TestingSubsetNames
+MESH_Enrichment_1014 = MESH_Enrich(total_genes_all = Total_list_out_entrez,
+                                   sig_genes_all = Sig_list_out_entrez,
+                                   TestingSubsetNames = TestingSubsetNames42,
+                                   Meshthres = 0.05,
+                                   Sig_list_out = Sig_list_out,
+                                   MeshCate = c("D","G"),
+                                   dataset="MeSH.Bta.eg.db",
+                                   keyword = "MESH_Enrichment_1014_Day42")
 
 #===========================================================================================
 #                             12. Reactome  enrichment                                    ##
