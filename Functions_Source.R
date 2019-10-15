@@ -209,13 +209,13 @@ Go_Enrich_Plot = function(total_genes_all,
                           GOthres = 0.05,
                           biomart="ensembl",
                           dataset="btaurus_gene_ensembl",
-                          host="http://www.ensembl.org",
-                          attributes = c("external_gene_name","go_id","name_1006"),
+                          attributes = c("ensembl_gene_id","go_id","name_1006"),
                           keyword = "GO_Enrichment_thres_point1_5sets"){
   total_enrich = 0
   raw_pvalue_all = numeric()
   GO_results_b = list()
   GO_results_b_raw = list()
+  DB_List = list()
   library(ggplot2);library(biomaRt);library(gage);library(magrittr)# load pkg
   ## Analysis bosTau annotation: GO
   database = useMart(biomart)
@@ -224,7 +224,12 @@ Go_Enrich_Plot = function(total_genes_all,
   goName = unique(gene[,c(2,3)]); goName = goName[order(goName$go_id),];goName = goName[-1,]
   GO = goName$go_id
   Name = goName$name_1006
-  genesGO = unique(subset(gene,go_id != "")$external_gene_name)[-1]
+  genesGO = unique(subset(gene,go_id != "")$ensembl_gene_id)[-1]#
+  for ( p in seq_along(GO)){
+    tmp = subset(gene, go_id == GO[p])$ensembl_gene_id
+    DB_List[[p]] = tmp #
+    names(DB_List)[p]  <- paste(GO[p],"-",Name[p])
+  }
   #length(genesGO)
   message("Total Number of module/subsets to check: ",length(TestingSubsetNames))
   message("Total Number of GO sets to check: ",length(GO)," with total number of names: ",length(Name))
@@ -250,7 +255,7 @@ Go_Enrich_Plot = function(total_genes_all,
     message("Module size of ",TestingSubsetNames[i],": ", length(sig.genes))
     for(j in 1:length(GO)){
       if (j%%100 == 0) {message("tryingd on GO ",j," - ",GO[j]," - ",Name[j])}
-      gENEs = subset(gene, go_id == GO[j])$external_gene_name # all gene in target GO
+      gENEs = DB_List[[j]] # all gene in target GO #### note
       m = length(total.genes[total.genes %in% gENEs]) # genes from target GO and in our dataset
       findG = sig.genes[sig.genes %in% gENEs]
       s = length(findG)
@@ -306,7 +311,7 @@ Go_Enrich_Plot = function(total_genes_all,
   for( z in seq_along(raw_pvalue_index)){raw_pvalue_sum[z] = length(which(raw_pvalue_all <= raw_pvalue_index[z]))}
   raw_pvalue_distribution = data.frame(index = raw_pvalue_index,counts_GO = raw_pvalue_sum)
   #raw_pvalue_distribution
-  save(GO_results_b, GO_results_b_raw, raw_pvalue_distribution, file = paste(trimws(keyword),".RData",sep = ""))
+  save(DB_List,GO_results_b, GO_results_b_raw, raw_pvalue_distribution, file = paste(trimws(keyword),".RData",sep = ""))
   message(total_enrich," significant GO terms found within ",
           length(TestingSubsetNames)," modules/subsets", 
           " at the significance level of ",GOthres)
@@ -412,7 +417,6 @@ InterPro_Enrich = function(total_genes_all,
                            IPthres = 0.05,
                            biomart="ensembl",
                            dataset="btaurus_gene_ensembl",
-                           #host="http://www.ensembl.org",
                            Identifier = "external_gene_name",
                            attributes = c("ensembl_gene_id","external_gene_name","interpro","interpro_description"),
                            keyword = "Interpro_Enrichment"){
@@ -420,6 +424,7 @@ InterPro_Enrich = function(total_genes_all,
   raw_pvalue_all = numeric()
   Interpro_results_b = list()
   Interpro_results_b_raw = list()
+  DB_List = list()
   library(ggplot2);library(biomaRt);library(gage);library(magrittr);library(tidyverse)# load pkg
   ## GetInterpro : bosTau 
   database = useMart(biomart)
@@ -430,12 +435,24 @@ InterPro_Enrich = function(total_genes_all,
   Interpro = na.omit(InterproName$interpro)[-1]
   Name = na.omit(InterproName$interpro_description)[-1]
   #
-  if (Identifier == "ensembl_gene_id"){genesInterpro = unique(subset(gene,interpro != "")$ensembl_gene_id)
+  if (Identifier == "ensembl_gene_id"){
+    genesInterpro = unique(subset(gene,interpro != "")$ensembl_gene_id)
+    for ( p in seq_along(Interpro)){
+      tmp = subset(gene, interpro == Interpro[p])$ensembl_gene_id
+      DB_List[[p]] = tmp #
+      names(DB_List)[p]  <- paste(Interpro[p],"-",Name[p])
+    }
   } else if (Identifier == "external_gene_name") {
     genesInterpro= unique(subset(gene,interpro != "")$external_gene_name);
     genesInterpro = genesInterpro[-1]
+    for ( p in seq_along(Interpro)){
+      tmp = subset(gene, interpro == Interpro[p])$external_gene_name
+      DB_List[[p]] = tmp #
+      names(DB_List)[p]  <- paste(Interpro[p],"-",Name[p])
+    }
   } else {message("Sorry, we only have ensembel and names available as identifier, please use one of the followings: 
                   ensembl_gene_id OR external_gene_name.")}
+  
   #length(genesGO)
   message("Total Number of module/subsets to check: ",length(TestingSubsetNames))
   message("Total Number of Interpro domains to check: ",length(Interpro)," with total number of names: ",length(Name))
@@ -460,11 +477,7 @@ InterPro_Enrich = function(total_genes_all,
     message("Module size of ",TestingSubsetNames[i],": ", length(sig.genes))
     for(j in 1:length(Interpro)){
       if (j%%100 == 0) {message("tryingd on Interpro ",j," - ",Interpro[j]," - ",Name[j])}
-      if (Identifier == "ensembl_gene_id"){
-        gENEs = subset(gene, interpro == Interpro[j])$ensembl_gene_id
-      } else if (Identifier == "external_gene_name") {
-        gENEs = subset(gene, interpro == Interpro[j])$external_gene_name
-      }
+      gENEs = DB_List[[j]]
       m = length(total.genes[total.genes %in% gENEs]) # genes from target interpro and in our dataset
       findG = sig.genes[sig.genes %in% gENEs]
       s = length(findG) # # genes from target interpro also in the non-preserved module
@@ -525,7 +538,6 @@ InterPro_Enrich = function(total_genes_all,
           length(TestingSubsetNames)," modules/subsets", 
           " at the significance level of ",IPthres)
   message("Nice! - Interpro enrichment finished and data saved")}
-
 #########################################################################################################################
 MESH_Enrich = function(total_genes_all,
                        sig_genes_all,
