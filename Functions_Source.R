@@ -21,7 +21,7 @@ library(MeSH.Bta.eg.db)
 DataPre   = function(networkData, cousin = 0.4, n1, n2, perct){
   #function prepare
   remove_filter = function(networkData,thres){
-    ID_meanexpr1 = data.frame(names = rownames(networkData), mean = apply(networkData, MARGIN = 1,mean));
+    ID_meanexpr1 = data.frame(names = rownames(networkData), mean = apply(networkData, MARGIN = 1,mean))
     ID_meanexpr2 = cbind(ID_meanexpr1,percent = ID_meanexpr1$mean/sum(ID_meanexpr1$mean))
     ID_meanexpr3 = ID_meanexpr2[order(ID_meanexpr2$mean,decreasing = T),]
     accumulative = numeric(nrow(ID_meanexpr3))
