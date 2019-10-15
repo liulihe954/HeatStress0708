@@ -558,6 +558,7 @@ MESH_Enrich = function(total_genes_all,
   raw_pvalue_all = numeric()
   Mesh_results_b = list()
   Mesh_results_b_raw = list()
+  DB_List = list()
   library(MeSH.db);library(MeSH.Bta.eg.db);library(tidyverse);library(gage);library(magrittr)
   library(ggplot2);library(biomaRt);library(MeSH.Bta.eg.db)
   
@@ -599,8 +600,9 @@ MESH_Enrich = function(total_genes_all,
   list_Bta = list_Bta[which(list_Bta$MESHCATEGORY %in%MeshCate),]
   #list_Bta = dplyr::filter(list_Bta,MESHCATEGORY%in%MeshCate)
   genesMesh = unique(list_Bta$GENEID)
-  MeshID = unique(list_Bta$MESHID)#; MeshID = MeshID[1:200] # delete
-  MeshTerm = unique(list_Bta$MESHTERM)
+  MeshRecords = unique(list_Bta[,c("MESHID","MESHTERM")]) %>% arrange(MESHID)
+  MeshID = na.omit(MeshRecords$MESHID)
+  MeshTerm = na.omit(MeshRecords$MESHTERM)
   #head(unique(MeshID),200)
   #length(genesGO)
   message("Total Number of module/subsets to check: ",length(TestingSubsetNames))
@@ -626,8 +628,9 @@ MESH_Enrich = function(total_genes_all,
     message("Module size of ",TestingSubsetNames[i],": ", length(sig.genes))
     for(j in c(1:length(MeshID))){
       if (j%%500 == 0) {message("tryingd on MeshID ",j," - ",MeshID[j]," - ",MeshTerm[j])}
-      target = MeshID[j]
-      gENEs = unique(subset(list_Bta, MESHID == target)$GENEID)
+      #target = MeshID[j]
+      #gENEs = unique(subset(list_Bta, MESHID == target)$GENEID)
+      gENEs = DB_List[[j]]
       m = length(total.genes[total.genes %in% gENEs]) # genes from target  and in our dataset
       findG = sig.genes[sig.genes %in% gENEs]
       s = length(findG)
@@ -706,10 +709,18 @@ Reactome_Enrich = function(total_genes_all,
   raw_pvalue_all = numeric()
   Reactome_results_b = list()
   Reactome_results_b_raw = list()
+  DB_List = list()
   library(ggplot2);library(biomaRt);library(gage);library(magrittr);library(tidyverse)# load pkg
-  Reactome_gene =   unique(InputSource[,1])
-  ReactomeID =      unique(InputSource[,2])
-  ReactomeName =    unique(InputSource[,3])
+  Reactome_gene =   unique(InputSource[,c("EntrezID")])
+  ReactomeRecords = unique(list_Bta[,c("ReactomeID","Reactome_Description")]) %>% arrange(ReactomeID)
+  ReactomeID = na.omit(MeshRecords$ReactomeID)
+  ReactomeName = na.omit(MeshRecords$ReactomeID)
+  for ( p in seq_along(Interpro)){
+    IDindex = ReactomeID
+    tmp = subset(InputSource, ReactomeID == IDindex[p])$ensembl_gene_id
+    DB_List[[p]] = tmp #
+    names(DB_List)[p]  <- paste(ReactomeID[p],"-",ReactomeName[p])
+  }
   #ReactomeID = ReactomeID[1:300]
   message("Total Number of module/subsets to check: ",length(TestingSubsetNames))
   message("Total Number of Reactome to check: ",length(ReactomeID)," with total number of names: ",length(ReactomeName))
@@ -738,8 +749,9 @@ Reactome_Enrich = function(total_genes_all,
     for(j in 1:length(ReactomeID)){
       # j = 101
       if (j%%100 == 0) {message("tryingd on Reactome ",j," - ",ReactomeID[j]," - ",ReactomeName[j])}
-      target = ReactomeID[j]
-      gENEs = unique(subset(InputSource, ReactomeID == target)$EntrezID)
+      #target = ReactomeID[j]
+      #gENEs = unique(subset(InputSource, ReactomeID == target)$EntrezID)
+      gENEs = DB_List[[j]]
       m = length(total.genes[total.genes %in% gENEs]) 
       findG = sig.genes[sig.genes %in% gENEs]
       s = length(findG)
