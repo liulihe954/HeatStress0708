@@ -160,6 +160,45 @@ DataPre_C = function(networkData, cousin = 0.4, n1, n2, perct){
        file = paste(deparse(substitute(networkData)),"prepare with corrections","_top",100*(1-perct),".RData",sep = ""))
   return(list(Corrected_log2_PC = networkData_final))
 }
+
+
+#########################################################################################################################
+# Read in database
+# lowest_path
+NCBI2Reactome_lowest_path = read.csv("NCBI2Reactome.txt",sep = "\t",header = F)
+NCBI2Reactome_lowest_path_bt = dplyr::filter(NCBI2Reactome_lowest_path, V6 == "Bos taurus") %>% 
+  dplyr::select(V1,V2,V4,V5,V6) %>% 
+  dplyr::rename(EntrezID = V1,ReactomeID = V2,Reactome_Description = V4, Source = V5,Species = V6)
+#head(NCBI2Reactome_lowest_path_bt,10)
+# all_path
+NCBI2Reactome_all_path = read.csv("NCBI2Reactome_All_Levels.txt",sep = "\t",header = F)
+NCBI2Reactome_all_path_bt = 
+  dplyr::filter(NCBI2Reactome_all_path,V6 == "Bos taurus") %>% 
+  dplyr::select(V1,V2,V4,V5,V6) %>% 
+  dplyr::rename(EntrezID = V1,
+                ReactomeID = V2,
+                Reactome_Description = V4, 
+                Source = V5, 
+                Species = V6)
+#head(NCBI2Reactome_all_path_bt)
+# all_react
+NCBI2Reactome_all_react = read.csv("NCBI2Reactome_PE_Reactions.txt",sep = "\t",header = F)
+NCBI2Reactome_all_react_bt = 
+  dplyr::filter(NCBI2Reactome_all_react,V8 == "Bos taurus") %>% 
+  dplyr::select(V1,V4,V6,V2,V3,V7,V8) %>% 
+  dplyr::rename(EntrezID = V1,ReactomeID = V4, 
+                Reactome_Description = V6,
+                ProteinID = V2,
+                Protein_Description = V3,
+                Source = V7, Species = V8)
+#head(NCBI2Reactome_all_react_bt,50)
+
+# turn data input as charactor
+NCBI2Reactome_all_react_bt[] <-   lapply(NCBI2Reactome_all_react_bt, function(x) if(is.factor(x)) as.character(x) else x)
+NCBI2Reactome_lowest_path_bt[] <- lapply(NCBI2Reactome_lowest_path_bt, function(x) if(is.factor(x)) as.character(x) else x)
+NCBI2Reactome_all_path_bt[] <-   lapply(NCBI2Reactome_all_path_bt, function(x) if(is.factor(x)) as.character(x) else x)
+#########################################################################################################################
+
 #===========================================================================================
 #                                2. KEGG enrichment                                      ##
 #===========================================================================================
@@ -716,7 +755,8 @@ Reactome_Enrich = function(total_genes_all,
   DB_List = list()
   library(ggplot2);library(biomaRt);library(gage);library(magrittr);library(tidyverse)# load pkg
   Reactome_gene =   unique(InputSource[,c("EntrezID")])
-  ReactomeRecords = unique(list_Bta[,c("ReactomeID","Reactome_Description")]) %>% arrange(ReactomeID)
+  ReactomeRecords = dplyr::select(InputSource,ReactomeID,Reactome_Description) %>% dplyr::arrange(ReactomeID) %>% distinct()
+  #ReactomeRecords = unique(InputSource[,c("ReactomeID","Reactome_Description")]) %>% arrange(ReactomeID) #
   ReactomeID = na.omit(MeshRecords$ReactomeID)
   ReactomeID = ReactomeID[1:20] #delete
   ReactomeName = na.omit(MeshRecords$ReactomeID)
@@ -988,39 +1028,4 @@ ConvertNformat = function(bg_gene,
        file = paste(trimws(keyword),".RData",sep = ""))
   message("Nice! Conversion finished")
 }
-#########################################################################################################################
-# Read in database
-# lowest_path
-NCBI2Reactome_lowest_path = read.csv("NCBI2Reactome.txt",sep = "\t",header = F)
-NCBI2Reactome_lowest_path_bt = dplyr::filter(NCBI2Reactome_lowest_path, V6 == "Bos taurus") %>% 
-  dplyr::select(V1,V2,V4,V5,V6) %>% 
-  dplyr::rename(EntrezID = V1,ReactomeID = V2,Reactome_Description = V4, Source = V5,Species = V6)
-#head(NCBI2Reactome_lowest_path_bt,10)
-# all_path
-NCBI2Reactome_all_path = read.csv("NCBI2Reactome_All_Levels.txt",sep = "\t",header = F)
-NCBI2Reactome_all_path_bt = 
-  dplyr::filter(NCBI2Reactome_all_path,V6 == "Bos taurus") %>% 
-  dplyr::select(V1,V2,V4,V5,V6) %>% 
-  dplyr::rename(EntrezID = V1,
-                ReactomeID = V2,
-                Reactome_Description = V4, 
-                Source = V5, 
-                Species = V6)
-#head(NCBI2Reactome_all_path_bt)
-# all_react
-NCBI2Reactome_all_react = read.csv("NCBI2Reactome_PE_Reactions.txt",sep = "\t",header = F)
-NCBI2Reactome_all_react_bt = 
-  dplyr::filter(NCBI2Reactome_all_react,V8 == "Bos taurus") %>% 
-  dplyr::select(V1,V4,V6,V2,V3,V7,V8) %>% 
-  dplyr::rename(EntrezID = V1,ReactomeID = V4, 
-                Reaction_Description = V6,
-                ProteinID = V2,
-                Protein_Description = V3,
-                Source = V7, Species = V8)
-#head(NCBI2Reactome_all_react_bt,50)
-
-# turn data input as charactor
-NCBI2Reactome_all_react_bt[] <-   lapply(NCBI2Reactome_all_react_bt, function(x) if(is.factor(x)) as.character(x) else x)
-NCBI2Reactome_lowest_path_bt[] <- lapply(NCBI2Reactome_lowest_path_bt, function(x) if(is.factor(x)) as.character(x) else x)
-NCBI2Reactome_all_path_bt[] <-   lapply(NCBI2Reactome_all_path_bt, function(x) if(is.factor(x)) as.character(x) else x)
 
