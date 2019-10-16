@@ -60,7 +60,6 @@ print("Step7 - cross condition dendrogram created")
 #Results_b_mp14_1 = stats14_b[order(-stats14_b[,2]),c(1:2)]
 #save(mp14_b, file = "CoolHeatDay42_modulePreservation_bicor_c_top20.RData")
 load("CoolHeatDay42_modulePreservation_bicor_c_top20.RData")
-# load("CoolHeatDay14_modulePreservation.RData")
 print("Step8 - mp finished and data saved")
 ################ output - shortest - only p summmary  ######################
 ################ output - shortest - only p summmary  ######################
@@ -135,25 +134,17 @@ Convert = ConvertNformat(bg_gene42,
                          keyword = "Ensembl2Entrez_Convert_day42")
 load("Ensembl2Entrez_Convert_day42.RData")
 
-#str(Sig_list_out_entrez)
-#str(Total_list_out_entrez)
-#===========================================================================================
-#                                10. KEGG enrichment                                      ##
-#===========================================================================================
-#nonpres_index_b = (which(Zsummary14_b < 2))
-#nonpres_modulenames_b = rownames(Z.PreservationStats14_b)[nonpres_index_b]
-#nonpres_modulenames_b = nonpres_modulenames_b[-grep("gold",nonpres_modulenames_b)]
-str(Sig_list_out_entrez)
-str(Total_list_out_entrez)
-str(Sig_list_out)
+
+
 Kegg_Enrichment_pval005_1014 = Kegg_Enrich_Plot(sig_genes_all = Sig_list_out_entrez,
                                                 total_genes_all = Total_list_out_entrez,
-                                                TestingSubsetNames = TestingSubsetNames42,
+                                                TestingSubsetNames = TestingSubsetNames14,
                                                 KEGGthres = 0.05, 
                                                 species = "bta", 
                                                 id.type = "kegg",
                                                 Sig_list_out =Sig_list_out,
                                                 keyword = "Kegg_Enrichment_pval005_1014_Day42")
+
 
 #==============================================================================================
 #                                      11. Mesh enrichment                                   ##
@@ -161,28 +152,28 @@ Kegg_Enrichment_pval005_1014 = Kegg_Enrich_Plot(sig_genes_all = Sig_list_out_ent
 #TestingSubsetNames
 MESH_Enrichment_1014 = MESH_Enrich(total_genes_all = Total_list_out_entrez,
                                    sig_genes_all = Sig_list_out_entrez,
-                                   TestingSubsetNames = TestingSubsetNames42,
+                                   TestingSubsetNames = TestingSubsetNames14,
                                    Meshthres = 0.05,
                                    Sig_list_out = Sig_list_out,
                                    MeshCate = c("D","G"),
                                    dataset="MeSH.Bta.eg.db",
                                    keyword = "MESH_Enrichment_1014_Day42")
-
 #===========================================================================================
 #                             12. Reactome  enrichment                                    ##
 #===========================================================================================
 ## all react
 Reactome_Enrich_all_react_1014 = Reactome_Enrich(total_genes_all=Total_list_out_entrez,
                                                  sig_genes_all=Sig_list_out_entrez,
-                                                 TestingSubsetNames = TestingSubsetNames42,
+                                                 TestingSubsetNames = TestingSubsetNames14,
                                                  InputSource=  NCBI2Reactome_all_react_bt,
                                                  Sig_list_out = Sig_list_out,
                                                  Reacthres = 0.05,
                                                  keyword = "Reactome_Enrichment_all_react_1014_Day42")
+
 ## lowest path
 Reactome_Enrich_lowest_path_1014 = Reactome_Enrich(total_genes_all=Total_list_out_entrez,
                                                    sig_genes_all=Sig_list_out_entrez,
-                                                   TestingSubsetNames = TestingSubsetNames42,
+                                                   TestingSubsetNames = TestingSubsetNames14,
                                                    InputSource=  NCBI2Reactome_lowest_path_bt,
                                                    Sig_list_out = Sig_list_out,
                                                    Reacthres = 0.05,
@@ -190,19 +181,21 @@ Reactome_Enrich_lowest_path_1014 = Reactome_Enrich(total_genes_all=Total_list_ou
 ## all path
 Reactome_Enrich_all_path_1014 = Reactome_Enrich(total_genes_all=Total_list_out_entrez,
                                                 sig_genes_all=Sig_list_out_entrez,
-                                                TestingSubsetNames = TestingSubsetNames42,
+                                                TestingSubsetNames = TestingSubsetNames14,
                                                 InputSource=  NCBI2Reactome_all_path_bt,
                                                 Sig_list_out = Sig_list_out,
                                                 Reacthres = 0.05,
-                                                keyword = "Reactome_Enrich_all_path_1011_Day14_Day42")
+                                                keyword = "Reactome_Enrich_all_path_1011_Day42")
+
+
 #===========================================================================================
 #                             13. Gene Ontology enrichment                                ##
 #===========================================================================================
 Enrich_Results_thres005_1014 = Go_Enrich_Plot(total_genes_all = Total_list_out_ens,
                                               sig_genes_all = Sig_list_out_ens,
-                                              TestingSubsetNames = TestingSubsetNames42,
+                                              TestingSubsetNames = TestingSubsetNames14,
                                               GOthres = 0.05,
-                                              keyword = "GO_Enrichment_pval005_1014_Day14_Day14")
+                                              keyword = "GO_Enrichment_pval005_1014_Day42")
 
 #===========================================================================================
 #                             14. Interpro enrichment                                    ##
@@ -210,7 +203,7 @@ Enrich_Results_thres005_1014 = Go_Enrich_Plot(total_genes_all = Total_list_out_e
 Interpro_Enrich_Results_thres005_1014 = 
   InterPro_Enrich(total_genes_all = Total_list_out_ens,
                   sig_genes_all = Sig_list_out_ens,
-                  TestingSubsetNames = TestingSubsetNames42,
+                  TestingSubsetNames = TestingSubsetNames14,
                   IPthres = 0.05,
                   biomart="ensembl",
                   dataset="btaurus_gene_ensembl",

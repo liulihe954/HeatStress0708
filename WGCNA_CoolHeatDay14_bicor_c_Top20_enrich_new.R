@@ -135,11 +135,13 @@ Convert = ConvertNformat(bg_gene14,
                          TestingModAssign14,
                          keyword = "Ensembl2Entrez_Convert_day14")
 load("Ensembl2Entrez_Convert_day14.RData")
+#save(Sig_list_out,
+##     Sig_list_out_entrez,Total_list_out_entrez,
+#     Sig_list_out_ens,Total_list_out_ens,
+#     file = paste(trimws(keyword),".RData",sep = ""))
 
-#str(Sig_list_out_entrez)
-#str(Total_list_out_entrez)
 #===========================================================================================
-#                                10. KEGG enrichment                                      ##
+#                                11. KEGG enrichment                                      ##
 #===========================================================================================
 #nonpres_index_b = (which(Zsummary14_b < 2))
 #nonpres_modulenames_b = rownames(Z.PreservationStats14_b)[nonpres_index_b]
@@ -158,7 +160,7 @@ Kegg_Enrichment_pval005_1014 = Kegg_Enrich_Plot(sig_genes_all = Sig_list_out_ent
 
 
 #==============================================================================================
-#                                      11. Mesh enrichment                                   ##
+#                                      12. Mesh enrichment                                   ##
 #==============================================================================================
 #TestingSubsetNames
 MESH_Enrichment_1014 = MESH_Enrich(total_genes_all = Total_list_out_entrez,
@@ -168,10 +170,9 @@ MESH_Enrichment_1014 = MESH_Enrich(total_genes_all = Total_list_out_entrez,
                                    Sig_list_out = Sig_list_out,
                                    MeshCate = c("D","G"),
                                    dataset="MeSH.Bta.eg.db",
-                                   keyword = "MESH_Enrichment_1014_Day14_lc")
-
+                                   keyword = "MESH_Enrichment_1014_Day14")
 #===========================================================================================
-#                             12. Reactome  enrichment                                    ##
+#                             13. Reactome  enrichment                                    ##
 #===========================================================================================
 ## all react
 Reactome_Enrich_all_react_1014 = Reactome_Enrich(total_genes_all=Total_list_out_entrez,
@@ -180,7 +181,8 @@ Reactome_Enrich_all_react_1014 = Reactome_Enrich(total_genes_all=Total_list_out_
                                                  InputSource=  NCBI2Reactome_all_react_bt,
                                                  Sig_list_out = Sig_list_out,
                                                  Reacthres = 0.05,
-                                                 keyword = "Reactome_Enrichment_all_react_1014_Day14_lc")
+                                                 keyword = "Reactome_Enrichment_all_react_1014_Day14")
+
 ## lowest path
 Reactome_Enrich_lowest_path_1014 = Reactome_Enrich(total_genes_all=Total_list_out_entrez,
                                                    sig_genes_all=Sig_list_out_entrez,
@@ -200,18 +202,16 @@ Reactome_Enrich_all_path_1014 = Reactome_Enrich(total_genes_all=Total_list_out_e
 
 
 #===========================================================================================
-#                             13. Gene Ontology enrichment                                ##
+#                             14. Gene Ontology enrichment                                ##
 #===========================================================================================
-str(Sig_list_out_ens)
-str(Total_list_out_ens)
 Enrich_Results_thres005_1014 = Go_Enrich_Plot(total_genes_all = Total_list_out_ens,
                                          sig_genes_all = Sig_list_out_ens,
                                          TestingSubsetNames = TestingSubsetNames14,
                                          GOthres = 0.05,
-                                         keyword = "GO_Enrichment_pval005_1014_Day14_Day14_lc")
+                                         keyword = "GO_Enrichment_pval005_1014_Day14_Day14")
 
 #===========================================================================================
-#                             14. Interpro enrichment                                    ##
+#                             15. Interpro enrichment                                    ##
 #===========================================================================================
 Interpro_Enrich_Results_thres005_1014 = 
   InterPro_Enrich(total_genes_all = Total_list_out_ens,
@@ -222,5 +222,5 @@ Interpro_Enrich_Results_thres005_1014 =
                   dataset="btaurus_gene_ensembl",
                   Identifier = "ensembl_gene_id",
                   attributes = c("ensembl_gene_id","external_gene_name","interpro","interpro_description"),
-                  keyword = "Interpro_Enrichment_thres005_1014_Day14_lc")
+                  keyword = "Interpro_Enrichment_thres005_1014_Day14")
 

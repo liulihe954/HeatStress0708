@@ -262,7 +262,6 @@ Go_Enrich_Plot = function(total_genes_all,
   gene = getBM(attributes,mart = genome)
   goName = unique(gene[,c(2,3)]); goName = goName[order(goName$go_id),];goName = goName[-1,]
   GO = goName$go_id
-  GO = GO[1:20] # delete
   Name = goName$name_1006
   genesGO = unique(subset(gene,go_id != "")$ensembl_gene_id)[-1]#
   for ( p in seq_along(GO)){
@@ -474,7 +473,6 @@ InterPro_Enrich = function(total_genes_all,
   InterproName = unique(gene[,c("interpro","interpro_description")]) %>% arrange(interpro)
   Interpro = na.omit(InterproName$interpro)[-1]
   Name = na.omit(InterproName$interpro_description)[-1]
-  Interpro = Interpro[1:20] # delete
   #
   if (Identifier == "ensembl_gene_id"){
     genesInterpro = unique(subset(gene,interpro != "")$ensembl_gene_id)
@@ -645,7 +643,6 @@ MESH_Enrich = function(total_genes_all,
   MeshRecords = unique(list_Bta[,c("MESHID","MESHTERM")]) %>% arrange(MESHID)
   MeshID = na.omit(MeshRecords$MESHID)
   MeshTerm = na.omit(MeshRecords$MESHTERM)
-  MeshID = MeshID[1:20] # delete
   #head(unique(MeshID),200)
   #length(genesGO)
   message("Total Number of module/subsets to check: ",length(TestingSubsetNames))
@@ -757,12 +754,11 @@ Reactome_Enrich = function(total_genes_all,
   Reactome_gene =   unique(InputSource[,c("EntrezID")])
   ReactomeRecords = dplyr::select(InputSource,ReactomeID,Reactome_Description) %>% dplyr::arrange(ReactomeID) %>% distinct()
   #ReactomeRecords = unique(InputSource[,c("ReactomeID","Reactome_Description")]) %>% arrange(ReactomeID) #
-  ReactomeID = na.omit(MeshRecords$ReactomeID)
-  ReactomeID = ReactomeID[1:20] #delete
-  ReactomeName = na.omit(MeshRecords$ReactomeID)
-  for ( p in seq_along(Interpro)){
-    IDindex = ReactomeID
-    tmp = subset(InputSource, ReactomeID == IDindex[p])$ensembl_gene_id
+  ReactomeID = na.omit(ReactomeRecords$ReactomeID)
+  ReactomeName = na.omit(ReactomeRecords$ReactomeID)
+  for ( p in seq_along(ReactomeID)){
+    IDindex = ReactomeID[p]
+    tmp = subset(InputSource, ReactomeID == IDindex)$EntrezID
     DB_List[[p]] = tmp #
     names(DB_List)[p]  <- paste(ReactomeID[p],"-",ReactomeName[p])
   }
@@ -1029,3 +1025,4 @@ ConvertNformat = function(bg_gene,
   message("Nice! Conversion finished")
 }
 
+print("update 1015 6pm")
