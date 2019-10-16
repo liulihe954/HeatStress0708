@@ -152,7 +152,7 @@ Kegg_Enrichment_pval005_1014 = Kegg_Enrich_Plot(sig_genes_all = Sig_list_out_ent
 #TestingSubsetNames
 MESH_Enrichment_1014 = MESH_Enrich(total_genes_all = Total_list_out_entrez,
                                    sig_genes_all = Sig_list_out_entrez,
-                                   TestingSubsetNames = TestingSubsetNames14,
+                                   TestingSubsetNames = TestingSubsetNames42,
                                    Meshthres = 0.05,
                                    Sig_list_out = Sig_list_out,
                                    MeshCate = c("D","G"),
