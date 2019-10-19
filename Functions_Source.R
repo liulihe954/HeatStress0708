@@ -755,7 +755,7 @@ Reactome_Enrich = function(total_genes_all,
   ReactomeRecords = dplyr::select(InputSource,ReactomeID,Reactome_Description) %>% dplyr::arrange(ReactomeID) %>% distinct()
   #ReactomeRecords = unique(InputSource[,c("ReactomeID","Reactome_Description")]) %>% arrange(ReactomeID) #
   ReactomeID = na.omit(ReactomeRecords$ReactomeID)
-  ReactomeName = na.omit(ReactomeRecords$Reactome_Descriptio)
+  ReactomeName = na.omit(ReactomeRecords$Reactome_Description)
   for ( p in seq_along(ReactomeID)){
     IDindex = ReactomeID[p]
     tmp = subset(InputSource, ReactomeID == IDindex)$EntrezID
@@ -1025,4 +1025,4 @@ ConvertNformat = function(bg_gene,
   message("Nice! Conversion finished")
 }
 
-print("update 1015 6pm")
+print("update 1019 4pm")
