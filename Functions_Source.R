@@ -755,7 +755,7 @@ Reactome_Enrich = function(total_genes_all,
   ReactomeRecords = dplyr::select(InputSource,ReactomeID,Reactome_Description) %>% dplyr::arrange(ReactomeID) %>% distinct()
   #ReactomeRecords = unique(InputSource[,c("ReactomeID","Reactome_Description")]) %>% arrange(ReactomeID) #
   ReactomeID = na.omit(ReactomeRecords$ReactomeID)
-  ReactomeName = na.omit(ReactomeRecords$ReactomeID)
+  ReactomeName = na.omit(ReactomeRecords$Reactome_Descriptio)
   for ( p in seq_along(ReactomeID)){
     IDindex = ReactomeID[p]
     tmp = subset(InputSource, ReactomeID == IDindex)$EntrezID
