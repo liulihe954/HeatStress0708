@@ -87,6 +87,7 @@ DataPre   = function(networkData, cousin = 0.4, n1, n2, perct){
        file = paste(deparse(substitute(networkData)),"prepare with corrections","_top",100*(1-perct),".RData",sep = ""))
   return(list(Processed_final = networkData_final))
 }
+
 # Same rationales but FANCY way, remove confounding artifacts
 # (ref - https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1700-9 )
 DataPre_C = function(networkData, cousin = 0.4, n1, n2, perct){
