@@ -95,18 +95,17 @@ diag(adjacency14_b_ht)=0
 dissTOM14_b_ht = 1-TOMsimilarity(adjacency14_b_ht, TOMType="unsigned")
 geneTree14_b_ht = hclust(as.dist(dissTOM14_b_ht), method="average")
 # save the matrix
-save(adjacency14_b_cl,dissTOM14_b_cl,geneTree14_b_cl,adjacency14_b_ht,dissTOM14_b_ht,geneTree14_b_ht,file = "AllMatrixday14 bicor.RData")
+save(adjacency14_b_cl,dissTOM14_b_cl,geneTree14_b_cl,adjacency14_b_ht,dissTOM14_b_ht,geneTree14_b_ht,file = "AllMatrixday14_bicor.RData")
 print("Step3 - adj matrix created and rdata saved")
 #==========================================================================================
 #                                    4.  plot trees                                  ######
 #==========================================================================================
-# cor
-pdf("dendrogram14 bicor.pdf",     height=6,width=16)
-par(mfrow=c(1,2))
-plot(geneTree14_b_cl,xlab="",sub="",main="Gene clustering on TOM-based dissimilarity bicor (14_cl)",labels=FALSE,hang=0.04);
-plot(geneTree14_b_ht,xlab="",sub="",main="Gene clustering on TOM-based dissimilarity bicor (14_ht)",labels=FALSE,hang=0.04);
-dev.off()
-print("Step4 - dissmi plottd and rdata saved")
+# pdf("dendrogram14 bicor.pdf",     height=6,width=16)
+# par(mfrow=c(1,2))
+# plot(geneTree14_b_cl,xlab="",sub="",main="Gene clustering on TOM-based dissimilarity bicor (14_cl)",labels=FALSE,hang=0.04);
+# plot(geneTree14_b_ht,xlab="",sub="",main="Gene clustering on TOM-based dissimilarity bicor (14_ht)",labels=FALSE,hang=0.04);
+# dev.off()
+# print("Step4 - dissmi plottd and rdata saved")
 #=========================================================================================
 #                                5.cutting and merging                              ######
 #=========================================================================================
