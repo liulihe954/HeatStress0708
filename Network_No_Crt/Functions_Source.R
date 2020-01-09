@@ -2,12 +2,18 @@
 #                                0. Package preparations                                  ##
 #===========================================================================================
 #devtools::install_github("jakesherman/easypackages")
-library(easypackages)
-my_packages <- c("WGCNA","ppcor","edgeR","clusterProfiler","magrittr","gage","doParallel",
-                 "recount","pamr","stringr")
-libraries(my_packages)
-library(readxl);library(ggplot2);library(biomaRt);library(tidyverse)
-library(biomaRt);library(GOSemSim);library(corrplot);library(limma)
+#my_packages <- c("WGCNA","ppcor","edgeR","clusterProfiler","magrittr","gage","doParallel","recount","pamr","stringr")
+#libraries(my_packages)
+library(tidyverse)
+library(WGCNA)
+library(edgeR)
+library(limma)
+library(sva)
+library(recount)
+library(biomaRt)
+library(readxl)
+library(GOSemSim)
+library(corrplot)
 library(org.Bt.eg.db)
 library(meshr)
 library(MeSH.db)
@@ -17,7 +23,9 @@ library(MeSH.Bta.eg.db)
 #===========================================================================================
 # Classical way, networkData(rawdata,genes in rows and samples in cols), 
 #                 n1-n2 (number of ref and treatmnent group)
-#                 perct (the percentage to REMOVE based on VARIANCE across two conditions)            
+#                 perct (the percentage to REMOVE based on VARIANCE across two conditions)
+# Same rationales but FANCY way, remove confounding artifacts
+# (ref - https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1700-9 )
 DataPre_C = function(networkData, cousin = 0.4, n1, n2, perct,
                      thres_rmzero = 5,count_rmzero,
                      Correct = 'Y'){
@@ -118,42 +126,6 @@ DataPre_C = function(networkData, cousin = 0.4, n1, n2, perct,
          file = paste(deparse(substitute(networkData)),"prepare_no_corrections","_top",100*(1-perct),".RData",sep = ""))}
   else {message("please specify pc data correction option - Correct = T or F")}
 }
-
-#########################################################################################################################
-# Read in database
-# lowest_path
-NCBI2Reactome_lowest_path = read.csv("NCBI2Reactome.txt",sep = "\t",header = F)
-NCBI2Reactome_lowest_path_bt = dplyr::filter(NCBI2Reactome_lowest_path, V6 == "Bos taurus") %>% 
-  dplyr::select(V1,V2,V4,V5,V6) %>% 
-  dplyr::rename(EntrezID = V1,ReactomeID = V2,Reactome_Description = V4, Source = V5,Species = V6)
-#head(NCBI2Reactome_lowest_path_bt,10)
-# all_path
-NCBI2Reactome_all_path = read.csv("NCBI2Reactome_All_Levels.txt",sep = "\t",header = F)
-NCBI2Reactome_all_path_bt = 
-  dplyr::filter(NCBI2Reactome_all_path,V6 == "Bos taurus") %>% 
-  dplyr::select(V1,V2,V4,V5,V6) %>% 
-  dplyr::rename(EntrezID = V1,
-                ReactomeID = V2,
-                Reactome_Description = V4, 
-                Source = V5, 
-                Species = V6)
-#head(NCBI2Reactome_all_path_bt)
-# all_react
-NCBI2Reactome_all_react = read.csv("NCBI2Reactome_PE_Reactions.txt",sep = "\t",header = F)
-NCBI2Reactome_all_react_bt = 
-  dplyr::filter(NCBI2Reactome_all_react,V8 == "Bos taurus") %>% 
-  dplyr::select(V1,V4,V6,V2,V3,V7,V8) %>% 
-  dplyr::rename(EntrezID = V1,ReactomeID = V4, 
-                Reactome_Description = V6,
-                ProteinID = V2,
-                Protein_Description = V3,
-                Source = V7, Species = V8)
-#head(NCBI2Reactome_all_react_bt,50)
-
-# turn data input as charactor
-NCBI2Reactome_all_react_bt[] <-   lapply(NCBI2Reactome_all_react_bt, function(x) if(is.factor(x)) as.character(x) else x)
-NCBI2Reactome_lowest_path_bt[] <- lapply(NCBI2Reactome_lowest_path_bt, function(x) if(is.factor(x)) as.character(x) else x)
-NCBI2Reactome_all_path_bt[] <-   lapply(NCBI2Reactome_all_path_bt, function(x) if(is.factor(x)) as.character(x) else x)
 #########################################################################################################################
 
 #===========================================================================================
@@ -175,20 +147,12 @@ NCBI2Reactome_all_path_bt[] <-   lapply(NCBI2Reactome_all_path_bt, function(x) i
 ###
 ##########################################################################################
 Parse_Results = function(Results_List,keyword = "Which D.B"){
-  all_enrich = data.frame(ID=character(),
-                          Description=character(),
-                          Total_gene=numeric(),
-                          Significant_gene=numeric(),
-                          pvalue=numeric(),
-                          ExternalLoss_total = character(),
-                          InternalLoss_total = character(),
-                          HitPerc = numeric(),
-                          stringsAsFactors=FALSE)
+  all_enrich = data.frame()
   for (i in 1:length(Results_List)){
     len = dim(data.frame(Results_List[i]))[1]
     if (len> 0){
       tmp = data.frame(Results_List[i])
-      names(tmp) = names(all_enrich)
+      names(tmp) = names(Results_List[[1]])
       all_enrich = rbind(all_enrich,tmp)
     }
   }
@@ -198,6 +162,7 @@ Parse_Results = function(Results_List,keyword = "Which D.B"){
   print(paste("In database: ",keyword,"-",total_hits,"hits found in",total_modules,"tested modules: ",names(Results_List)))
   return(ParseResults = all_enrich)
 }
+
 ##############################################################################################################
 Go_Enrich_Plot = function(total_genes_all,
                           sig_genes_all,
@@ -557,24 +522,22 @@ MESH_Enrich = function(total_genes_all,
   DB_List = list()
   library(MeSH.db);library(MeSH.Bta.eg.db);library(tidyverse);library(gage);library(magrittr)
   library(ggplot2);library(biomaRt);library(MeSH.Bta.eg.db)
-  
   ### Three ways to get meshdb
   # 1 download from github: we are gonna use
   #githubURL <- "https://github.com/liulihe954/Repro_Estrous_0918/raw/master/MeshDB.RData"
-  githubURL <- "https://github.com/liulihe954/HeatStress0708/raw/master/MeshDB_new.RData"
-  load(url(githubURL))
-  if (all(MeshCate%in%c("G","D"))){list_Bta = dplyr::filter(list_Bta, MESHCATEGORY %in% MeshCate)}
-  else {
-    message("Sorry, we only have G and D")
-    message("Now reload the category you need, it will take a while...")
-    KEY = keys(MeSH.db, keytype = "MESHID")
-    List = select(MeSH.db, keys = KEY, columns = columns(MeSH.db), keytype = "MESHID")
-    List = select(MeSH.db, keys = KEY[1:3], columns = columns(MeSH.db), keytype = "MESHID")
-    Match_List = dplyr::select(List, MESHID, MESHTERM)
-    key_Bta <- keys(MeSH.Bta.eg.db, keytype = "MESHID")
-    list_Bta = MeSHDbi::select(MeSH.Bta.eg.db, keys = key_Bta, columns = columns(MeSH.Bta.eg.db)[-4], keytype = "MESHID") %>% 
-      dplyr::select(GENEID,MESHCATEGORY,MESHID,SOURCEID) %>% dplyr::filter(MESHCATEGORY %in% MeshCate) %>% 
-      dplyr::left_join(Match_List,by= c("MESHID" = "MESHID"))}
+  #githubURL <- "https://github.com/liulihe954/HeatStress0708/raw/master/MeshDB_new.RData"
+  #load(url(githubURL))
+  #if (all(MeshCate%in%c("G","D"))){list_Bta = dplyr::filter(list_Bta, MESHCATEGORY %in% MeshCate)}
+  #else {
+  #  message("Sorry, we only have G and D")
+  #  message("Now reload the category you need, it will take a while...")
+  #  KEY = keys(MeSH.db, keytype = "MESHID")
+  #  List = select(MeSH.db, keys = KEY, columns = columns(MeSH.db), keytype = "MESHID")
+  #  Match_List = dplyr::select(List, MESHID, MESHTERM)
+  #  key_Bta <- keys(MeSH.Bta.eg.db, keytype = "MESHID")
+  #  list_Bta = MeSHDbi::select(MeSH.Bta.eg.db, keys = key_Bta, columns = columns(MeSH.Bta.eg.db)[-4], keytype = "MESHID") %>% 
+  #    dplyr::select(GENEID,MESHCATEGORY,MESHID,SOURCEID) %>% dplyr::filter(MESHCATEGORY %in% MeshCate) %>% 
+  #    dplyr::left_join(Match_List,by= c("MESHID" = "MESHID"))}
   # 2. match from the very begining (will take an hour or so)
   #KEY = keys(MeSH.db, keytype = "MESHID")
   #List = select(MeSH.db, keys = KEY, columns = columns(MeSH.db), keytype = "MESHID")
@@ -588,20 +551,23 @@ MESH_Enrich = function(total_genes_all,
   #  dplyr::left_join(Match_List,by= c("MESHID" = "MESHID"))
   
   # 3. alternatively, if you have them in your environment
-  # keyword_outer = "MeshDB"
-  # DB = paste(keyword_outer,".RData",sep = "")
-  # load(DB)
+  keyword_outer = "MeshDB"
+  DB = paste(keyword_outer,".RData",sep = "")
+  load(DB)
   #Sig_list_out_entrez_test2
   #Total_list_out_entrez_test2
   # Get index
-  list_Bta = list_Bta[which(list_Bta$MESHCATEGORY %in%MeshCate),]
+  list_Bta = list_Bta[which(list_Bta$MESHCATEGORY %in% MeshCate),]
   #list_Bta = dplyr::filter(list_Bta,MESHCATEGORY%in%MeshCate)
   genesMesh = unique(list_Bta$GENEID)
   MeshRecords = unique(list_Bta[,c("MESHID","MESHTERM")]) %>% arrange(MESHID)
   MeshID = na.omit(MeshRecords$MESHID)
   MeshTerm = na.omit(MeshRecords$MESHTERM)
-  #head(unique(MeshID),200)
-  #length(genesGO)
+  for ( p in seq_along(MeshID)){
+    tmp = subset(list_Bta, MESHID == MESHID[p])$GENEID
+    DB_List[[p]] = tmp #
+    names(DB_List)[p]  <- paste(MeshID[p],"-",MeshTerm[p])
+  }
   message("Total Number of module/subsets to check: ",length(TestingSubsetNames))
   message("Total Number of Mesh to check: ",length(MeshID)," with total number of names: ",length(MeshTerm))
   #pdf(paste(trimws(keyword),".pdf",sep = ""))
@@ -624,7 +590,7 @@ MESH_Enrich = function(total_genes_all,
                      findG =  character())
     message("Module size of ",TestingSubsetNames[i],": ", length(sig.genes))
     for(j in c(1:length(MeshID))){
-      if (j%%500 == 0) {message("tryingd on MeshID ",j," - ",MeshID[j]," - ",MeshTerm[j])}
+      if (j%%100 == 0) {message("tryingd on MeshID ",j," - ",MeshID[j]," - ",MeshTerm[j])}
       #target = MeshID[j]
       #gENEs = unique(subset(list_Bta, MESHID == target)$GENEID)
       gENEs = DB_List[[j]]
@@ -982,4 +948,4 @@ ConvertNformat = function(bg_gene,
   message("Nice! Conversion finished")
 }
 
-print("update 1019 4pm")
+print("update 0108 4pm")

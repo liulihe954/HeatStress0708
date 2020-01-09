@@ -2,22 +2,11 @@
 #================================================================================================
 ###                                       0. pkg prep                                      ######
 #================================================================================================
-require(sva);require(WGCNA)
-require(ppcor);require(dplyr)
-require(edgeR);require(clusterProfiler)
-require(ggplot2);require(magrittr)
-require(biomaRt);require(gage);require(doParallel)
-require(limma);require(recount);require(pamr)
-#library(igraph);;library(ggplot2);library(gdata)
-#library(ggpubr);require(cowplot);library(extrafont)
-#library(plotly) ;library(geomnet);library(readxl);
-#library(car) ## qqplot but didnt use
-#library(qqplotr)## qqplot: used 
+setwd("/ufrc/penagaricano/lihe.liu/HeatStress0708/Network_No_Crt")
+source("Functions_Source.R")
 #================================================================================================
 ###                                       1. dataprep                                      ######
 #================================================================================================
-## read
-#setwd("/Users/liulihe95/Desktop/HeatStress0708");getwd()
 options(stringsAsFactors = FALSE)
 enableWGCNAThreads()
 CowsID_ht = c("6334","8514","8971","8867","8841","8966")# ID of heat group
@@ -45,94 +34,10 @@ networkData42 = networkData[,c(column_42_cl,column_42_ht)]
 networkData84 = networkData[,c(column_84_cl,column_84_ht)]
 dim(networkData14);dim(networkData42);dim(networkData84)
 
-
 ########################################################################################################################
-# step 1 - filter out top 40% counts
-## filter out top 40% counts # function established for future use
-remove_filter = function(networkData,thres){
-  ID_meanexpr1 = data.frame(names = rownames(networkData), mean = apply(networkData, MARGIN = 1,mean));
-  ID_meanexpr2 = cbind(ID_meanexpr1,percent = ID_meanexpr1$mean/sum(ID_meanexpr1$mean))
-  ID_meanexpr3 = ID_meanexpr2[order(ID_meanexpr2$mean,decreasing = T),]
-  accumulative = numeric(nrow(ID_meanexpr3))
-  for (i in c(1:nrow(ID_meanexpr3))){
-    accum = sum(ID_meanexpr3$percent[1:i])
-    accumulative[i] = accum
-  }
-  remove_pos = (length(which(accumulative <= thres))+1)
-  remove_index = ID_meanexpr3$names[1:remove_pos]
-  networkData_filter = networkData[!(rownames(networkData)%in%remove_index),]
-  Results = list(remove_index=remove_index,networkData_filter = networkData_filter)
-  return(Results)
-}
-networkData14_filter = remove_filter(networkData14,0.4)$networkData_filter
-#networkData42_filter = remove_filter(networkData42,0.4)$networkData_filter
-#networkData84_filter = remove_filter(networkData84,0.4)$networkData_filter
-dim(networkData14_filter)#;dim(networkData42_filter);dim(networkData84_filter);
-
-# step 2 - normalization (0s out and normalization)
-#BiocManager::install("edgeR") 
-# zeros out!
-remove_index14 = which(rowSums(networkData14_filter) == 0);length(remove_index14)
-#remove_index42 = which(rowSums(networkData42_filter) == 0);length(remove_index42)
-#remove_index84 = which(rowSums(networkData84_filter) == 0);length(remove_index84)
-
-# normalization
-require(edgeR)
-networkData14_nm1 = networkData14_filter[-remove_index14,];dim(networkData14_nm1)
-networkData14_nmList = DGEList(counts = networkData14_nm1,group  = c(rep("CL",length(column_14_cl)),rep("HT",length(column_14_ht))))
-networkData14_nm2 = calcNormFactors(networkData14_nmList)
-networkData14_normalized_normfactors = networkData14_nm2$samples
-networkData14_normalized = data.frame(networkData14_nm2$counts)
-dim(networkData14_normalized)
-save(networkData14_normalized_normfactors,networkData14_normalized,file = "networkData14 norm and factors.RData")
-
-# step 3 - log 2 trans
-# log trans
-networkData14_log2 = log2(networkData14_normalized+2)
-
-# step 4 - filter out bottom 50% variation
-# select most var
-networkData14_log2$variance = apply(networkData14_log2,1,var)
-networkData14_log2_50var = networkData14_log2[networkData14_log2$variance >= quantile(networkData14_log2$variance,c(.50)),] #50% most variable genes
-networkData14_log2_50var$variance <- NULL
-dim(networkData14_log2_50var)
-
-# step 5 - pca correction 
-q_normalize <- function(dat){
-  n = nrow(dat)
-  p = ncol(dat)
-  rank.dat =  dat # matrix for ranking
-  for (i in 1:p){
-    rank.dat[,i] = rank(dat[,i])
-  }
-  U = rank.dat/(n+1)
-  qnorm(U)
-}
-Correct_pca = function(rse_raw,method){
-  rse_raw <- t(rse_raw)# transpose data so that rows are samples and columns are gene expression measurements
-  mod=matrix(1,nrow=dim(rse_raw)[1],ncol=1)
-  colnames(mod)="Intercept"
-  ## num.sv requires data matrix with features(genes) in the rows and samples in the column
-  nsv=num.sv(t(rse_raw), mod, method = method)
-  print(paste("Number of PCs estimated to be removed:", nsv))
-  ## PC residualization of gene expression data using sva_network. Rows correspond to samples, Columns correspond to features
-  exprs_corrected = sva_network(rse_raw, nsv)
-  ## Quantile normalize the corrected gene expression measurements such that each expression of every gene follows a gaussian distribution
-  exprs_corrected_norm <- q_normalize(exprs_corrected)
-  return(list(exprs_corrected_norm = t(data.frame(exprs_corrected_norm))))
-}
-networkData14_correction = Correct_pca(networkData14_log2_50var,"leek")
-networkData14_final = data.frame(networkData14_correction$exprs_corrected_norm); 
-names(networkData14_final) = names(networkData14_log2_50var)
-# step 6 - select into two groups
-datExpr14_cl = t(networkData14_final[,colnames(networkData14_final) %in% names(networkData)[column_14_cl] ])
-datExpr14_ht = t(networkData14_final[,colnames(networkData14_final) %in% names(networkData)[column_14_ht] ])
-datExpr14_cl = data.frame(datExpr14_cl);datExpr14_ht = data.frame(datExpr14_ht)
-dim(datExpr14_cl);dim(datExpr14_ht)
-
-
-# step 7 check for na (may not necessary)
-table(is.na(datExpr14_cl));table(is.na(datExpr14_ht))
+networkData_final  =  DataPre_C(networkData14, cousin = 0.4, n1 = 6, n2 = 6,
+                                perct = 0.5,thres_rmzero = 5,count_rmzero = 6,Correct='N')
+network_final = data.frame(networkData_final[[1]])
 
 #================================================================================================
 ###                                  2. weighted in day 14                                ######    
