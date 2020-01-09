@@ -37,7 +37,12 @@ dim(networkData14);dim(networkData42);dim(networkData84)
 ########################################################################################################################
 networkData_final  =  DataPre_C(networkData14, cousin = 0.4, n1 = 6, n2 = 6,
                                 perct = 0.5,thres_rmzero = 5,count_rmzero = 6,Correct='N')
-network_final = data.frame(networkData_final[[1]])
+networkData14_final = data.frame(networkData_final[[1]])
+########################################################################################################################
+datExpr14_cl = t(networkData14_final[,colnames(networkData14_final) %in% names(networkData)[column_14_cl] ])
+datExpr14_ht = t(networkData14_final[,colnames(networkData14_final) %in% names(networkData)[column_14_ht] ])
+datExpr14_cl = data.frame(datExpr14_cl);datExpr14_ht = data.frame(datExpr14_ht)
+dim(datExpr14_cl);dim(datExpr14_ht)
 
 #================================================================================================
 ###                                  2. weighted in day 14                                ######    
@@ -45,13 +50,12 @@ network_final = data.frame(networkData_final[[1]])
 ## pick soft thresholds
 # Choose a set of soft-thresholding powers
 powers = c(c(1:10), seq(from = 12, to=30, by=2))
-sft_b_cl = pickSoftThreshold(datExpr14_cl, powerVector = powers, corFnc = "bicor",verbose = 0)
-sft_b_cl
-### 10 works good. 10 - 0.832 and corresponging mean connectivity
-softPower_b = min(sft_b_cl$fitIndices[,1][which(sft_b_cl$fitIndices[,2] > 0.8)])
+#
+sft_b_cl = pickSoftThreshold(datExpr14_cl, corFnc = "bicor",powerVector = powers,verbose = 0)
+#softPower_b = min(sft_b_cl$fitIndices[,1][which(sft_b_cl$fitIndices[,2] > 0.8)])
 # pre_checked
-softPower_b = sft_b_cl$powerEstimate
-MeanK_b = sft_b_cl$fitIndices[softPower_b,5]
+softPower_b = 24
+MeanK_b = 711
 # Plot the results of threshold picking:
 sizeGrWindow(9,5)
 cex1 = 0.9
@@ -163,17 +167,17 @@ print("Step5 - mergeing finished")
 #=================================================================================================
 #                              6. plotting heatmap                                            ###
 #=================================================================================================
-pdf("Network heatmap plot bicor, all genes 14_cl.pdf",height=8,width=16)
-for (i in c(6:12)){
-  # Transform dissTOM with a power to make moderately strong connections more visible in the heatmap
-  plotTOM_b = dissTOM14_b_cl^i
-  # Set diagonal to NA for a nicer plot
-  diag(plotTOM_b) = NA
-  # Call the plot function
-  TOMplot(plotTOM_b, geneTree14_b_cl, moduleColors14_b_cl, main = "Network heatmap plot bicor, all genes")
-}
-dev.off()
-print("Step6 - heapmap created")
+# pdf("Network heatmap plot bicor, all genes 14_cl.pdf",height=8,width=16)
+# for (i in c(6:12)){
+#   # Transform dissTOM with a power to make moderately strong connections more visible in the heatmap
+#   plotTOM_b = dissTOM14_b_cl^i
+#   # Set diagonal to NA for a nicer plot
+#   diag(plotTOM_b) = NA
+#   # Call the plot function
+#   TOMplot(plotTOM_b, geneTree14_b_cl, moduleColors14_b_cl, main = "Network heatmap plot bicor, all genes")
+# }
+# dev.off()
+# print("Step6 - heapmap created")
 #===============================================================================================
 #                           7. plot cross-condition dendrogram                               ###
 #===============================================================================================
