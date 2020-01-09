@@ -1,5 +1,11 @@
-*
+*.*
+.Rproj.user/**
+!.gitattributes
+!.gitkeep
 !*.R
 !.gitignore
+!*.Rmd
+!*.html
 !MeshDB_new.RData
+!*/
 .Rproj.user
