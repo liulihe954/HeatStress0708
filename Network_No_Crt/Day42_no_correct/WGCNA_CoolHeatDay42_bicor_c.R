@@ -79,7 +79,8 @@ sft_b_cl = pickSoftThreshold(datExpr14_cl,corFnc = "bicor",powerVector = powers,
 # abline(h=MeanK_b,col="red")
 # dev.off()
 # #save
-save(sft_b_cl,softPower_b,MeanK_b,file = "SoftThres bicor.RData")
+save(sft_b_cl,file = "SoftThres bicor.RData")
+#save(sft_b_cl,softPower_b,MeanK_b,file = "SoftThres bicor.RData")
 # print("Step2 - soft thre plotted and Rdata saved")
 # #==============================================================================================
 # #                                 3. soft-threshold and dissimilarity                    ######
