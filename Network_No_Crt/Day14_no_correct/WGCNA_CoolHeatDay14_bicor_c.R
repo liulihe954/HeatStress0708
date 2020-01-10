@@ -35,8 +35,8 @@ networkData84 = networkData[,c(column_84_cl,column_84_ht)]
 dim(networkData14);dim(networkData42);dim(networkData84)
 
 ########################################################################################################################
-networkData_final  =  DataPre_C(networkData14, cousin = 0.4, n1 = 6, n2 = 6,
-                                perct = 0.5,thres_rmzero = 5,count_rmzero = 6,Correct='N')
+networkData_final  =  DataPre_C(networkData14, cousin = 0.4, n1 = 6, n2 = 6,perct = 0.5,
+                                thres_rmzero = 5,count_rmzero = 6,Correct='N')
 networkData14_final = data.frame(networkData_final[[1]])
 ########################################################################################################################
 datExpr14_cl = t(networkData14_final[,colnames(networkData14_final) %in% names(networkData)[column_14_cl] ])
@@ -51,8 +51,8 @@ setwd("/ufrc/penagaricano/lihe.liu/HeatStress0708/Network_No_Crt/Day14_no_correc
 ## pick soft thresholds
 # Choose a set of soft-thresholding powers
 powers = c(c(1:10), seq(from = 12, to=30, by=2))
-#
-sft_b_cl = pickSoftThreshold(datExpr14_cl, corFnc = "bicor",powerVector = powers,verbose = 0)
+# 
+sft_b_cl = pickSoftThreshold(datExpr14_ht,corFnc = "bicor",powerVector = powers,verbose = 0)
 #softPower_b = min(sft_b_cl$fitIndices[,1][which(sft_b_cl$fitIndices[,2] > 0.8)])
 # pre_checked
 softPower_b = 1

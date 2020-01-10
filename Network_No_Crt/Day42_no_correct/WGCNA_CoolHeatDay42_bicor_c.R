@@ -43,7 +43,8 @@ datExpr14_cl = t(networkData14_final[,colnames(networkData14_final) %in% names(n
 datExpr14_ht = t(networkData14_final[,colnames(networkData14_final) %in% names(networkData)[column_42_ht] ])
 datExpr14_cl = data.frame(datExpr14_cl);datExpr14_ht = data.frame(datExpr14_ht)
 dim(datExpr14_cl);dim(datExpr14_ht)
-
+########################################################################################################################
+setwd("/ufrc/penagaricano/lihe.liu/HeatStress0708/Network_No_Crt/Day42_no_correct")
 #================================================================================================
 ###                                  2. weighted in day 14                                ######    
 #================================================================================================
