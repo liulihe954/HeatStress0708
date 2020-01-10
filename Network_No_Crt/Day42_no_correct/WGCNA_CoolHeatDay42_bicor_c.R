@@ -53,7 +53,7 @@ powers = c(c(1:10), seq(from = 12, to=30, by=2))
 #
 sft_b_cl = pickSoftThreshold(datExpr14_cl, powerVector = powers,corFnc = "bicor",verbose = 0)
 ### 10 works good. 10 - 0.832 and corresponging mean connectivity
-softPower_b = min(sft_b_cl$fitIndices[,1][which(sft_b_cl$fitIndices[,2] > 0.8)])
+#softPower_b = min(sft_b_cl$fitIndices[,1][which(sft_b_cl$fitIndices[,2] > 0.8)])
 # pre_checked
 softPower_b = 1
 MeanK_b = sft_b_cl$fitIndices[softPower_b,5]
