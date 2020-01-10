@@ -142,7 +142,6 @@ DataPre_C = function(networkData, cousin = 0.4, n1, n2, perct,
 ### Function output: a. a plot with all the enriched items, one page for each module.
 ###                  b. .RData containing a long list, each element show all the enriched items for corresponding module.
 ###                      same length with that of all non-preserved module
-###
 ##########################################################################################
 Parse_Results = function(Results_List,keyword = "Which D.B"){
   all_enrich = data.frame()

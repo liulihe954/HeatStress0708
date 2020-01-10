@@ -168,17 +168,17 @@ print("Step5 - mergeing finished")
 #=================================================================================================
 #                              6. plotting heatmap                                            ###
 #=================================================================================================
-pdf("Network heatmap plot bicor, all genes 14_cl.pdf",height=8,width=16)
-for (i in c(6:12)){
-  # Transform dissTOM with a power to make moderately strong connections more visible in the heatmap
-  plotTOM_b = dissTOM14_b_cl^i
-  # Set diagonal to NA for a nicer plot
-  diag(plotTOM_b) = NA
-  # Call the plot function
-  TOMplot(plotTOM_b, geneTree14_b_cl, moduleColors14_b_cl, main = "Network heatmap plot bicor, all genes")
-}
-dev.off()
-print("Step6 - heapmap created")
+# pdf("Network heatmap plot bicor, all genes 14_cl.pdf",height=8,width=16)
+# for (i in c(6:12)){
+#   # Transform dissTOM with a power to make moderately strong connections more visible in the heatmap
+#   plotTOM_b = dissTOM14_b_cl^i
+#   # Set diagonal to NA for a nicer plot
+#   diag(plotTOM_b) = NA
+#   # Call the plot function
+#   TOMplot(plotTOM_b, geneTree14_b_cl, moduleColors14_b_cl, main = "Network heatmap plot bicor, all genes")
+# }
+# dev.off()
+# print("Step6 - heapmap created")
 #===============================================================================================
 #                           7. plot cross-condition dendrogram                               ###
 #===============================================================================================
