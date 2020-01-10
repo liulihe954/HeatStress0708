@@ -33,7 +33,8 @@ networkData14 = networkData[,c(column_14_cl,column_14_ht)]
 networkData42 = networkData[,c(column_42_cl,column_42_ht)]
 networkData84 = networkData[,c(column_84_cl,column_84_ht)]
 dim(networkData14);dim(networkData42);dim(networkData84)
-
+########################################################################################################################
+setwd("/ufrc/penagaricano/lihe.liu/HeatStress0708/Network_No_Crt/Day84_no_correct")
 ########################################################################################################################
 networkData_final  =  DataPre_C(networkData84, cousin = 0.4, n1 = 6, n2 = 6,
                                 perct = 0.5,thres_rmzero = 5,count_rmzero = 6,Correct='N')
@@ -43,8 +44,6 @@ datExpr14_cl = t(networkData14_final[,colnames(networkData14_final) %in% names(n
 datExpr14_ht = t(networkData14_final[,colnames(networkData14_final) %in% names(networkData)[column_84_ht] ])
 datExpr14_cl = data.frame(datExpr14_cl);datExpr14_ht = data.frame(datExpr14_ht)
 dim(datExpr14_cl);dim(datExpr14_ht)
-########################################################################################################################
-setwd("/ufrc/penagaricano/lihe.liu/HeatStress0708/Network_No_Crt/Day84_no_correct")
 #================================================================================================
 ###                                  2. weighted in day 14                                ######    
 #================================================================================================
