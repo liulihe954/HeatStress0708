@@ -50,76 +50,75 @@ dim(datExpr14_cl);dim(datExpr14_ht)
 #================================================================================================
 ## pick soft thresholds
 # Choose a set of soft-thresholding powers
-powers = c(c(1:10), seq(from = 12, to=50, by=2))
+powers = c(c(1:10), seq(from = 12, to=30, by=2))
 #
 sft_b_cl = pickSoftThreshold(datExpr14_cl,corFnc = "bicor",powerVector = powers,verbose = 0)
-### 10 works good. 10 - 0.832 and corresponging mean connectivity
-#softPower_b = min(sft_b_cl$fitIndices[,1][which(sft_b_cl$fitIndices[,2] > 0.8)])
+## 10 works good. 10 - 0.832 and corresponging mean connectivity
+#softPower_b = min(sft_b_cl$fitIndices[,1][which(sft_b_cl$fitIndices[,2] > 0.7)])
 # pre_checked
-# softPower_b = 1
-# MeanK_b = sft_b_cl$fitIndices[softPower_b,5]
-# # Plot the results of threshold picking:
-# sizeGrWindow(9,5)
-# cex1 = 0.9
-# pdf(file = "soft_b threshold picking day14.pdf", width = 12, height = 9)
-# par(mfrow = c(1,2))
-# # Scale-free topology fit index as a function of the soft-thresholding power
-# plot(sft_b_cl$fitIndices[,1], -sign(sft_b_cl$fitIndices[,3])*sft_b_cl$fitIndices[,2],
-#      xlab="Soft Threshold bicor (power) 14_cl",ylab="Scale Free Topology Model Fit bicor, unsigned R^2 14_cl",type="n",
-#      main = paste("Scale independence bicor 14_cl"));
-# text(sft_b_cl$fitIndices[,1], -sign(sft_b_cl$fitIndices[,3])*sft_b_cl$fitIndices[,2],
-#      labels=powers,cex=cex1,col="red");
-# # this line corresponds to using an R^2 cut-off of h
-# abline(h=0.80,col="red")
-# # Mean connectivity as a function of the soft-thresholding power
-# plot(sft_b_cl$fitIndices[,1], sft_b_cl$fitIndices[,5],
-#      xlab="Soft Threshold bicor (power) 14_cl",ylab="Mean Connectivity bicor 14_cl",type="n",
-#      main = paste("Mean connectivity bicor 14_cl"))
-# text(sft_b_cl$fitIndices[,1], sft_b_cl$fitIndices[,5], labels=powers, cex=cex1,col="red")
-# abline(h=MeanK_b,col="red")
-# dev.off()
-# #save
-save(sft_b_cl,file = "SoftThres bicor.RData")
-#save(sft_b_cl,softPower_b,MeanK_b,file = "SoftThres bicor.RData")
-# print("Step2 - soft thre plotted and Rdata saved")
-# #==============================================================================================
-# #                                 3. soft-threshold and dissimilarity                    ######
-# #==============================================================================================
-# # ref - cl; test - ht
-# # dim(datExpr14_ht);dim(datExpr14_cl)
-# # Peaerson Cor
-# adjacency14_b_cl = adjacency(datExpr14_cl,power=softPower_b,type="unsigned",corFnc = "bicor");
-# diag(adjacency14_b_cl)=0
-# dissTOM14_b_cl = 1-TOMsimilarity(adjacency14_b_cl, TOMType="unsigned")
-# geneTree14_b_cl = hclust(as.dist(dissTOM14_b_cl), method ="average")
-# #
-# adjacency14_b_ht = adjacency(datExpr14_ht,power=softPower_b,type="unsigned",corFnc = "bicor");
-# diag(adjacency14_b_ht)=0
-# dissTOM14_b_ht = 1-TOMsimilarity(adjacency14_b_ht, TOMType="unsigned")
-# geneTree14_b_ht = hclust(as.dist(dissTOM14_b_ht), method="average")
-# # save the matrix
-# save(adjacency14_b_cl,dissTOM14_b_cl,geneTree14_b_cl,adjacency14_b_ht,dissTOM14_b_ht,geneTree14_b_ht,file = "AllMatrixday14 bicor.RData")
-# print("Step3 - adj matrix created and rdata saved")
-# #==========================================================================================
-# #                                    4.  plot trees                                  ######
-# #==========================================================================================
-# # cor
+softPower_b = 1
+MeanK_b = sft_b_cl$fitIndices[softPower_b,5]
+# Plot the results of threshold picking:
+sizeGrWindow(9,5)
+cex1 = 0.9
+pdf(file = "soft_b threshold picking day14.pdf", width = 12, height = 9)
+par(mfrow = c(1,2))
+# Scale-free topology fit index as a function of the soft-thresholding power
+plot(sft_b_cl$fitIndices[,1], -sign(sft_b_cl$fitIndices[,3])*sft_b_cl$fitIndices[,2],
+     xlab="Soft Threshold bicor (power) 14_cl",ylab="Scale Free Topology Model Fit bicor, unsigned R^2 14_cl",type="n",
+     main = paste("Scale independence bicor 14_cl"));
+text(sft_b_cl$fitIndices[,1], -sign(sft_b_cl$fitIndices[,3])*sft_b_cl$fitIndices[,2],
+     labels=powers,cex=cex1,col="red");
+# this line corresponds to using an R^2 cut-off of h
+abline(h=0.80,col="red")
+# Mean connectivity as a function of the soft-thresholding power
+plot(sft_b_cl$fitIndices[,1], sft_b_cl$fitIndices[,5],
+     xlab="Soft Threshold bicor (power) 14_cl",ylab="Mean Connectivity bicor 14_cl",type="n",
+     main = paste("Mean connectivity bicor 14_cl"))
+text(sft_b_cl$fitIndices[,1], sft_b_cl$fitIndices[,5], labels=powers, cex=cex1,col="red")
+abline(h=MeanK_b,col="red")
+dev.off()
+#save
+save(sft_b_cl,softPower_b,MeanK_b,file = "SoftThres bicor.RData")
+print("Step2 - soft thre plotted and Rdata saved")
+#==============================================================================================
+#                                 3. soft-threshold and dissimilarity                    ######
+#==============================================================================================
+# ref - cl; test - ht
+# dim(datExpr14_ht);dim(datExpr14_cl)
+# Peaerson Cor
+adjacency14_b_cl = adjacency(datExpr14_cl,power=softPower_b,type="unsigned",corFnc = "bicor");
+diag(adjacency14_b_cl)=0
+dissTOM14_b_cl = 1-TOMsimilarity(adjacency14_b_cl, TOMType="unsigned")
+geneTree14_b_cl = hclust(as.dist(dissTOM14_b_cl), method ="average")
+#
+adjacency14_b_ht = adjacency(datExpr14_ht,power=softPower_b,type="unsigned",corFnc = "bicor");
+diag(adjacency14_b_ht)=0
+dissTOM14_b_ht = 1-TOMsimilarity(adjacency14_b_ht, TOMType="unsigned")
+geneTree14_b_ht = hclust(as.dist(dissTOM14_b_ht), method="average")
+# save the matrix
+save(adjacency14_b_cl,dissTOM14_b_cl,geneTree14_b_cl,adjacency14_b_ht,dissTOM14_b_ht,geneTree14_b_ht,file = "AllMatrixday14 bicor.RData")
+print("Step3 - adj matrix created and rdata saved")
+#==========================================================================================
+#                                    4.  plot trees                                  ######
+#==========================================================================================
 # pdf("dendrogram14 bicor.pdf",     height=6,width=16)
 # par(mfrow=c(1,2))
 # plot(geneTree14_b_cl,xlab="",sub="",main="Gene clustering on TOM-based dissimilarity bicor (14_cl)",labels=FALSE,hang=0.04);
 # plot(geneTree14_b_ht,xlab="",sub="",main="Gene clustering on TOM-based dissimilarity bicor (14_ht)",labels=FALSE,hang=0.04);
 # dev.off()
 # print("Step4 - dissmi plottd and rdata saved")
-# #=========================================================================================
-# #                                5.cutting and merging                              ######
-# #=========================================================================================
-# # set the minimum module size relatively high:
-# minModuleSize = 30;
-# # Module identification using dynamic tree cut:
-# dynamicMods14_b_cl = cutreeDynamic(dendro = geneTree14_b_cl, distM = dissTOM14_b_cl,
-#                                    cutHeight=0.995, deepSplit = 1, pamRespectsDendro = FALSE,
-#                                    minClusterSize = minModuleSize);
-# table(dynamicMods14_b_cl)
+#=========================================================================================
+#                                5.cutting and merging                              ######
+#=========================================================================================
+# set the minimum module size relatively high:
+minModuleSize = 30;
+# Module identification using dynamic tree cut:
+dynamicMods14_b_cl = cutreeDynamic(dendro = geneTree14_b_cl, distM = dissTOM14_b_cl,
+                                   cutHeight=0.995, deepSplit = 1, pamRespectsDendro = FALSE,
+                                   minClusterSize = minModuleSize);
+table(dynamicMods14_b_cl)
+sft_b_cl
 # # Convert numeric lables into colors
 # dynamicColors14_b_cl = labels2colors(dynamicMods14_b_cl)
 # # Plot the dendrogram and colors underneath
@@ -135,7 +134,7 @@ save(sft_b_cl,file = "SoftThres bicor.RData")
 # # Calculate eigengenes
 # MEList14_b_cl = moduleEigengenes(datExpr14_cl,colors = dynamicColors14_b_cl)
 # MEs14_b_cl = MEList14_b_cl$eigengenes
-# #greyMEName = paste(moduleColor.getMEprefix(), "grey", sep = "") 
+# #greyMEName = paste(moduleColor.getMEprefix(), "grey", sep = "")
 # #if (greyMEName %in% colnames(MEList14_b_cl$eigengenes))  { print("grey found")
 # #  MEs14_b_cl = removeGreyME(MEList14_b_cl$eigengenes)}
 # # Calculate dissimilarity of module eigengenes
@@ -241,7 +240,7 @@ save(sft_b_cl,file = "SoftThres bicor.RData")
 # #===========================================================================================
 # #                                9. mp visualization                                      ##
 # #===========================================================================================
-# ####### ###### ######   present Z summary ###### ###### ###### ###### ###### 
+# ####### ###### ######   present Z summary ###### ###### ###### ###### ######
 # # Let us now visualize the data.
 # modColors14_b = rownames(Obs.PreservationStats14_b)
 # moduleSize14_b = Obs.PreservationStats14_b$moduleSize
@@ -270,7 +269,7 @@ save(sft_b_cl,file = "SoftThres bicor.RData")
 # dev.off()
 # print("Step9 - preservation statistics calculated vis and saved")
 # ############################################################################################################################
-# ####### ###### ######   present individual Z  ###### ###### ###### ###### ###### 
+# ####### ###### ######   present individual Z  ###### ###### ###### ###### ######
 # # Re-initialize module color labels and sizes
 # ref = 1;test = 2
 # # Module labels and module sizes are also contained in the results
@@ -313,7 +312,7 @@ save(sft_b_cl,file = "SoftThres bicor.RData")
 # }
 # dev.off()
 # print("Step9 - all_module_preservation_statistics finished and data saved")
-# # 
+#
 # #===========================================================================================
 # #                                10. KEGG enrichment                                      ##
 # #===========================================================================================
