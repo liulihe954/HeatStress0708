@@ -110,21 +110,21 @@ DataPre_C = function(networkData, cousin = 0.4, n1, n2, perct,
   networkData_correction = Correct_pca(networkData_log2_50var,"leek")
   networkData_final = data.frame(networkData_correction$exprs_corrected_norm); 
   names(networkData_final) = names(networkData_log2_50var)
-  if (Correct == "Y") {
-    return(list(Corrected_log2_PC = networkData_final))
+  if (Correct == "Y"){
     save(networkData_final,
          networkData_log2_50var,
          networkData_normalized_normfactors,
          networkData_normalized,
-         file = paste(deparse(substitute(networkData)),"prepare_with_corrections","_top",100*(1-perct),".RData",sep = ""))}
+         file = paste(deparse(substitute(networkData)),"prepare_with_corrections","_top",100*(1-perct),".RData",sep = ""))
+    return(list(Corrected_log2_PC = networkData_final))}
   else if (Correct == "N"){
     message('pc correction not applied')
-    return(list(networkData_50var_no_crt = networkData_50var_nocrt))
     save(networkData_50var_nocrt,
          networkData_normalized_normfactors,
          networkData_normalized,
-         file = paste(deparse(substitute(networkData)),"prepare_no_corrections","_top",100*(1-perct),".RData",sep = ""))}
-  else {message("please specify pc data correction option - Correct = T or F")}
+         file = paste(deparse(substitute(networkData)),"prepare_no_corrections","_top",100*(1-perct),".RData",sep = ""))
+    return(list(networkData_50var_no_crt = networkData_50var_nocrt))}
+  else {message("please specify pc data correction option - Correct = 'Y' or 'N'")}
 }
 #########################################################################################################################
 
