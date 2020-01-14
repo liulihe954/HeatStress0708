@@ -205,7 +205,7 @@ names(multiExpr14_b) = setLabels
 mp14_b = modulePreservation(multiExpr14_b,multiColor14_b,referenceNetworks=1,verbose=3,
                             corFnc = "bicor",
                             networkType="unsigned", nPermutations=1000,
-                            maxGoldModuleSize = 500, maxModuleSize = 500,
+                            maxGoldModuleSize = 1000, maxModuleSize = 1000,
                             calculateQvalue = T,
                             calculateCor.kIMall = T,
                             calculateClusterCoeff = T,
