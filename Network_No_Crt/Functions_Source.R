@@ -561,7 +561,7 @@ MESH_Enrich = function(total_genes_all,
   MeshID = na.omit(MeshRecords$MESHID)
   MeshTerm = na.omit(MeshRecords$MESHTERM)
   for ( p in seq_along(MeshID)){
-    tmp = subset(list_Bta, MESHID == MESHID[p])$GENEID
+    tmp = subset(list_Bta, MESHID == MeshID[p])$GENEID
     DB_List[[p]] = tmp #
     names(DB_List)[p]  <- paste(MeshID[p],"-",MeshTerm[p])
   }
