@@ -1,0 +1,11 @@
+*
+!*/
+!/Network_No_Crt/**
+.Rproj.user/**
+!.gitattributes
+!.gitignore
+!.gitkeep
+!*.R
+!*.Rmd
+!*.html
+.Rproj.user
