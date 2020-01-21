@@ -8,5 +8,4 @@
 !*.html
 !MeshDB_new.RData
 !*/
-#!*/*/
-.Rproj.user
+#!Network_No_Crt/*
