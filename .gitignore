@@ -8,4 +8,5 @@
 !*.html
 !MeshDB_new.RData
 !*/
+#!*/*/
 .Rproj.user
