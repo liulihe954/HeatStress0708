@@ -7,5 +7,5 @@
 !*.Rmd
 !*.html
 !MeshDB_new.RData
-!*/
-#!Network_No_Crt/*
+*/
+!Network_No_Crt/enrich_results/Day*
