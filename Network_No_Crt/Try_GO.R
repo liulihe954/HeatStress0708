@@ -1,13 +1,13 @@
 # Founction preparation
-setwd('/ufrc/penagaricano/lihe.liu/Methylation_WGCNA')
-source("Function_Source.R")
-setwd('/ufrc/penagaricano/lihe.liu/Methylation_WGCNA/Network_No_Crt/Net')
-load("data_expr_all_with0prepare_no_corrections_top50.RData")
+setwd('/ufrc/penagaricano/lihe.liu/HeatStress0708/Network_No_Crt')
+source("Functions_Source.R")
+setwd('/ufrc/penagaricano/lihe.liu/HeatStress0708/Network_No_Crt/Day42_no_correct')
+load("CoolHeatday14 bicor.RData")
+load("CoolHeatDay14_modulePreservation bicor.RData")
+load("networkData42prepare_no_corrections_top50.RData")
 load("permutedStats-actualModules.RData")
-load("modulePreservation_methionine.RData")
-load("SoftThres_control.RData")
-load("modulePreservation_methionine.RData")
-load("module_colorsNlabels_control.RData")
+load("SoftThres bicor.RData")
+#load("module_colorsNlabels_control.RData")
 
 load("Enrich_Ensentials.RData")
 # Container pre
@@ -24,12 +24,13 @@ Enrich_Results_thres005_1102 = Go_Enrich_Plot(total_genes_all = Total_list_out_e
                                               sig_genes_all = Sig_list_out_ens,
                                               TestingSubsetNames = TestingSubsetNames,
                                               GOthres = 0.05,
-                                              keyword = "GO_Enrichment_0113")
+                                              keyword = "GO_Enrichment_0121")
 
 ##################################################
 ### =======             GO           ========== ##
 ##################################################
-load("GO_Enrichment_0113.RData")
+setwd('/ufrc/penagaricano/lihe.liu/HeatStress0708/Network_No_Crt/Day84_no_correct')
+load("GO_Enrichment_0121.RData")
 # get loop index
 
 all_module = character()
@@ -54,8 +55,8 @@ for (i in seq_along(all_module)){
 names(all_go_results) = all_module
 
 require(openxlsx)
-setwd("/ufrc/penagaricano/lihe.liu/Methylation_WGCNA/Network_No_Crt/enrich_results")
-write.xlsx(all_go_results,file = "GO_Results_all_0113.xlsx")
+setwd("/ufrc/penagaricano/lihe.liu/HeatStress0708/Network_No_Crt/enrich_results/Day84")
+write.xlsx(all_go_results,file = "GO_Results_all_0121.xlsx")
 
 ###
 # setwd("/ufrc/penagaricano/lihe.liu/Methylation_WGCNA/enrich_results")

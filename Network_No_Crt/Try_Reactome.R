@@ -1,21 +1,16 @@
 # Founction preparation
-setwd('/ufrc/penagaricano/lihe.liu/Methylation_WGCNA')
-source("Function_Source.R")
-setwd('/ufrc/penagaricano/lihe.liu/Methylation_WGCNA/Network_No_Crt/Net')
-load("data_expr_all_with0prepare_no_corrections_top50.RData")
+# Founction preparation
+setwd('/ufrc/penagaricano/lihe.liu/HeatStress0708/Network_No_Crt')
+source("Functions_Source.R")
+setwd('/ufrc/penagaricano/lihe.liu/HeatStress0708/Network_No_Crt/Day84_no_correct')
+load("CoolHeatday14 bicor.RData")
+load("CoolHeatDay14_modulePreservation bicor.RData")
+load("networkData84prepare_no_corrections_top50.RData")
 load("permutedStats-actualModules.RData")
-load("modulePreservation_methionine.RData")
-load("SoftThres_control.RData")
-load("modulePreservation_methionine.RData")
-load("module_colorsNlabels_control.RData")
+load("SoftThres bicor.RData")
+#load("module_colorsNlabels_control.RData")
 
 load("Enrich_Ensentials.RData")
-# Container pre
-Total_list_out_entrez = Sig_list_out_entrez
-Sig_list_out_entrez = Total_list_out_entrez
-TestingSubsetNames = nonpres_modulenames_b
-load("Ensembl2Entrez_Convert.RData")
-# Run loops
 
 #### Read in database
 setwd("/ufrc/penagaricano/lihe.liu/Methylation_WGCNA/Reactome_db/")
@@ -52,7 +47,8 @@ NCBI2Reactome_all_react_bt =
 NCBI2Reactome_all_react_bt[] <-   lapply(NCBI2Reactome_all_react_bt, function(x) if(is.factor(x)) as.character(x) else x)
 NCBI2Reactome_lowest_path_bt[] <- lapply(NCBI2Reactome_lowest_path_bt, function(x) if(is.factor(x)) as.character(x) else x)
 NCBI2Reactome_all_path_bt[] <-   lapply(NCBI2Reactome_all_path_bt, function(x) if(is.factor(x)) as.character(x) else x)
-setwd("/ufrc/penagaricano/lihe.liu/Methylation_WGCNA/Network_No_Crt/Net")
+
+setwd('/ufrc/penagaricano/lihe.liu/HeatStress0708/Network_No_Crt/Day84_no_correct')
 ### Container pre
 # Container pre
 Total_list_out_entrez = Sig_list_out_entrez
@@ -71,7 +67,7 @@ Reactome_Enrich_all_react_1102 = Reactome_Enrich(total_genes_all=Total_list_out_
                                                  InputSource=  NCBI2Reactome_all_react_bt,
                                                  Sig_list_out = Sig_list_out,
                                                  Reacthres = 0.05,
-                                                 keyword = "Reactome_Enrichment_all_react_0113")
+                                                 keyword = "Reactome_Enrichment_all_react_0121")
 ## lowest path
 Reactome_Enrich_lowest_path_1102 = Reactome_Enrich(total_genes_all=Total_list_out_entrez,
                                                    sig_genes_all=Sig_list_out_entrez,
@@ -79,7 +75,7 @@ Reactome_Enrich_lowest_path_1102 = Reactome_Enrich(total_genes_all=Total_list_ou
                                                    InputSource=  NCBI2Reactome_lowest_path_bt,
                                                    Sig_list_out = Sig_list_out,
                                                    Reacthres = 0.05,
-                                                   keyword = "Reactome_Enrich_lowest_path_0113")
+                                                   keyword = "Reactome_Enrich_lowest_path_0121")
 ## all path
 Reactome_Enrich_all_path_1102 = Reactome_Enrich(total_genes_all=Total_list_out_entrez,
                                                 sig_genes_all=Sig_list_out_entrez,
@@ -87,7 +83,7 @@ Reactome_Enrich_all_path_1102 = Reactome_Enrich(total_genes_all=Total_list_out_e
                                                 InputSource=  NCBI2Reactome_all_path_bt,
                                                 Sig_list_out = Sig_list_out,
                                                 Reacthres = 0.05,
-                                                keyword = "Reactome_Enrich_all_path_0113")
+                                                keyword = "Reactome_Enrich_all_path_0121")
 
 
 
@@ -96,18 +92,19 @@ Reactome_Enrich_all_path_1102 = Reactome_Enrich(total_genes_all=Total_list_out_e
 ### =======                   Reactome         ========== ##
 ############################################################
 # get loop index
-load('Reactome_Enrich_all_path_0113.RData')
+setwd('/ufrc/penagaricano/lihe.liu/HeatStress0708/Network_No_Crt/Day84_no_correct')
+load('Reactome_Enrich_lowest_path_0121.RData')
 all_module = character()
 for (i in seq_along(names(Reactome_results_b))){
   all_module[i] = unlist(strsplit(names(Reactome_results_b)[i]," "))[1]
 }
 
-all_data =c("Reactome_Enrich_all_path_0113.RData",
-            "Reactome_Enrich_lowest_path_0113.RData",
-            "Reactome_Enrichment_all_react_0113.RData")
-all_keywords=c("Reactome_all_path_Results_all_0113.xlsx",
-               "Reactome_lowest_path_Results_all_0113.xlsx",
-               "Reactome_all_react_Results_all_0113.xlsx")
+all_data =c("Reactome_Enrich_all_path_0121.RData",
+            "Reactome_Enrich_lowest_path_0121.RData",
+            "Reactome_Enrichment_all_react_0121.RData")
+all_keywords=c("Reactome_all_path_Results_all_0121.xlsx",
+               "Reactome_lowest_path_Results_all_0121.xlsx",
+               "Reactome_all_react_Results_all_0121.xlsx")
 
 
 
@@ -127,8 +124,8 @@ for (m in c(1:3)){
     names(all_r_a_path_results)[i] = all_module[i]
   }
   require(openxlsx)
-  setwd("/ufrc/penagaricano/lihe.liu/Methylation_WGCNA/Network_No_Crt/enrich_results")
+  setwd("/ufrc/penagaricano/lihe.liu/HeatStress0708/Network_No_Crt/enrich_results/Day84")
   write.xlsx(all_r_a_path_results,file=keyword)
-  #setwd("/ufrc/penagaricano/lihe.liu/Methylation_WGCNA")
+  setwd('/ufrc/penagaricano/lihe.liu/HeatStress0708/Network_No_Crt/Day84_no_correct')
 }
 

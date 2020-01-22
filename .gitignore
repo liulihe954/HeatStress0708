@@ -2,6 +2,9 @@
 !*/
 /Network_No_Crt/count_matrix.tsv
 !/Network_No_Crt/**
+/Network_No_Crt/**/*.xlsx
+/Network_No_Crt/**/*.csv
+#!/Network_No_Crt/**
 .Rproj.user/**
 !.gitattributes
 !.gitignore
